@@ -4,10 +4,12 @@ using Unity.Netcode;
 public class Player : NetworkBehaviour
 {
     [SerializeField]
-    private float speed = 1;
+    private GameObject playerCameraPrefab = null;
 
     private Rigidbody rb;
+    private GameObject playerCamera = null;
     private Vector2 moveInput = Vector2.zero;
+
     void Start()
     {
         rb = this.GetComponent<Rigidbody>();
@@ -18,6 +20,14 @@ public class Player : NetworkBehaviour
         if (IsOwner)
         {
             SetMoveInputServerRpc(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+            if (playerCamera == null)
+            {
+                playerCamera = Instantiate(playerCameraPrefab);
+                //子オブジェクトを取得
+                GameObject cameraRoot = this.transform.Find("PlayerCameraRoot").gameObject;
+                playerCamera.GetComponent<Cinemachine.CinemachineVirtualCamera>().Follow = cameraRoot.transform;
+            }
         }
         if (IsServer)
         {
@@ -34,9 +44,9 @@ public class Player : NetworkBehaviour
 
     private void ServerUpdate()
     {
-        var velocity = Vector3.zero;
-        velocity.x = speed * moveInput.normalized.x;
-        velocity.z = speed * moveInput.normalized.y;
-        rb.AddForce(velocity);
+        // var velocity = Vector3.zero;
+        // velocity.x = speed * moveInput.normalized.x;
+        // velocity.z = speed * moveInput.normalized.y;
+        // this.transform.Translate(velocity * Time.deltaTime);
     }
 }
