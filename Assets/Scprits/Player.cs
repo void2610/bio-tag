@@ -9,6 +9,12 @@ public class Player : NetworkBehaviour
     private Rigidbody rb;
     private GameObject playerCamera = null;
     private Vector2 moveInput = Vector2.zero;
+    private float speed = 5.0f;
+
+    public override void OnNetworkSpawn()
+    {
+
+    }
 
     void Start()
     {
@@ -44,9 +50,9 @@ public class Player : NetworkBehaviour
 
     private void ServerUpdate()
     {
-        // var velocity = Vector3.zero;
-        // velocity.x = speed * moveInput.normalized.x;
-        // velocity.z = speed * moveInput.normalized.y;
-        // this.transform.Translate(velocity * Time.deltaTime);
+        var velocity = Vector3.zero;
+        velocity.x = speed * moveInput.normalized.x;
+        velocity.z = speed * moveInput.normalized.y;
+        this.transform.Translate(velocity * Time.deltaTime);
     }
 }
