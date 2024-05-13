@@ -6,10 +6,16 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private GameObject playerCameraPrefab = null;
 
-    private Rigidbody rb;
+    private Animator animator;
+    private CharacterController cCon;
+    private Vector3 velocity = Vector3.zero;
     private GameObject playerCamera = null;
-    private Vector2 moveInput = Vector2.zero;
-    private float speed = 5.0f;
+    [SerializeField]
+    private float jumpPower = 5f;
+
+    [SerializeField]
+    private float walkSpeed = 4f;
+    private Vector3 input;
 
     public override void OnNetworkSpawn()
     {
@@ -18,7 +24,8 @@ public class Player : NetworkBehaviour
 
     void Start()
     {
-        rb = this.GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
+        cCon = GetComponent<CharacterController>();
     }
 
     void Update()
@@ -45,14 +52,45 @@ public class Player : NetworkBehaviour
     [ServerRpc]
     private void SetMoveInputServerRpc(float x, float y)
     {
-        moveInput = new Vector2(x, y);
+        input = new Vector3(x, 0f, y);
     }
 
     private void ServerUpdate()
     {
-        var velocity = Vector3.zero;
-        velocity.x = speed * moveInput.normalized.x;
-        velocity.z = speed * moveInput.normalized.y;
-        this.transform.Translate(velocity * Time.deltaTime);
+        UpdateCharacterController();
+    }
+
+    private void UpdateCharacterController()
+    {
+        if (cCon.isGrounded)
+        {
+            velocity = Vector3.zero;
+            //　着地していたらアニメーションパラメータと２段階ジャンプフラグをfalse
+            //animator.SetBool("Jump", false);
+
+            //　方向キーが多少押されている
+            if (input.magnitude > 0f)
+            {
+                //animator.SetFloat("Speed", input.magnitude);
+
+                //transform.LookAt(transform.position + input);
+
+                velocity += input.normalized * walkSpeed;
+                //　キーの押しが小さすぎる場合は移動しない
+            }
+            else
+            {
+                //animator.SetFloat("Speed", 0f);
+            }
+
+            if (Input.GetButtonDown("Jump"))
+            {
+                //animator.SetBool("Jump", true);
+                velocity.y += jumpPower;
+            }
+        }
+
+        velocity.y += Physics.gravity.y * Time.deltaTime;
+        cCon.Move(velocity * Time.deltaTime);
     }
 }
