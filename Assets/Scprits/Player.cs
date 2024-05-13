@@ -68,29 +68,37 @@ public class Player : NetworkBehaviour
         {
             velocity = Vector3.zero;
             //　着地していたらアニメーションパラメータと２段階ジャンプフラグをfalse
-            //animator.SetBool("Jump", false);
+            animator.SetBool("Grounded", true);
+            animator.SetBool("FreeFall", false);
+            animator.SetBool("Jump", false);
 
             //　方向キーが多少押されている
             if (input.magnitude > 0f)
             {
-                //animator.SetFloat("Speed", input.magnitude);
-
-                //transform.LookAt(transform.position + input);
-
                 velocity += input.normalized * walkSpeed;
-                //　キーの押しが小さすぎる場合は移動しない
+                animator.SetFloat("Speed", 1);
             }
             else
             {
-                //animator.SetFloat("Speed", 0f);
+                animator.SetFloat("Speed", 0);
             }
 
             if (isJump)
             {
-                //animator.SetBool("Jump", true);
+                animator.SetBool("Jump", true);
                 velocity.y += jumpPower;
             }
         }
+        else
+        {
+            animator.SetBool("Grounded", false);
+            animator.SetBool("FreeFall", true);
+            animator.SetFloat("Speed", 0);
+        }
+
+
+        animator.SetFloat(Animator.StringToHash("MotionSpeed"), input.magnitude * 2);
+
 
         velocity.y += Physics.gravity.y * Time.deltaTime;
         cCon.Move(velocity * Time.deltaTime);
