@@ -5,6 +5,9 @@ public class Player : NetworkBehaviour
 {
     [SerializeField]
     private GameObject playerCameraPrefab = null;
+    public AudioClip[] FootstepAudioClips;
+    public AudioClip LandingAudioClip;
+    [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
 
     private Animator animator;
     private CharacterController cCon;
@@ -17,6 +20,7 @@ public class Player : NetworkBehaviour
     private float walkSpeed = 4f;
     private Vector3 input;
     private bool isJump = false;
+    private float animationBlend = 0f;
 
     public override void OnNetworkSpawn()
     {
@@ -27,6 +31,14 @@ public class Player : NetworkBehaviour
     {
         animator = GetComponent<Animator>();
         cCon = GetComponent<CharacterController>();
+        if (playerCamera == null && NetworkManager.Singleton == null)
+        {
+            playerCamera = Instantiate(playerCameraPrefab);
+            //子オブジェクトを取得
+            GameObject cameraRoot = this.transform.Find("PlayerCameraRoot").gameObject;
+            playerCamera.GetComponent<Cinemachine.CinemachineFreeLook>().Follow = cameraRoot.transform;
+            playerCamera.GetComponent<Cinemachine.CinemachineFreeLook>().LookAt = cameraRoot.transform;
+        }
     }
 
     void Update()
@@ -40,7 +52,8 @@ public class Player : NetworkBehaviour
                 playerCamera = Instantiate(playerCameraPrefab);
                 //子オブジェクトを取得
                 GameObject cameraRoot = this.transform.Find("PlayerCameraRoot").gameObject;
-                playerCamera.GetComponent<Cinemachine.CinemachineVirtualCamera>().Follow = cameraRoot.transform;
+                playerCamera.GetComponent<Cinemachine.CinemachineFreeLook>().Follow = cameraRoot.transform;
+                playerCamera.GetComponent<Cinemachine.CinemachineFreeLook>().LookAt = cameraRoot.transform;
             }
         }
         if (IsServer)
@@ -64,6 +77,7 @@ public class Player : NetworkBehaviour
 
     private void UpdateCharacterController()
     {
+        float targetSpeed = input.normalized.magnitude;
         if (cCon.isGrounded)
         {
             velocity = Vector3.zero;
@@ -76,11 +90,11 @@ public class Player : NetworkBehaviour
             if (input.magnitude > 0f)
             {
                 velocity += input.normalized * walkSpeed;
-                animator.SetFloat("Speed", 1);
+
             }
             else
             {
-                animator.SetFloat("Speed", 0);
+                targetSpeed = 0f;
             }
 
             if (isJump)
@@ -97,10 +111,34 @@ public class Player : NetworkBehaviour
         }
 
 
-        animator.SetFloat(Animator.StringToHash("MotionSpeed"), input.magnitude * 2);
-
+        animator.SetFloat(Animator.StringToHash("MotionSpeed"), input.normalized.magnitude);
+        animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Time.deltaTime * 10);
+        if (animationBlend < 0.01f) animationBlend = 0f;
+        animator.SetFloat("Speed", animationBlend);
 
         velocity.y += Physics.gravity.y * Time.deltaTime;
         cCon.Move(velocity * Time.deltaTime);
+    }
+
+    private void OnFootstep(AnimationEvent animationEvent)
+    {
+        if (!IsOwner) return;
+        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        {
+            if (FootstepAudioClips.Length > 0)
+            {
+                var index = Random.Range(0, FootstepAudioClips.Length);
+                AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(cCon.center), FootstepAudioVolume);
+            }
+        }
+    }
+
+    private void OnLand(AnimationEvent animationEvent)
+    {
+        if (!IsOwner) return;
+        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        {
+            AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(cCon.center), FootstepAudioVolume);
+        }
     }
 }

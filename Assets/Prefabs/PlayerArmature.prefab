@@ -2007,7 +2007,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 568907cd2a1684135942d7591ea233bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCameraPrefab: {fileID: 8220390389458140740, guid: 7ef2b6604e1aa4edea2edf78ead2c4fe, type: 3}
+  playerCameraPrefab: {fileID: 1491397514676184951, guid: 865d25bd88ac04bad93ced4c2c42c5fb, type: 3}
+  FootstepAudioClips:
+  - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}
+  - {fileID: 8300000, guid: 22537e39083884518b948b6542639237, type: 3}
+  - {fileID: 8300000, guid: 43db7da7ab06f44108f08affa300c419, type: 3}
+  - {fileID: 8300000, guid: 73f07aa753dc1463ebf904d34973e49d, type: 3}
+  - {fileID: 8300000, guid: d3fd818a8ea5a49f8af96c6f37f066f7, type: 3}
+  - {fileID: 8300000, guid: 90d68c2128ad54149a1f1310c64bfa22, type: 3}
+  - {fileID: 8300000, guid: ff8ebcc7ee9e24189a958b6d55efe7f0, type: 3}
+  - {fileID: 8300000, guid: 58617bea5edbf4eaf887b9e5bc9b8069, type: 3}
+  - {fileID: 8300000, guid: 82ffb1d8dbecd446fb1eb573921ad7de, type: 3}
+  - {fileID: 8300000, guid: 5ee2b731a277645fe86f15e96042556b, type: 3}
+  LandingAudioClip: {fileID: 8300000, guid: 1e27bdb7813524c9791edadb30b134c1, type: 3}
+  FootstepAudioVolume: 0.5
   jumpPower: 5
   walkSpeed: 4
 --- !u!114 &8367085312096808584
@@ -2043,10 +2056,10 @@ MonoBehaviour:
   SyncRotAngleX: 1
   SyncRotAngleY: 1
   SyncRotAngleZ: 1
-  SyncScaleX: 1
-  SyncScaleY: 1
-  SyncScaleZ: 1
-  PositionThreshold: 0.001
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.05
   RotAngleThreshold: 0.01
   ScaleThreshold: 0.01
   UseQuaternionSynchronization: 0
