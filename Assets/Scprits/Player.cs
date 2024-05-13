@@ -16,6 +16,7 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private float walkSpeed = 4f;
     private Vector3 input;
+    private bool isJump = false;
 
     public override void OnNetworkSpawn()
     {
@@ -32,7 +33,7 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
-            SetMoveInputServerRpc(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            SetMoveInputServerRpc(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetButtonDown("Jump"));
 
             if (playerCamera == null)
             {
@@ -50,9 +51,10 @@ public class Player : NetworkBehaviour
 
 
     [ServerRpc]
-    private void SetMoveInputServerRpc(float x, float y)
+    private void SetMoveInputServerRpc(float x, float y, bool j)
     {
         input = new Vector3(x, 0f, y);
+        isJump = j;
     }
 
     private void ServerUpdate()
@@ -83,7 +85,7 @@ public class Player : NetworkBehaviour
                 //animator.SetFloat("Speed", 0f);
             }
 
-            if (Input.GetButtonDown("Jump"))
+            if (isJump)
             {
                 //animator.SetBool("Jump", true);
                 velocity.y += jumpPower;
