@@ -12,7 +12,7 @@ public class Player : NetworkBehaviour
     private Animator animator;
     private CharacterController cCon;
     private Vector3 velocity = Vector3.zero;
-    private Cinemachine.CinemachineFreeLook freeLookCamera = null;
+    private GameObject playerCamera = null;
     [SerializeField]
     private float jumpPower = 5f;
 
@@ -40,11 +40,10 @@ public class Player : NetworkBehaviour
         {
             SetMoveInputServerRpc(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetButtonDown("Jump"));
 
-            if (freeLookCamera == null)
+            if (playerCamera == null)
             {
-                freeLookCamera = Instantiate(playerCameraPrefab).GetComponent<Cinemachine.CinemachineFreeLook>();
-                freeLookCamera.Follow = this.transform.Find("PlayerCameraRoot").gameObject.transform;
-                freeLookCamera.LookAt = this.transform.Find("PlayerCameraRoot").gameObject.transform;
+                playerCamera = Instantiate(playerCameraPrefab);
+                playerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
             }
         }
         if (IsServer)
@@ -115,9 +114,9 @@ public class Player : NetworkBehaviour
 
     private void AlignPlayerWithCamera()
     {
-        if (freeLookCamera != null && freeLookCamera.LookAt != null)
+        if (playerCamera != null)
         {
-            lookDirection = freeLookCamera.LookAt.position - freeLookCamera.transform.position;
+            lookDirection = playerCamera.transform.forward;
             Quaternion targetRotation = Quaternion.LookRotation(new Vector3(lookDirection.x, 0, lookDirection.z));
 
             Quaternion currentRotation = this.transform.rotation;
