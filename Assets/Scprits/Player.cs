@@ -12,7 +12,7 @@ public class Player : NetworkBehaviour
     private Animator animator;
     private CharacterController cCon;
     private Vector3 velocity = Vector3.zero;
-    private GameObject playerCamera = null;
+    private Cinemachine.CinemachineFreeLook freeLookCamera = null;
     [SerializeField]
     private float jumpPower = 5f;
 
@@ -21,6 +21,7 @@ public class Player : NetworkBehaviour
     private Vector3 input;
     private bool isJump = false;
     private float animationBlend = 0f;
+    private Vector3 lookDirection = Vector3.zero;
 
     public override void OnNetworkSpawn()
     {
@@ -31,14 +32,6 @@ public class Player : NetworkBehaviour
     {
         animator = GetComponent<Animator>();
         cCon = GetComponent<CharacterController>();
-        if (playerCamera == null && NetworkManager.Singleton == null)
-        {
-            playerCamera = Instantiate(playerCameraPrefab);
-            //子オブジェクトを取得
-            GameObject cameraRoot = this.transform.Find("PlayerCameraRoot").gameObject;
-            playerCamera.GetComponent<Cinemachine.CinemachineFreeLook>().Follow = cameraRoot.transform;
-            playerCamera.GetComponent<Cinemachine.CinemachineFreeLook>().LookAt = cameraRoot.transform;
-        }
     }
 
     void Update()
@@ -47,13 +40,11 @@ public class Player : NetworkBehaviour
         {
             SetMoveInputServerRpc(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetButtonDown("Jump"));
 
-            if (playerCamera == null)
+            if (freeLookCamera == null)
             {
-                playerCamera = Instantiate(playerCameraPrefab);
-                //子オブジェクトを取得
-                GameObject cameraRoot = this.transform.Find("PlayerCameraRoot").gameObject;
-                playerCamera.GetComponent<Cinemachine.CinemachineFreeLook>().Follow = cameraRoot.transform;
-                playerCamera.GetComponent<Cinemachine.CinemachineFreeLook>().LookAt = cameraRoot.transform;
+                freeLookCamera = Instantiate(playerCameraPrefab).GetComponent<Cinemachine.CinemachineFreeLook>();
+                freeLookCamera.Follow = this.transform.Find("PlayerCameraRoot").gameObject.transform;
+                freeLookCamera.LookAt = this.transform.Find("PlayerCameraRoot").gameObject.transform;
             }
         }
         if (IsServer)
@@ -77,26 +68,28 @@ public class Player : NetworkBehaviour
 
     private void UpdateCharacterController()
     {
-        float targetSpeed = input.normalized.magnitude;
         if (cCon.isGrounded)
         {
             velocity = Vector3.zero;
-            //　着地していたらアニメーションパラメータと２段階ジャンプフラグをfalse
             animator.SetBool("Grounded", true);
             animator.SetBool("FreeFall", false);
             animator.SetBool("Jump", false);
 
-            //　方向キーが多少押されている
+            if (input.z > 0)
+            {
+                AlignPlayerWithCamera();
+            }
+
             if (input.magnitude > 0f)
             {
-                velocity += input.normalized * walkSpeed;
+
+                //プレイヤーの向きに合わせて移動方向を変える
+                velocity += transform.forward * input.z * walkSpeed;
+                velocity += transform.right * input.x * walkSpeed;
+                Debug.Log(transform.right);
+
 
             }
-            else
-            {
-                targetSpeed = 0f;
-            }
-
             if (isJump)
             {
                 animator.SetBool("Jump", true);
@@ -112,12 +105,24 @@ public class Player : NetworkBehaviour
 
 
         animator.SetFloat(Animator.StringToHash("MotionSpeed"), input.normalized.magnitude);
-        animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Time.deltaTime * 10);
+        animationBlend = Mathf.Lerp(animationBlend, input.magnitude > 0f ? input.normalized.magnitude : 0, Time.deltaTime * 10);
         if (animationBlend < 0.01f) animationBlend = 0f;
         animator.SetFloat("Speed", animationBlend);
 
         velocity.y += Physics.gravity.y * Time.deltaTime;
         cCon.Move(velocity * Time.deltaTime);
+    }
+
+    private void AlignPlayerWithCamera()
+    {
+        if (freeLookCamera != null && freeLookCamera.LookAt != null)
+        {
+            lookDirection = freeLookCamera.LookAt.position - freeLookCamera.transform.position;
+            Quaternion targetRotation = Quaternion.LookRotation(new Vector3(lookDirection.x, 0, lookDirection.z));
+
+            Quaternion currentRotation = this.transform.rotation;
+            this.transform.rotation = Quaternion.Lerp(currentRotation, targetRotation, Time.deltaTime * 10);
+        }
     }
 
     private void OnFootstep(AnimationEvent animationEvent)
