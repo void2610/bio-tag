@@ -8,16 +8,15 @@ public class Player : NetworkBehaviour
     public AudioClip[] FootstepAudioClips;
     public AudioClip LandingAudioClip;
     [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
-
+    [SerializeField]
+    private float jumpPower = 6f;
+    [SerializeField]
+    private float walkSpeed = 6f;
     private Animator animator;
     private CharacterController cCon;
     private Vector3 velocity = Vector3.zero;
     private GameObject playerCamera = null;
-    [SerializeField]
-    private float jumpPower = 5f;
 
-    [SerializeField]
-    private float walkSpeed = 4f;
     private Vector3 input;
     private bool isJump = false;
     private float animationBlend = 0f;
@@ -81,13 +80,8 @@ public class Player : NetworkBehaviour
 
             if (input.magnitude > 0f)
             {
-
-                //プレイヤーの向きに合わせて移動方向を変える
                 velocity += transform.forward * input.z * walkSpeed;
                 velocity += transform.right * input.x * walkSpeed;
-                Debug.Log(transform.right);
-
-
             }
             if (isJump)
             {
