@@ -19,6 +19,7 @@ public class Player : NetworkBehaviour
 
     private Vector3 input;
     private bool isJump = false;
+    private Vector3 playerDirection = Vector3.zero;
     private float animationBlend = 0f;
     private Vector3 lookDirection = Vector3.zero;
 
@@ -38,6 +39,8 @@ public class Player : NetworkBehaviour
         if (IsOwner)
         {
             SetMoveInputServerRpc(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetButtonDown("Jump"));
+            SetLookDirectionServerRpc(this.transform.eulerAngles);
+            AlignPlayerWithCamera();
 
             if (playerCamera == null)
             {
@@ -58,6 +61,11 @@ public class Player : NetworkBehaviour
         input = new Vector3(x, 0f, y);
         isJump = j;
     }
+    [ServerRpc]
+    private void SetLookDirectionServerRpc(Vector3 lookDir)
+    {
+        playerDirection = lookDir;
+    }
 
     private void ServerUpdate()
     {
@@ -73,10 +81,6 @@ public class Player : NetworkBehaviour
             animator.SetBool("FreeFall", false);
             animator.SetBool("Jump", false);
 
-            if (input.z > 0)
-            {
-                AlignPlayerWithCamera();
-            }
 
             if (input.magnitude > 0f)
             {
@@ -96,14 +100,17 @@ public class Player : NetworkBehaviour
             animator.SetFloat("Speed", 0);
         }
 
-
-        animator.SetFloat(Animator.StringToHash("MotionSpeed"), input.normalized.magnitude);
         animationBlend = Mathf.Lerp(animationBlend, input.magnitude > 0f ? input.normalized.magnitude : 0, Time.deltaTime * 10);
-        if (animationBlend < 0.01f) animationBlend = 0f;
-        animator.SetFloat("Speed", animationBlend);
+        animator.SetFloat("Speed", animationBlend < 0.01f ? 0 : animationBlend);
+        animator.SetFloat("MotionSpeed", input.normalized.magnitude);
+
 
         velocity.y += Physics.gravity.y * Time.deltaTime;
         cCon.Move(velocity * Time.deltaTime);
+        if (new Vector3(playerDirection.x, 0, playerDirection.z).magnitude > 0.1f)
+        {
+            this.transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.LookRotation(new Vector3(playerDirection.x, 0, playerDirection.z)), Time.deltaTime * 10);
+        }
     }
 
     private void AlignPlayerWithCamera()
@@ -111,10 +118,7 @@ public class Player : NetworkBehaviour
         if (playerCamera != null)
         {
             lookDirection = playerCamera.transform.forward;
-            Quaternion targetRotation = Quaternion.LookRotation(new Vector3(lookDirection.x, 0, lookDirection.z));
-
-            Quaternion currentRotation = this.transform.rotation;
-            this.transform.rotation = Quaternion.Lerp(currentRotation, targetRotation, Time.deltaTime * 10);
+            SetLookDirectionServerRpc(lookDirection);
         }
     }
 
