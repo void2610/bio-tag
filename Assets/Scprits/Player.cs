@@ -4,21 +4,24 @@ using Unity.Netcode;
 public class Player : NetworkBehaviour
 {
     [SerializeField]
-    private GameObject playerCameraPrefab = null;
-    public AudioClip[] FootstepAudioClips;
-    public AudioClip LandingAudioClip;
-    [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
+    private GameObject playerCameraPrefab;
+    [SerializeField]
+    private AudioClip[] FootstepAudioClips;
+    [SerializeField]
+    private AudioClip LandingAudioClip;
     [SerializeField]
     private float jumpPower = 6f;
     [SerializeField]
     private float walkSpeed = 6f;
+    [Range(0, 1)]
+    public float FootstepAudioVolume = 0.5f;
     private Animator animator;
     private CharacterController cCon;
-    private Vector3 velocity = Vector3.zero;
     private GameObject playerCamera = null;
     private float animationBlend = 0f;
     private Vector3 lookDirection = Vector3.zero;
     private Vector3 networkPosition;
+    private Vector3 velocity = Vector3.zero;
 
     void Start()
     {
@@ -30,15 +33,14 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
-            AlignPlayerWithCamera();
-            LocalMoving();
-            SentPositionToServerRpc(this.transform.position);
-
             if (playerCamera == null)
             {
                 playerCamera = Instantiate(playerCameraPrefab);
                 playerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
             }
+
+            LocalMoving();
+            SentPositionToServerRpc(this.transform.position);
         }
         else
         {
@@ -48,16 +50,9 @@ public class Player : NetworkBehaviour
 
     private void LocalMoving()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-
-        Vector3 movement = new Vector3(horizontalInput, 0.0f, verticalInput);
-
-        if (playerCamera != null)
-        {
-            UpdateCharacterController(movement, playerCamera.transform.forward, Input.GetButtonDown("Jump"));
-            AlignPlayerWithCamera();
-        }
+        Vector3 movement = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
+        UpdateCharacterController(movement, playerCamera.transform.forward, Input.GetButtonDown("Jump"));
+        lookDirection = playerCamera.transform.forward;
     }
 
     [ServerRpc]
@@ -116,24 +111,13 @@ public class Player : NetworkBehaviour
         }
     }
 
-    private void AlignPlayerWithCamera()
-    {
-        if (playerCamera != null)
-        {
-            lookDirection = playerCamera.transform.forward;
-        }
-    }
-
     private void OnFootstep(AnimationEvent animationEvent)
     {
         if (!IsOwner) return;
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
-            if (FootstepAudioClips.Length > 0)
-            {
-                var index = Random.Range(0, FootstepAudioClips.Length);
-                AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(cCon.center), FootstepAudioVolume);
-            }
+            var index = Random.Range(0, FootstepAudioClips.Length);
+            AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(cCon.center), FootstepAudioVolume);
         }
     }
 
