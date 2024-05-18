@@ -16,17 +16,9 @@ public class Player : NetworkBehaviour
     private CharacterController cCon;
     private Vector3 velocity = Vector3.zero;
     private GameObject playerCamera = null;
-
-    private Vector3 input;
-    private bool isJump = false;
-    private Vector3 playerDirection = Vector3.zero;
     private float animationBlend = 0f;
     private Vector3 lookDirection = Vector3.zero;
-
-    public override void OnNetworkSpawn()
-    {
-
-    }
+    private Vector3 networkPosition;
 
     void Start()
     {
@@ -38,9 +30,9 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
-            SetMoveInputServerRpc(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetButtonDown("Jump"));
-            SetLookDirectionServerRpc(this.transform.eulerAngles);
             AlignPlayerWithCamera();
+            LocalMoving();
+            SentPositionToServerRpc(this.transform.position);
 
             if (playerCamera == null)
             {
@@ -48,31 +40,42 @@ public class Player : NetworkBehaviour
                 playerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
             }
         }
-        if (IsServer)
+        else
         {
-            ServerUpdate();
+            this.transform.position = networkPosition;
         }
     }
 
+    private void LocalMoving()
+    {
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+
+        Vector3 movement = new Vector3(horizontalInput, 0.0f, verticalInput);
+
+        if (playerCamera != null)
+        {
+            UpdateCharacterController(movement, playerCamera.transform.forward, Input.GetButtonDown("Jump"));
+            AlignPlayerWithCamera();
+        }
+    }
 
     [ServerRpc]
-    private void SetMoveInputServerRpc(float x, float y, bool j)
+    private void SentPositionToServerRpc(Vector3 position)
     {
-        input = new Vector3(x, 0f, y);
-        isJump = j;
-    }
-    [ServerRpc]
-    private void SetLookDirectionServerRpc(Vector3 lookDir)
-    {
-        playerDirection = lookDir;
+        SentPositionFromClientRpc(position);
     }
 
-    private void ServerUpdate()
+    [ClientRpc]
+    private void SentPositionFromClientRpc(Vector3 position)
     {
-        UpdateCharacterController();
+        if (IsOwner)
+            return;
+
+        networkPosition = position;
     }
 
-    private void UpdateCharacterController()
+    private void UpdateCharacterController(Vector3 input, Vector3 playerDirection, bool isJump)
     {
         if (cCon.isGrounded)
         {
@@ -118,7 +121,6 @@ public class Player : NetworkBehaviour
         if (playerCamera != null)
         {
             lookDirection = playerCamera.transform.forward;
-            SetLookDirectionServerRpc(lookDirection);
         }
     }
 

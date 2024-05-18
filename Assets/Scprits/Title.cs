@@ -37,4 +37,13 @@ public class Title : MonoBehaviour
         response.Rotation = Quaternion.identity;
         response.Pending = false;
     }
+
+    public void Start()
+    {
+#if UNITY_SERVER
+        Debug.Log("Starting server");
+        NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+        NetworkManager.Singleton.StartServer();
+#endif
+    }
 }
