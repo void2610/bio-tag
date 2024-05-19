@@ -124,7 +124,7 @@ public class Player : NetworkBehaviour
     private void OnLand(AnimationEvent animationEvent)
     {
         if (!IsOwner) return;
-        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        if (animationEvent.animatorClipInfo.weight > 0.2f)
         {
             AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(cCon.center), FootstepAudioVolume);
         }
