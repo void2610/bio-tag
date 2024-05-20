@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        string playerName = PlayerPrefs.GetString("PlayerName", "DefaultName");
+        PlayerNetworkManager.Instance.SetPlayerName(playerName);
         //3秒後にゲームを開始
         Invoke("StartGame", 3);
     }

@@ -1,11 +1,17 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
+using UnityEngine.UI;
+using TMPro;
 
 public class Title : MonoBehaviour
 {
+    [SerializeField]
+    private TMP_InputField playerNameInputField;
     public void StartHost()
     {
+        string playerName = playerNameInputField.text;
+        PlayerPrefs.SetString("PlayerName", playerName);
         NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
         NetworkManager.Singleton.StartHost();
 
@@ -14,6 +20,8 @@ public class Title : MonoBehaviour
 
     public void StartClient()
     {
+        string playerName = playerNameInputField.text;
+        PlayerPrefs.SetString("PlayerName", playerName);
         NetworkManager.Singleton.StartClient();
     }
 
