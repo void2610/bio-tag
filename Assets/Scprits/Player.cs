@@ -22,6 +22,7 @@ public class Player : NetworkBehaviour
     private Vector3 lookDirection = Vector3.zero;
     private Vector3 networkPosition;
     private Vector3 velocity = Vector3.zero;
+    private float onLandTime = 0f;
 
     void Start()
     {
@@ -124,8 +125,9 @@ public class Player : NetworkBehaviour
     private void OnLand(AnimationEvent animationEvent)
     {
         if (!IsOwner) return;
-        if (animationEvent.animatorClipInfo.weight > 0.2f)
+        if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - onLandTime > 0.1f)
         {
+            onLandTime = Time.time;
             AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(cCon.center), FootstepAudioVolume);
         }
     }
