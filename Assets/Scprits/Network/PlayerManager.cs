@@ -49,6 +49,11 @@ public class PlayerManager : NetworkBehaviour
         return "Unknown";
     }
 
+    public int GetPlayerCount()
+    {
+        return playerNames.Count;
+    }
+
     private void OnClientDisconnected(ulong clientId)
     {
         if (playerNames.ContainsKey(clientId))
@@ -59,6 +64,5 @@ public class PlayerManager : NetworkBehaviour
 
     private void Update()
     {
-        Debug.Log("Player count: " + playerNames.Count);
     }
 }

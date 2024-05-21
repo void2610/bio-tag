@@ -3,17 +3,12 @@ using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using Unity.Netcode;
 
+[RequireComponent(typeof(NetworkObject))]
 public class GameManager : NetworkBehaviour
 {
     public static GameManager instance;
     private void Awake()
     {
-        if (!NetworkManager.Singleton.IsServer)
-        {
-            Destroy(this);
-            return;
-        }
-
         if (instance == null)
         {
             instance = this;
@@ -25,43 +20,56 @@ public class GameManager : NetworkBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-    private List<float> playerScores = new List<float>();
-    private int playerCount = 0;
-    private bool onGame = false;
-    private int itIndex;
+    //private List<float> playerScores = new List<float>();
+    // private int playerCount = 0;
+    // private int itIndex;
+    public NetworkVariable<float> TimerValue = new NetworkVariable<float>();
+    public NetworkVariable<bool> OnGame = new NetworkVariable<bool>();
 
     public void StartGame()
     {
-        playerCount = NetworkManager.Singleton.ConnectedClientsList.Count;
-        playerScores.Clear();
-        for (int i = 0; i < playerCount; i++)
-        {
-            playerScores.Add(0);
-        }
-        itIndex = Random.Range(0, playerCount);
+        // playerCount = PlayerManager.Instance.GetPlayerCount();
+        // playerScores.Clear();
+        // for (int i = 0; i < playerCount; i++)
+        // {
+        //     playerScores.Add(0);
+        // }
+        // itIndex = Random.Range(0, playerCount);
+        OnGame.Value = true;
     }
 
     public void ChangeIt(int index)
     {
-        itIndex = index;
+        //itIndex = index;
     }
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
-        // string playerName = PlayerPrefs.GetString("PlayerName", "DefaultName");
-        // PlayerNetworkManager.Instance.SetPlayerName(playerName);
+        if (!NetworkManager.Singleton.IsServer) return;
 
+        TimerValue.Value = 0;
+        OnGame.Value = false;
+        Debug.Log("Game Manager spawned");
         //3秒後にゲームを開始
         Invoke("StartGame", 3);
     }
 
+    public void Start()
+    {
+        var networkObject = this.GetComponent<NetworkObject>();
+        if (!networkObject.IsSpawned)
+        {
+            networkObject.Spawn();
+        }
+    }
+
     public void Update()
     {
-        if (!IsServer) return;
+        if (!NetworkManager.Singleton.IsServer) return;
 
-        if (onGame)
+        if (OnGame.Value)
         {
-            playerScores[itIndex] += Time.deltaTime;
+            TimerValue.Value += Time.deltaTime;
         }
     }
 }
