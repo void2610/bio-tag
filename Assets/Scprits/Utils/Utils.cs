@@ -1,11 +1,11 @@
 using UnityEngine;
 using Unity.Netcode;
 
-public class Utils : MonoBehaviour
+public class Utils : NetworkBehaviour
 {
     [SerializeField]
     private GameObject playerPrefab = null;
-    void Start()
+    public override void OnNetworkSpawn()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
