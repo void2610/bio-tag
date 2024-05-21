@@ -2,9 +2,11 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.Collections;
 
-public class PlayerNetworkManager : NetworkBehaviour
+public class PlayerNetwork : NetworkBehaviour
 {
-    public static PlayerNetworkManager Instance { get; private set; }
+    public static PlayerNetwork Instance { get; private set; }
+
+    private NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>();
 
     private void Awake()
     {
@@ -18,28 +20,31 @@ public class PlayerNetworkManager : NetworkBehaviour
         }
     }
 
-    private NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>();
-
     public override void OnNetworkSpawn()
     {
         if (IsOwner)
         {
             playerName.OnValueChanged += OnPlayerNameChanged;
         }
+
+        if (IsServer)
+        {
+            playerName.OnValueChanged += (oldName, newName) =>
+            {
+                PlayerManager.Instance.SetPlayerName(OwnerClientId, newName.ToString());
+            };
+        }
     }
 
     private void OnPlayerNameChanged(FixedString32Bytes oldName, FixedString32Bytes newName)
     {
-        // プレイヤー名が変更された際の処理を追加
         Debug.Log($"Player name changed from {oldName} to {newName}");
     }
 
     public void SetPlayerName(string newName)
     {
-
         if (IsOwner)
         {
-            Debug.Log("PlayerName: " + newName);
             playerName.Value = new FixedString32Bytes(newName);
         }
     }

@@ -3,11 +3,17 @@ using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using Unity.Netcode;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     public static GameManager instance;
     private void Awake()
     {
+        if (!NetworkManager.Singleton.IsServer)
+        {
+            Destroy(this);
+            return;
+        }
+
         if (instance == null)
         {
             instance = this;
@@ -42,14 +48,17 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        string playerName = PlayerPrefs.GetString("PlayerName", "DefaultName");
-        PlayerNetworkManager.Instance.SetPlayerName(playerName);
+        // string playerName = PlayerPrefs.GetString("PlayerName", "DefaultName");
+        // PlayerNetworkManager.Instance.SetPlayerName(playerName);
+
         //3秒後にゲームを開始
         Invoke("StartGame", 3);
     }
 
     public void Update()
     {
+        if (!IsServer) return;
+
         if (onGame)
         {
             playerScores[itIndex] += Time.deltaTime;
