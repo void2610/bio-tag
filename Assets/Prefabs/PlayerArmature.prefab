@@ -2007,6 +2007,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 568907cd2a1684135942d7591ea233bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameManagerPrefab: {fileID: 1389551862980239553, guid: 0029f786afefa4643a78c8ac72eb8d62, type: 3}
   playerCameraPrefab: {fileID: 5409894540958609353, guid: b4be50f88394247c3bd92fe52a339b1a, type: 3}
   FootstepAudioClips:
   - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}

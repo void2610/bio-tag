@@ -56,11 +56,13 @@ public class GameManager : NetworkBehaviour
 
     public void Start()
     {
-        var networkObject = this.GetComponent<NetworkObject>();
-        if (!networkObject.IsSpawned)
-        {
-            networkObject.Spawn();
-        }
+        if (!NetworkManager.Singleton.IsServer) return;
+
+        // var networkObject = this.GetComponent<NetworkObject>();
+        // if (!networkObject.IsSpawned)
+        // {
+        //     networkObject.Spawn();
+        // }
     }
 
     public void Update()
