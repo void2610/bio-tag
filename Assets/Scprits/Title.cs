@@ -48,10 +48,5 @@ public class Title : MonoBehaviour
 
     public void Start()
     {
-#if UNITY_SERVER
-        Debug.Log("Starting server");
-        NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
-        NetworkManager.Singleton.StartServer();
-#endif
     }
 }

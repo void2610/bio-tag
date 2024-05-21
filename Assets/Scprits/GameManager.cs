@@ -49,7 +49,7 @@ public class GameManager : NetworkBehaviour
 
         TimerValue.Value = 0;
         OnGame.Value = false;
-        Debug.Log("Game Manager spawned");
+
         //3秒後にゲームを開始
         Invoke("StartGame", 3);
     }
@@ -57,12 +57,6 @@ public class GameManager : NetworkBehaviour
     public void Start()
     {
         if (!NetworkManager.Singleton.IsServer) return;
-
-        // var networkObject = this.GetComponent<NetworkObject>();
-        // if (!networkObject.IsSpawned)
-        // {
-        //     networkObject.Spawn();
-        // }
     }
 
     public void Update()
