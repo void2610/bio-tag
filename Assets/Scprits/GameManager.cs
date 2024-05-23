@@ -16,8 +16,8 @@ public class GameManager : NetworkBehaviour
         else
         {
             Destroy(this.gameObject);
+            DontDestroyOnLoad(this.gameObject);
         }
-        DontDestroyOnLoad(this.gameObject);
     }
 
     //private List<float> playerScores = new List<float>();

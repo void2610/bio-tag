@@ -37,6 +37,13 @@ public class Player : NetworkBehaviour
         }
     }
 
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner) return;
+
+        PlayerManager.Instance?.AddPlayerServerRpc(NetworkObject.OwnerClientId);
+    }
+
     void Update()
     {
         if (IsOwner)

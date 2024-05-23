@@ -7,11 +7,6 @@ public class PlayerManager : NetworkBehaviour
     public static PlayerManager Instance { get; private set; }
     private void Awake()
     {
-        if (!NetworkManager.Singleton.IsServer)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
         if (Instance != null)
         {
             Destroy(this);
@@ -19,16 +14,22 @@ public class PlayerManager : NetworkBehaviour
         else
         {
             Instance = this;
+            DontDestroyOnLoad(this.gameObject);
         }
     }
 
     private Dictionary<ulong, string> playerNames = new Dictionary<ulong, string>();
 
+    public NetworkVariable<int> PlayerCount = new NetworkVariable<int>();
     public override void OnNetworkSpawn()
     {
-        if (IsServer)
+        if (NetworkManager.Singleton.IsServer)
         {
-            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            PlayerCount.Value = 0;
+        }
+        if (IsOwner)
+        {
+            PlayerCount.Value++;
         }
     }
 
@@ -56,10 +57,17 @@ public class PlayerManager : NetworkBehaviour
 
     private void OnClientDisconnected(ulong clientId)
     {
-        if (playerNames.ContainsKey(clientId))
-        {
-            playerNames.Remove(clientId);
-        }
+        PlayerCount.Value--;
+        // if (playerNames.ContainsKey(clientId))
+        // {
+        //     playerNames.Remove(clientId);
+        // }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void AddPlayerServerRpc(ulong clientId)
+    {
+        PlayerCount.Value++;
     }
 
     private void Update()
