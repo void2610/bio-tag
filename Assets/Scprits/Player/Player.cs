@@ -31,10 +31,9 @@ public class Player : NetworkBehaviour
         animator = GetComponent<Animator>();
         cCon = GetComponent<CharacterController>();
 
-        if (IsOwner)
+        if (IsServer)
         {
-            var gm = Instantiate(gameManagerPrefab);
-            gm.GetComponent<NetworkObject>().Spawn();
+            Instantiate(gameManagerPrefab).GetComponent<NetworkObject>().Spawn();
         }
     }
 
