@@ -18,27 +18,11 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    private Dictionary<ulong, string> playerNames = new Dictionary<ulong, string>();
+    public Dictionary<ulong, string> playerNames = new Dictionary<ulong, string>();
 
-    public NetworkVariable<int> PlayerCount = new NetworkVariable<int>();
+    public int PlayerCount = 0;
     public override void OnNetworkSpawn()
     {
-        if (NetworkManager.Singleton.IsServer)
-        {
-            PlayerCount.Value = 0;
-        }
-        if (IsOwner)
-        {
-            PlayerCount.Value++;
-        }
-    }
-
-    public void SetPlayerName(ulong clientId, string name)
-    {
-        if (IsServer)
-        {
-            playerNames[clientId] = name;
-        }
     }
 
     public string GetPlayerName(ulong clientId)
@@ -57,20 +41,46 @@ public class PlayerManager : NetworkBehaviour
 
     private void OnClientDisconnected(ulong clientId)
     {
-        PlayerCount.Value--;
-        // if (playerNames.ContainsKey(clientId))
-        // {
-        //     playerNames.Remove(clientId);
-        // }
+        PlayerCount--;
+        if (playerNames.ContainsKey(clientId))
+        {
+            playerNames.Remove(clientId);
+        }
+    }
+
+    public void AddPlayer(ulong clientId, string name)
+    {
+        if (NetworkManager.Singleton.IsHost)
+        {
+            playerNames[clientId] = name;
+            PlayerCount++;
+            AddPlayerClientRpc(clientId, name);
+        }
+        else
+        {
+            AddPlayerServerRpc(clientId, name);
+        }
+
+        foreach (var item in playerNames)
+        {
+            Debug.Log(item.Key + " : " + item.Value);
+        }
+    }
+
+    [ClientRpc]
+    public void AddPlayerClientRpc(ulong clientId, string name)
+    {
+        playerNames[clientId] = name;
+        PlayerCount++;
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void AddPlayerServerRpc(ulong clientId)
+    public void AddPlayerServerRpc(ulong clientId, string name)
     {
-        PlayerCount.Value++;
+        playerNames[clientId] = name;
+        PlayerCount++;
+        AddPlayerClientRpc(clientId, name);
     }
 
-    private void Update()
-    {
-    }
+
 }

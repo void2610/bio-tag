@@ -2007,7 +2007,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 568907cd2a1684135942d7591ea233bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManagerPrefab: {fileID: 1389551862980239553, guid: 0029f786afefa4643a78c8ac72eb8d62, type: 3}
   playerCameraPrefab: {fileID: 5409894540958609353, guid: b4be50f88394247c3bd92fe52a339b1a, type: 3}
   FootstepAudioClips:
   - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}
@@ -2050,6 +2049,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bc95de1449d84ac7a09bbffdfde0152, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameManagerPrefab: {fileID: 1389551862980239553, guid: 0029f786afefa4643a78c8ac72eb8d62, type: 3}
+  worldSpaceCanvasPrefab: {fileID: 5299902430065150010, guid: d5a86d81a178849c68e71d6f8315b4ed, type: 3}
+  playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
+  playerName:
+    m_InternalValue:
+      utf8LengthInBytes: 0
+      bytes:
+        offset0000:
+          byte0000: 0
+          byte0001: 0
+          byte0002: 0
+          byte0003: 0
+          byte0004: 0
+          byte0005: 0
+          byte0006: 0
+          byte0007: 0
+          byte0008: 0
+          byte0009: 0
+          byte0010: 0
+          byte0011: 0
+          byte0012: 0
+          byte0013: 0
+          byte0014: 0
+          byte0015: 0
+        byte0016: 0
+        byte0017: 0
+        byte0018: 0
+        byte0019: 0
+        byte0020: 0
+        byte0021: 0
+        byte0022: 0
+        byte0023: 0
+        byte0024: 0
+        byte0025: 0
+        byte0026: 0
+        byte0027: 0
+        byte0028: 0
+        byte0029: 0
 --- !u!1 &7776785986142313572
 GameObject:
   m_ObjectHideFlags: 0

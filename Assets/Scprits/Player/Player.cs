@@ -4,8 +4,6 @@ using Unity.Netcode;
 public class Player : NetworkBehaviour
 {
     [SerializeField]
-    private GameObject gameManagerPrefab;
-    [SerializeField]
     private GameObject playerCameraPrefab;
     [SerializeField]
     private AudioClip[] FootstepAudioClips;
@@ -31,17 +29,7 @@ public class Player : NetworkBehaviour
         animator = GetComponent<Animator>();
         cCon = GetComponent<CharacterController>();
 
-        if (IsServer)
-        {
-            Instantiate(gameManagerPrefab).GetComponent<NetworkObject>().Spawn();
-        }
-    }
 
-    public override void OnNetworkSpawn()
-    {
-        if (!IsOwner) return;
-
-        PlayerManager.Instance?.AddPlayerServerRpc(NetworkObject.OwnerClientId);
     }
 
     void Update()

@@ -4,53 +4,36 @@ using Unity.Collections;
 
 public class PlayerNetwork : NetworkBehaviour
 {
-    public static PlayerNetwork Instance { get; private set; }
-
+    [SerializeField]
+    private GameObject gameManagerPrefab;
+    [SerializeField]
+    private GameObject worldSpaceCanvasPrefab;
+    [SerializeField]
+    private GameObject playerNameUIPrefab;
+    [SerializeField]
     private NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>();
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this);
-        }
-        else
-        {
-            Instance = this;
-        }
-    }
 
     public override void OnNetworkSpawn()
     {
-        if (IsOwner)
+        playerName.Value = PlayerPrefs.GetString("PlayerName", "Player");
+        Debug.Log("PlayerName: " + playerName.Value + " OwnerClientId: " + OwnerClientId);
+        PlayerManager.Instance?.AddPlayer(OwnerClientId, "Player " + OwnerClientId);
+
+
+        GameObject canvas = GameObject.Find("WorldSpaceCanvas");
+        if (canvas == null)
         {
-            playerName.OnValueChanged += OnPlayerNameChanged;
+            canvas = Instantiate(worldSpaceCanvasPrefab);
+            canvas.name = "WorldSpaceCanvas";
         }
-
-        if (IsServer)
+        GameObject tmp = Instantiate(playerNameUIPrefab, canvas.transform);
+        tmp.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, "Player " + OwnerClientId);
+    }
+    void Awake()
+    {
+        if (NetworkManager.Singleton.IsServer)
         {
-            playerName.OnValueChanged += (oldName, newName) =>
-            {
-                PlayerManager.Instance.SetPlayerName(OwnerClientId, newName.ToString());
-            };
+            Instantiate(gameManagerPrefab).GetComponent<NetworkObject>().Spawn();
         }
-    }
-
-    private void OnPlayerNameChanged(FixedString32Bytes oldName, FixedString32Bytes newName)
-    {
-        Debug.Log($"Player name changed from {oldName} to {newName}");
-    }
-
-    public void SetPlayerName(string newName)
-    {
-        if (IsOwner)
-        {
-            playerName.Value = new FixedString32Bytes(newName);
-        }
-    }
-
-    public string GetPlayerName()
-    {
-        return playerName.Value.ToString();
     }
 }
