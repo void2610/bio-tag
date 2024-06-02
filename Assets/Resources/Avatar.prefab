@@ -2048,8 +2048,8 @@ GameObject:
   - component: {fileID: 1046156731043585764}
   - component: {fileID: 7979500563668944940}
   - component: {fileID: 6591633182021724453}
-  - component: {fileID: 5222349190582719750}
   - component: {fileID: 8902325866732217002}
+  - component: {fileID: 6368321461493701097}
   m_Layer: 8
   m_Name: Avatar
   m_TagString: Player
@@ -2142,26 +2142,11 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 5222349190582719750}
+  - {fileID: 8902325866732217002}
+  - {fileID: 6368321461493701097}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &5222349190582719750
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7493163483396742707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 1
 --- !u!114 &8902325866732217002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2175,6 +2160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCameraPrefab: {fileID: 5409894540958609353, guid: b4be50f88394247c3bd92fe52a339b1a, type: 3}
+  playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
   FootstepAudioClips:
   - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}
   - {fileID: 8300000, guid: 22537e39083884518b948b6542639237, type: 3}
@@ -2190,6 +2176,39 @@ MonoBehaviour:
   jumpPower: 6
   walkSpeed: 6
   FootstepAudioVolume: 0.5
+--- !u!114 &6368321461493701097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7493163483396742707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters:
+  - Type: 1
+    SynchronizeType: 0
+    Name: Speed
+  - Type: 4
+    SynchronizeType: 0
+    Name: Jump
+  - Type: 4
+    SynchronizeType: 0
+    Name: Grounded
+  - Type: 4
+    SynchronizeType: 0
+    Name: FreeFall
+  - Type: 1
+    SynchronizeType: 0
+    Name: MotionSpeed
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0
 --- !u!1 &7776785986142313572
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,10 +1,12 @@
 using UnityEngine;
 using Photon.Pun;
 
-public class PUN2Player : MonoBehaviourPunCallbacks
+public class PUN2Player : MonoBehaviourPunCallbacks, IPunObservable
 {
     [SerializeField]
     private GameObject playerCameraPrefab;
+    [SerializeField]
+    private GameObject playerNameUIPrefab;
     [SerializeField]
     private AudioClip[] FootstepAudioClips;
     [SerializeField]
@@ -20,7 +22,6 @@ public class PUN2Player : MonoBehaviourPunCallbacks
     private GameObject playerCamera = null;
     private float animationBlend = 0f;
     private Vector3 lookDirection = Vector3.zero;
-    private Vector3 networkPosition;
     private Vector3 velocity = Vector3.zero;
     private float onLandTime = 0f;
 
@@ -28,6 +29,10 @@ public class PUN2Player : MonoBehaviourPunCallbacks
     {
         animator = GetComponent<Animator>();
         cCon = GetComponent<CharacterController>();
+
+        var canvas = GameObject.Find("WorldSpaceCanvas");
+        var playerNameUI = Instantiate(playerNameUIPrefab, canvas.transform);
+        playerNameUI.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, $"{photonView.Owner.NickName}({photonView.OwnerActorNr})");
     }
 
     private void Update()
@@ -37,10 +42,25 @@ public class PUN2Player : MonoBehaviourPunCallbacks
             if (playerCamera == null)
             {
                 playerCamera = Instantiate(playerCameraPrefab);
+                playerCamera.name = "PlayerCamera";
                 playerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
             }
 
             LocalMoving();
+        }
+    }
+
+    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(transform.position);
+            stream.SendNext(transform.rotation);
+        }
+        else
+        {
+            transform.position = (Vector3)stream.ReceiveNext();
+            transform.rotation = (Quaternion)stream.ReceiveNext();
         }
     }
 
