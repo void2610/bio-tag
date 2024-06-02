@@ -1,8 +1,8 @@
 using UnityEngine;
-using Unity.Netcode;
 using System.Collections.Generic;
+using Photon.Pun;
 
-public class PlayerManager : NetworkBehaviour
+public class PlayerManager : MonoBehaviourPunCallbacks
 {
     public static PlayerManager Instance { get; private set; }
     private void Awake()
@@ -21,9 +21,6 @@ public class PlayerManager : NetworkBehaviour
     public Dictionary<ulong, string> playerNames = new Dictionary<ulong, string>();
 
     public int PlayerCount = 0;
-    public override void OnNetworkSpawn()
-    {
-    }
 
     public string GetPlayerName(ulong clientId)
     {
@@ -50,37 +47,9 @@ public class PlayerManager : NetworkBehaviour
 
     public void AddPlayer(ulong clientId, string name)
     {
-        if (NetworkManager.Singleton.IsHost)
-        {
-            playerNames[clientId] = name;
-            PlayerCount++;
-            AddPlayerClientRpc(clientId, name);
-        }
-        else
-        {
-            AddPlayerServerRpc(clientId, name);
-        }
-
         foreach (var item in playerNames)
         {
             Debug.Log(item.Key + " : " + item.Value);
         }
     }
-
-    [ClientRpc]
-    public void AddPlayerClientRpc(ulong clientId, string name)
-    {
-        playerNames[clientId] = name;
-        PlayerCount++;
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    public void AddPlayerServerRpc(ulong clientId, string name)
-    {
-        playerNames[clientId] = name;
-        PlayerCount++;
-        AddPlayerClientRpc(clientId, name);
-    }
-
-
 }

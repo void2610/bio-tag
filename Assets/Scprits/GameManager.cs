@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using Unity.Netcode;
+using Photon.Pun;
 
-[RequireComponent(typeof(NetworkObject))]
-public class GameManager : NetworkBehaviour
+public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager instance;
     private void Awake()
@@ -23,8 +22,8 @@ public class GameManager : NetworkBehaviour
     //private List<float> playerScores = new List<float>();
     // private int playerCount = 0;
     // private int itIndex;
-    public NetworkVariable<float> TimerValue = new NetworkVariable<float>();
-    public NetworkVariable<bool> OnGame = new NetworkVariable<bool>();
+    // public NetworkVariable<float> TimerValue = new NetworkVariable<float>();
+    // public NetworkVariable<bool> OnGame = new NetworkVariable<bool>();
 
     public void StartGame()
     {
@@ -35,7 +34,7 @@ public class GameManager : NetworkBehaviour
         //     playerScores.Add(0);
         // }
         // itIndex = Random.Range(0, playerCount);
-        OnGame.Value = true;
+        // OnGame.Value = true;
     }
 
     public void ChangeIt(int index)
@@ -43,29 +42,23 @@ public class GameManager : NetworkBehaviour
         //itIndex = index;
     }
 
-    public override void OnNetworkSpawn()
-    {
-        if (!NetworkManager.Singleton.IsServer) return;
+    // public override void OnNetworkSpawn()
+    // {
+    //     if (!NetworkManager.Singleton.IsServer) return;
 
-        TimerValue.Value = 0;
-        OnGame.Value = false;
+    //     TimerValue.Value = 0;
+    //     OnGame.Value = false;
 
-        //3秒後にゲームを開始
-        Invoke("StartGame", 3);
-    }
-
-    public void Start()
-    {
-        if (!NetworkManager.Singleton.IsServer) return;
-    }
-
+    //     //3秒後にゲームを開始
+    //     Invoke("StartGame", 3);
+    // }
     public void Update()
     {
-        if (!NetworkManager.Singleton.IsServer) return;
+        if (!PhotonNetwork.IsMasterClient) return;
 
-        if (OnGame.Value)
-        {
-            TimerValue.Value += Time.deltaTime;
-        }
+        // if (OnGame.Value)
+        // {
+        //     TimerValue.Value += Time.deltaTime;
+        // }
     }
 }
