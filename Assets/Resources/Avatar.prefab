@@ -2028,7 +2028,6 @@ MonoBehaviour:
   jumpPower: 6
   walkSpeed: 6
   FootstepAudioVolume: 0.5
-  lastTagTime: 0
 --- !u!114 &6368321461493701097
 MonoBehaviour:
   m_ObjectHideFlags: 0

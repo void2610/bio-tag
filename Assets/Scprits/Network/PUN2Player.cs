@@ -67,20 +67,22 @@ public class PUN2Player : MonoBehaviourPunCallbacks, IPunObservable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (photonView.IsMine && other.CompareTag("Player") && PhotonNetwork.CurrentRoom.TryGetItIndex(out int itIndex))
+        if (photonView.IsMine && other.CompareTag("Player") && PhotonNetwork.CurrentRoom.TryGetLastTagTime(out double lastTagTime))
         {
-            if (PhotonNetwork.CurrentRoom.TryGetLastTagTime(out double lastTagTime))
+            if (PhotonNetwork.ServerTimestamp - lastTagTime < 1000 || !PhotonNetwork.CurrentRoom.TryGetItIndex(out int itIndex))
             {
-                if (PhotonNetwork.ServerTimestamp - lastTagTime < 1000)
-                {
-                    Debug.Log("Tagging too fast");
-                    return;
-                }
+                return;
             }
-            var targetPlayer = other.gameObject.GetComponent<PhotonView>();
 
-            Debug.Log($"Player {photonView.OwnerActorNr} tagged Player {targetPlayer.OwnerActorNr}");
-            PhotonNetwork.CurrentRoom.SetItIndex(targetPlayer.OwnerActorNr, PhotonNetwork.ServerTimestamp);
+            var targetPlayer = other.gameObject.GetComponent<PhotonView>();
+            if (itIndex == photonView.OwnerActorNr)
+            {
+                PhotonNetwork.CurrentRoom.SetItIndex(targetPlayer.OwnerActorNr, PhotonNetwork.ServerTimestamp);
+            }
+            else if (itIndex == targetPlayer.OwnerActorNr)
+            {
+                PhotonNetwork.CurrentRoom.SetItIndex(photonView.OwnerActorNr, PhotonNetwork.ServerTimestamp);
+            }
         }
     }
     private void LocalMoving()
