@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             playerScores.Add(0);
         }
         itIndex = Random.Range(1, PhotonNetwork.PlayerList.Length + 1);
-        PhotonNetwork.CurrentRoom.SetItIndex(itIndex);
+        PhotonNetwork.CurrentRoom.SetItIndex(itIndex, PhotonNetwork.ServerTimestamp);
         PhotonNetwork.CurrentRoom.StartGame(PhotonNetwork.ServerTimestamp);
     }
 

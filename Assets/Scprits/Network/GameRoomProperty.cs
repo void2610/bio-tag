@@ -6,6 +6,7 @@ public static class GameRoomProperty
     private const string KeyStartTime = "s";
     private const string KeyOnGame = "g";
     private const string KeyItIndex = "i";
+    private const string LastTagTimeIndex = "l";
 
     private static readonly Hashtable propsToSet = new Hashtable();
 
@@ -42,6 +43,20 @@ public static class GameRoomProperty
         }
     }
 
+    public static bool TryGetLastTagTime(this Room room, out double time)
+    {
+        if (room.CustomProperties[LastTagTimeIndex] is double value)
+        {
+            time = value;
+            return true;
+        }
+        else
+        {
+            time = 0;
+            return false;
+        }
+    }
+
     public static void StartGame(this Room room, int timestamp)
     {
         propsToSet[KeyStartTime] = timestamp;
@@ -50,9 +65,11 @@ public static class GameRoomProperty
         propsToSet.Clear();
     }
 
-    public static void SetItIndex(this Room room, int index)
+    public static void SetItIndex(this Room room, int index, double time)
     {
         propsToSet[KeyItIndex] = index;
+        propsToSet[LastTagTimeIndex] = time;
+
         room.SetCustomProperties(propsToSet);
         propsToSet.Clear();
     }
