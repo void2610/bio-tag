@@ -19,46 +19,32 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    //private List<float> playerScores = new List<float>();
-    // private int playerCount = 0;
-    // private int itIndex;
-    // public NetworkVariable<float> TimerValue = new NetworkVariable<float>();
-    // public NetworkVariable<bool> OnGame = new NetworkVariable<bool>();
+    [SerializeField]
+    private List<float> playerScores = new List<float>();
+    private int itIndex;
+    public float TimerValue = 0.0f;
 
     public void StartGame()
     {
-        // playerCount = PlayerManager.Instance.GetPlayerCount();
-        // playerScores.Clear();
-        // for (int i = 0; i < playerCount; i++)
-        // {
-        //     playerScores.Add(0);
-        // }
-        // itIndex = Random.Range(0, playerCount);
-        // OnGame.Value = true;
+        playerScores.Clear();
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+        {
+            playerScores.Add(0);
+        }
+        itIndex = Random.Range(0, PhotonNetwork.PlayerList.Length - 1);
+        PhotonNetwork.CurrentRoom.StartGame(PhotonNetwork.ServerTimestamp);
     }
 
     public void ChangeIt(int index)
     {
-        //itIndex = index;
+        itIndex = index;
     }
 
-    // public override void OnNetworkSpawn()
-    // {
-    //     if (!NetworkManager.Singleton.IsServer) return;
-
-    //     TimerValue.Value = 0;
-    //     OnGame.Value = false;
-
-    //     //3秒後にゲームを開始
-    //     Invoke("StartGame", 3);
-    // }
-    public void Update()
+    public override void OnJoinedRoom()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
-
-        // if (OnGame.Value)
-        // {
-        //     TimerValue.Value += Time.deltaTime;
-        // }
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Invoke("StartGame", 3.0f);
+        }
     }
 }

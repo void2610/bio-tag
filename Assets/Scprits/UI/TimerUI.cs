@@ -1,26 +1,22 @@
 using UnityEngine;
 using TMPro;
+using Photon.Pun;
 
 public class TimerUI : MonoBehaviour
 {
     private TMP_Text timerText;
     void Start()
     {
-        //GameManager.instance.TimerValue.OnValueChanged += OnTimerValueChanged;
         timerText = this.GetComponent<TMP_Text>();
-        //timerText.text = GameManager.instance.TimerValue.Value.ToString("F2");
+        timerText.text = "0.00";
     }
 
-    private void OnTimerValueChanged(float oldValue, float newValue)
+    private void Update()
     {
-        timerText.text = newValue.ToString("F2");
-    }
+        if (!PhotonNetwork.InRoom) { return; }
+        if (!PhotonNetwork.CurrentRoom.TryGetStartTime(out int timestamp)) { return; }
 
-    private void OnDestroy()
-    {
-        if (GameManager.instance != null)
-        {
-            //GameManager.instance.TimerValue.OnValueChanged -= OnTimerValueChanged;
-        }
+        float elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
+        timerText.text = elapsedTime.ToString("f2");
     }
 }
