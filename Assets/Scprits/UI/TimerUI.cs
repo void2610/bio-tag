@@ -8,7 +8,7 @@ public class TimerUI : MonoBehaviour
     void Start()
     {
         timerText = this.GetComponent<TMP_Text>();
-        timerText.text = "0.00";
+        timerText.text = "";
     }
 
     private void Update()

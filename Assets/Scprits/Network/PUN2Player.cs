@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using Photon.Pun;
 
 public class PUN2Player : MonoBehaviourPunCallbacks, IPunObservable
@@ -24,6 +25,8 @@ public class PUN2Player : MonoBehaviourPunCallbacks, IPunObservable
     private Vector3 lookDirection = Vector3.zero;
     private Vector3 velocity = Vector3.zero;
     private float onLandTime = 0f;
+    private float cooldownTime = 1.0f;  // クールダウンタイム（秒）
+    public float lastTagTime = 0;  // 最後に鬼が交代された時間
 
     void Start()
     {
@@ -62,6 +65,28 @@ public class PUN2Player : MonoBehaviourPunCallbacks, IPunObservable
             transform.position = (Vector3)stream.ReceiveNext();
             transform.rotation = (Quaternion)stream.ReceiveNext();
         }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (photonView.IsMine && other.CompareTag("Player") && PhotonNetwork.CurrentRoom.TryGetItIndex(out int itIndex))
+        {
+
+            if (Time.time - lastTagTime >= cooldownTime)
+            {
+                var targetPlayer = other.gameObject.GetComponent<PhotonView>();
+
+                photonView.RPC("Tag", RpcTarget.AllViaServer);
+                Debug.Log($"Player {photonView.OwnerActorNr} tagged Player {targetPlayer.OwnerActorNr}");
+                PhotonNetwork.CurrentRoom.SetItIndex(targetPlayer.OwnerActorNr);
+            }
+        }
+    }
+
+    [PunRPC]
+    private void Tag()
+    {
+        lastTagTime = Time.time;
     }
 
     private void LocalMoving()

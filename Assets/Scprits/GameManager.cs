@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     [SerializeField]
     private List<float> playerScores = new List<float>();
+    [SerializeField]
     private int itIndex;
     public float TimerValue = 0.0f;
 
@@ -31,13 +32,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             playerScores.Add(0);
         }
-        itIndex = Random.Range(0, PhotonNetwork.PlayerList.Length - 1);
+        itIndex = Random.Range(1, PhotonNetwork.PlayerList.Length + 1);
+        PhotonNetwork.CurrentRoom.SetItIndex(itIndex);
         PhotonNetwork.CurrentRoom.StartGame(PhotonNetwork.ServerTimestamp);
-    }
-
-    public void ChangeIt(int index)
-    {
-        itIndex = index;
     }
 
     public override void OnJoinedRoom()
