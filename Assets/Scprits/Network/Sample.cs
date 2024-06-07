@@ -7,7 +7,8 @@ public class Sample : MonoBehaviourPunCallbacks
 {
     private void Start()
     {
-        PhotonNetwork.NickName = "Player";
+        string playerName = PlayerPrefs.GetString("PlayerName", "No Name");
+        PhotonNetwork.NickName = playerName;
 
         // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する
         PhotonNetwork.ConnectUsingSettings();
