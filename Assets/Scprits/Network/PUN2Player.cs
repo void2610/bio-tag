@@ -33,7 +33,7 @@ public class PUN2Player : MonoBehaviourPunCallbacks, IPunObservable
 
         var canvas = GameObject.Find("WorldSpaceCanvas");
         var playerNameUI = Instantiate(playerNameUIPrefab, canvas.transform);
-        playerNameUI.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, $"{photonView.Owner.NickName}({photonView.OwnerActorNr})");
+        playerNameUI.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, photonView.Owner.NickName);
     }
 
     private void Update()
