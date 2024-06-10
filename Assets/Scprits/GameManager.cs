@@ -36,6 +36,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         itIndex = Random.Range(1, PhotonNetwork.PlayerList.Length + 1);
         PhotonNetwork.CurrentRoom.SetItIndex(itIndex, PhotonNetwork.ServerTimestamp);
         PhotonNetwork.CurrentRoom.StartGame(PhotonNetwork.ServerTimestamp);
+
+        InvokeRepeating("SendScore", 0, 0.1f);
     }
 
     private bool IsAllPlayerReady()
@@ -54,6 +56,14 @@ public class GameManager : MonoBehaviourPunCallbacks
         return true;
     }
 
+    private void SendScore()
+    {
+        foreach (var player in PhotonNetwork.PlayerList)
+        {
+            player.AddScore((int)playerScores[player.ActorNumber - 1]);
+        }
+    }
+
     private void Update()
     {
         if (PhotonNetwork.IsMasterClient)
@@ -64,6 +74,10 @@ public class GameManager : MonoBehaviourPunCallbacks
                 {
                     StartGame();
                 }
+            }
+            else
+            {
+                playerScores[itIndex - 1] += Time.deltaTime;
             }
         }
 
@@ -79,7 +93,6 @@ public class GameManager : MonoBehaviourPunCallbacks
                 StartGame();
             }
         }
-        Debug.Log(IsAllPlayerReady());
     }
 
     public override void OnJoinedRoom()
