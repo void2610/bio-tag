@@ -39,13 +39,12 @@ public class ScoreBoard : MonoBehaviour
             players,
             (p1, p2) =>
             {
-                // スコアが多い順にソートする
-                int diff = p2.GetScore() - p1.GetScore();
+                // スコアが少ない順にソートする
+                int diff = p1.GetScore() - p2.GetScore();
                 if (diff != 0)
                 {
                     return diff;
                 }
-                // スコアが同じだった場合は、IDが小さい順にソートする
                 return p1.ActorNumber - p2.ActorNumber;
             }
         );

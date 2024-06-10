@@ -20,7 +20,7 @@ public class GameMessageUI : MonoBehaviour
 
         if (PhotonNetwork.CurrentRoom.IsGameStarted())
         {
-            messageText.text = "Game Started";
+            messageText.text = "";
         }
     }
 }

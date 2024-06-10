@@ -16,6 +16,6 @@ public class ItUI : MonoBehaviour
         if (!PhotonNetwork.InRoom) { return; }
         if (!PhotonNetwork.CurrentRoom.TryGetItIndex(out int itIndex)) { return; }
 
-        itText.text = $"It: {itIndex}";
+        itText.text = $"It: {PhotonNetwork.PlayerList[itIndex - 1].NickName}";
     }
 }
