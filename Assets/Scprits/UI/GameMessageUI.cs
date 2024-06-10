@@ -13,4 +13,14 @@ public class GameMessageUI : MonoBehaviour
     {
         messageText = this.GetComponent<TMP_Text>();
     }
+
+    void Update()
+    {
+        if (!PhotonNetwork.InRoom) { return; }
+
+        if (PhotonNetwork.CurrentRoom.IsGameStarted())
+        {
+            messageText.text = "Game Started";
+        }
+    }
 }

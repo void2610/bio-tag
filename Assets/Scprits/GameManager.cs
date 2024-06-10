@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private int itIndex;
     public float TimerValue = 0.0f;
 
+
     public void StartGame()
     {
         playerScores.Clear();
@@ -35,19 +36,50 @@ public class GameManager : MonoBehaviourPunCallbacks
         itIndex = Random.Range(1, PhotonNetwork.PlayerList.Length + 1);
         PhotonNetwork.CurrentRoom.SetItIndex(itIndex, PhotonNetwork.ServerTimestamp);
         PhotonNetwork.CurrentRoom.StartGame(PhotonNetwork.ServerTimestamp);
-        messageUI.SetMessage("Press F to ready");
+    }
+
+    private bool IsAllPlayerReady()
+    {
+        if (PhotonNetwork.PlayerList.Length < 2)
+        {
+            return false;
+        }
+        foreach (var player in PhotonNetwork.PlayerList)
+        {
+            if (!player.IsReady())
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void Update()
     {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (!PhotonNetwork.CurrentRoom.IsGameStarted())
+            {
+                if (IsAllPlayerReady())
+                {
+                    StartGame();
+                }
+            }
+        }
+
         if (PhotonNetwork.CurrentRoom != null && !PhotonNetwork.CurrentRoom.IsGameStarted())
         {
             if (Input.GetKeyDown(KeyCode.F))
             {
+                messageUI.SetMessage("Wait for other player to ready");
+                PhotonNetwork.LocalPlayer.SetReady(true);
+            }
+            if (IsAllPlayerReady())
+            {
                 StartGame();
-                messageUI.SetMessage("");
             }
         }
+        Debug.Log(IsAllPlayerReady());
     }
 
     public override void OnJoinedRoom()
