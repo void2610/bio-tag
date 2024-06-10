@@ -24,10 +24,9 @@ public static class PlayerProperty
         player.SetCustomProperties(propsToSet);
     }
 
-    public static void AddScore(this Player player, int value)
+    public static void SetScore(this Player player, int value)
     {
-        var score = player.GetScore() + value;
-        propsToSet[KeyScore] = score;
+        propsToSet[KeyScore] = value;
         player.SetCustomProperties(propsToSet);
     }
 }

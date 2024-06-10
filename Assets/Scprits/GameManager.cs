@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using Photon.Pun;
+using ExitGames.Client.Photon;
+using Photon.Realtime;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -60,7 +62,10 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         foreach (var player in PhotonNetwork.PlayerList)
         {
-            player.AddScore((int)playerScores[player.ActorNumber - 1]);
+            if (itIndex == player.ActorNumber)
+            {
+                player.SetScore((int)playerScores[player.ActorNumber - 1]);
+            }
         }
     }
 
@@ -88,14 +93,18 @@ public class GameManager : MonoBehaviourPunCallbacks
                 messageUI.SetMessage("Wait for other player to ready");
                 PhotonNetwork.LocalPlayer.SetReady(true);
             }
-            if (IsAllPlayerReady())
-            {
-                StartGame();
-            }
         }
     }
 
     public override void OnJoinedRoom()
     {
+    }
+
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        if (propertiesThatChanged.ContainsKey(GameRoomProperty.KeyItIndex))
+        {
+            PhotonNetwork.CurrentRoom.TryGetItIndex(out itIndex);
+        }
     }
 }

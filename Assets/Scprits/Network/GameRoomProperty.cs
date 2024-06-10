@@ -3,10 +3,10 @@ using Photon.Realtime;
 
 public static class GameRoomProperty
 {
-    private const string KeyStartTime = "s";
-    private const string KeyOnGame = "g";
-    private const string KeyItIndex = "i";
-    private const string LastTagTimeIndex = "l";
+    public const string KeyStartTime = "s";
+    public const string KeyOnGame = "g";
+    public const string KeyItIndex = "i";
+    public const string LastTagTimeIndex = "l";
 
     private static readonly Hashtable propsToSet = new Hashtable();
 
