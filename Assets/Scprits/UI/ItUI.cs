@@ -11,7 +11,6 @@ public class ItUI : MonoBehaviour
         itText.text = "";
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!PhotonNetwork.InRoom) { return; }

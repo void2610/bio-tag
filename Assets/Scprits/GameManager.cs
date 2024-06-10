@@ -20,8 +20,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
 
     [SerializeField]
+    private GameMessageUI messageUI;
     private List<float> playerScores = new List<float>();
-    [SerializeField]
     private int itIndex;
     public float TimerValue = 0.0f;
 
@@ -35,13 +35,22 @@ public class GameManager : MonoBehaviourPunCallbacks
         itIndex = Random.Range(1, PhotonNetwork.PlayerList.Length + 1);
         PhotonNetwork.CurrentRoom.SetItIndex(itIndex, PhotonNetwork.ServerTimestamp);
         PhotonNetwork.CurrentRoom.StartGame(PhotonNetwork.ServerTimestamp);
+        messageUI.SetMessage("Press F to ready");
+    }
+
+    private void Update()
+    {
+        if (PhotonNetwork.CurrentRoom != null && !PhotonNetwork.CurrentRoom.IsGameStarted())
+        {
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                StartGame();
+                messageUI.SetMessage("");
+            }
+        }
     }
 
     public override void OnJoinedRoom()
     {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            Invoke("StartGame", 3.0f);
-        }
     }
 }

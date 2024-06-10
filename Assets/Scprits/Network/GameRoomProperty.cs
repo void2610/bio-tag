@@ -10,7 +10,7 @@ public static class GameRoomProperty
 
     private static readonly Hashtable propsToSet = new Hashtable();
 
-    public static bool GetOnGame(this Room room)
+    public static bool IsGameStarted(this Room room)
     {
         return room.CustomProperties[KeyOnGame] is bool value && value;
     }
