@@ -23,14 +23,15 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     [SerializeField]
     private GameMessageUI messageUI;
+    public int? gameState { get; private set; } = 0;
     private List<float> playerScores = new List<float>();
     private int itIndex;
     private float gameLength = 10.0f;
-    public float TimerValue = 0.0f;
-
 
     public void StartGame()
     {
+        if (!PhotonNetwork.IsMasterClient) { return; }
+
         playerScores.Clear();
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
@@ -73,8 +74,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     private void Update()
     {
         if (!PhotonNetwork.InRoom) { return; }
-        PhotonNetwork.CurrentRoom.TryGetStartTime(out int gameState);
-        Debug.Log("Game State: " + gameState);
+        gameState = (int?)PhotonNetwork.CurrentRoom.CustomProperties[GameRoomProperty.KeyGameState] ?? 0;
+
         // マスタークライアントのみで実行
         if (PhotonNetwork.IsMasterClient)
         {
@@ -82,6 +83,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 if (IsAllPlayerReady())
                 {
+
                     StartGame();
                 }
             }
@@ -94,6 +96,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 {
                     CancelInvoke("SendScore");
                     PhotonNetwork.CurrentRoom.EndGame();
+                    Debug.Log("Game Over");
                 }
             }
         }

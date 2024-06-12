@@ -14,6 +14,7 @@ public class TimerUI : MonoBehaviour
     private void Update()
     {
         if (!PhotonNetwork.InRoom) { return; }
+        if (GameManager.instance.gameState != 1) { return; }
         if (!PhotonNetwork.CurrentRoom.TryGetStartTime(out int timestamp)) { return; }
 
         float elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
