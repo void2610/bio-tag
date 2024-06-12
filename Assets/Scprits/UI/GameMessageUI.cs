@@ -17,8 +17,8 @@ public class GameMessageUI : MonoBehaviour
     void Update()
     {
         if (!PhotonNetwork.InRoom) { return; }
-
-        if (PhotonNetwork.CurrentRoom.IsGameStarted())
+        PhotonNetwork.CurrentRoom.TryGetGameState(out int gameState);
+        if (gameState == 1)
         {
             messageText.text = "";
         }

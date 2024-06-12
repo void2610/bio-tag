@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private GameMessageUI messageUI;
     private List<float> playerScores = new List<float>();
     private int itIndex;
+    private float gameLength = 10.0f;
     public float TimerValue = 0.0f;
 
 
@@ -71,22 +72,34 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void Update()
     {
+        if (!PhotonNetwork.InRoom) { return; }
+        PhotonNetwork.CurrentRoom.TryGetStartTime(out int gameState);
+        Debug.Log("Game State: " + gameState);
+        // マスタークライアントのみで実行
         if (PhotonNetwork.IsMasterClient)
         {
-            if (!PhotonNetwork.CurrentRoom.IsGameStarted())
+            if (gameState == 0)
             {
                 if (IsAllPlayerReady())
                 {
                     StartGame();
                 }
             }
-            else
+            else if (gameState == 1)
             {
                 playerScores[itIndex - 1] += Time.deltaTime;
+                PhotonNetwork.CurrentRoom.TryGetStartTime(out int timestamp);
+                float elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
+                if (elapsedTime >= gameLength)
+                {
+                    CancelInvoke("SendScore");
+                    PhotonNetwork.CurrentRoom.EndGame();
+                }
             }
         }
 
-        if (PhotonNetwork.CurrentRoom != null && !PhotonNetwork.CurrentRoom.IsGameStarted())
+        // 全てのクライアントで実行
+        if (gameState == 0)
         {
             if (Input.GetKeyDown(KeyCode.F))
             {
@@ -105,6 +118,14 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (propertiesThatChanged.ContainsKey(GameRoomProperty.KeyItIndex))
         {
             PhotonNetwork.CurrentRoom.TryGetItIndex(out itIndex);
+        }
+        if (propertiesThatChanged.ContainsKey(GameRoomProperty.KeyGameState))
+        {
+            PhotonNetwork.CurrentRoom.TryGetGameState(out int gameState);
+            if (gameState == 2)
+            {
+                messageUI.SetMessage("Game Over");
+            }
         }
     }
 }
