@@ -13,11 +13,22 @@ public class TimerUI : MonoBehaviour
 
     private void Update()
     {
-        if (!PhotonNetwork.InRoom) { return; }
-        if (GameManager.instance.gameState != 1) { return; }
-        if (!PhotonNetwork.CurrentRoom.TryGetStartTime(out int timestamp)) { return; }
+        if (GameManagerBase.instance.GetType() == typeof(NetworkGameManager))
+        {
+            if (!PhotonNetwork.InRoom) { return; }
+            if (GameManagerBase.instance.gameState != 1) { return; }
+            if (!PhotonNetwork.CurrentRoom.TryGetStartTime(out int timestamp)) { return; }
 
-        float elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
-        timerText.text = elapsedTime.ToString("f2");
+            float elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
+            timerText.text = elapsedTime.ToString("f2");
+        }
+        else if (GameManagerBase.instance.GetType() == typeof(NPCGameManager))
+        {
+            NPCGameManager i = (NPCGameManager)GameManagerBase.instance;
+            if (i.gameState != 1) return;
+            float elapsedTime = i.getElapsedTime();
+            timerText.text = elapsedTime.ToString("f2");
+        }
+
     }
 }

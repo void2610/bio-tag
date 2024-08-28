@@ -3,7 +3,7 @@ using Photon.Realtime;
 using UnityEngine;
 
 // MonoBehaviourPunCallbacksを継承して、PUNのコールバックを受け取れるようにする
-public class Sample : MonoBehaviourPunCallbacks
+public class NetWorkEntryPoint : MonoBehaviourPunCallbacks
 {
     private void Start()
     {

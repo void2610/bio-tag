@@ -5,30 +5,12 @@ using Photon.Pun;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
 
-public class GameManager : MonoBehaviourPunCallbacks
+public class NetworkGameManager : GameManagerBase
 {
-    public static GameManager instance;
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(this.gameObject);
-            DontDestroyOnLoad(this.gameObject);
-        }
-    }
-
     [SerializeField]
     private GameMessageUI messageUI;
-    public int? gameState { get; private set; } = 0;
-    private List<float> playerScores = new List<float>();
-    private int itIndex;
-    private float gameLength = 10.0f;
 
-    public void StartGame()
+    public override void StartGame()
     {
         if (!PhotonNetwork.IsMasterClient) { return; }
 
@@ -44,7 +26,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         InvokeRepeating("SendScore", 0, 0.1f);
     }
 
-    private bool IsAllPlayerReady()
+    protected override bool IsAllPlayerReady()
     {
         if (PhotonNetwork.PlayerList.Length < 2)
         {

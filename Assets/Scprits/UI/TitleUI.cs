@@ -13,11 +13,16 @@ public class TitleUI : MonoBehaviour
         playerNameInputField.text = playerName;
     }
 
-    public void OnStartButtonClicked()
+    public void OnPlayerButtonClicked()
     {
         string playerName = playerNameInputField.text;
         PlayerPrefs.SetString("PlayerName", playerName);
         PlayerPrefs.Save();
         SceneManager.LoadScene("PUN2Test");
+    }
+
+    public void OnNpcButtonClicked()
+    {
+        SceneManager.LoadScene("NPC");
     }
 }
