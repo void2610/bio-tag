@@ -1,5 +1,6 @@
 # Import libraries
 from numpy import *
+from numpy import linspace, pi, cos, sin, arctan, sqrt, square, mean
 import pyqtgraph as pg
 import serial
 import binascii
@@ -297,22 +298,28 @@ def threading_of_update():
 
     while True:
         c = ser.inWaiting()
+        flag = 0
         print(c)
         if c >= 8:
-            namadata = str(binascii.b2a_hex(ser.read(8)))[
-                2:-1
-            ]  # 一度に8個のデータを受信（16進数で16個）
+            line = ser.readline()  # 一行を読み込む
+            namadata = line.decode("utf-8").strip()[
+                :-2
+            ]  # 改行を削除し、最後の\r\nを除去
             buffer += namadata  # バッファにデータを保存
-
+            print(namadata)
+            # namadata = str(binascii.b2a_hex(ser.read(8)))[
+            #     2:-1
+            # ]  # 一度に8個のデータを受信（16進数で16個）
+            # buffer += namadata  # バッファにデータを保存
             if (
                 len(buffer) == 16
             ):  # バッファが空のとき、最初に16個の16進数を受信したときに初期処理を行う
                 print(namadata)
 
-                flag = buffer.find("f0")  # f0に対応する点の開始位置をマーク
+                flag = buffer.find("F0")  # f0に対応する点の開始位置をマーク
                 print("flag=", flag, "c=", c)
                 if (
-                    buffer[flag + 1 :].find("f0") == -1
+                    buffer[flag + 1 :].find("F0") == -1
                 ):  # このグループに複数のf0がある場合、次のグループを探すためにこのグループを削除
                     buffer = buffer[flag:]
                 else:
@@ -324,24 +331,24 @@ def threading_of_update():
                 # 次に来るデータ形式が前回と変わった場合の異常処理
 
                 if (
-                    namadata[flag : flag + 2] != "f0" and namadata.count("f0") == 1
+                    namadata[flag : flag + 2] != "F0" and namadata.count("F0") == 1
                 ):  # TODO もし伝送にエラーが発生した場合、flagの位置は大抵f0ではないため、こう判断するが、伝送エラーが発生した場合にこの位置がちょうどf0である可能性もあるため、判断が不完全だが、確率が低いため、暫定的に未実施
                     print(namadata)
                     print(
                         "データの順序が変わりました\n変動前flag=",
                         flag,
                         "\n変動後flag=",
-                        namadata.find("f0"),
+                        namadata.find("F0"),
                     )
                     # バッファをクリアし、f0に対応する点の開始位置を再マーク
                     buffer = ""
-                    flag = namadata.find("f0")
+                    flag = namadata.find("F0")
                     buffer = (
                         buffer + namadata[flag:]
                     )  # f0の後をバッファに保存し、未完成のフレームとして、次のフレームと組み合わせて完全なフレームを作成する準備
                     continue
 
-                elif namadata.find("f0") == -1:
+                elif namadata.find("F0") == -1:
                     buffer = buffer[
                         :-16
                     ]  # 毎回完全なフレームを出力した後、元のフレームを削除し、バッファの長さを制御
@@ -666,8 +673,11 @@ def threading_of_update():
                         ifsamplingflag = False
                 else:
                     pass
-            except:
-                break  # ユーザーが指定されたキー以外のキーを押した場合、ループが終了します
+            except Exception:  # 具体的な例外をキャッチ
+                pass
+                # print(
+                #     f"Error: {e}"
+                # )
         else:
             time.sleep(0.001)
 
@@ -682,7 +692,7 @@ def threading_of_plot():
                 plotcountermark = 0
         else:
             pass
-    except:
+    except Exception:  # 具体的な例外をキャッチ
         pass
     if plotcountermark == 0:
         curve.setData(Xm, pen="b")  # このデータで曲線を設定
