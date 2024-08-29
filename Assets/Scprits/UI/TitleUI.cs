@@ -23,6 +23,9 @@ public class TitleUI : MonoBehaviour
 
     public void OnNpcButtonClicked()
     {
+        string playerName = playerNameInputField.text;
+        PlayerPrefs.SetString("PlayerName", playerName);
+        PlayerPrefs.Save();
         SceneManager.LoadScene("NPC");
     }
 }

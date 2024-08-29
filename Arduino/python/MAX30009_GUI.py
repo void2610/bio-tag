@@ -317,7 +317,6 @@ def threading_of_update():
                     buffer = buffer[flag:]
                 else:
                     buffer = ""
-            print(buffer)
             if (
                 len(buffer) > 16
             ):  # 2グループ目から、前のグループの16-flag個のデータとこのグループのflagデータを組み合わせて、最初のグループを出力
@@ -325,7 +324,6 @@ def threading_of_update():
                 if (
                     namadata[flag : flag + 2] != "F0" and namadata.count("F0") == 1
                 ):  # TODO もし伝送にエラーが発生した場合、flagの位置は大抵f0ではないため、こう判断するが、伝送エラーが発生した場合にこの位置がちょうどf0である可能性もあるため、判断が不完全だが、確率が低いため、暫定的に未実施
-                    print(namadata)
                     print(
                         "データの順序が変わりました\n変動前flag=",
                         flag,
@@ -347,11 +345,10 @@ def threading_of_update():
                     continue
 
                 # すべてが順調であれば、データを正常に接続
-                print("ok")
                 Xm[:-1] = Xm[1:]  # 時間平均のデータを1サンプル左にシフト
                 Xm2[:-1] = Xm2[1:]
                 data = buffer[-(16 - flag) - 16 : -(16 - flag)]
-                print(data)
+                # print(data)
 
                 data1 = (
                     int(data[3:8], 16)
@@ -374,7 +371,7 @@ def threading_of_update():
                 ]  # 毎回完全なフレームを出力した後、元のフレームを削除し、バッファのサイズを小さくする
                 if data[2] == "0":
                     # gapシンボルが来たとき
-                    if TheFirstMeasurementDataFlag:
+                    if not TheFirstMeasurementDataFlag:
                         # 正式に測定が始まる最初のデータが来たとき、以前のキャリブレーションデータを使用する、iiiは何番目の周波数のキャリブレーションを示す
                         mean_I_offset.append(
                             mean(I_offset[40:])
@@ -461,7 +458,7 @@ def threading_of_update():
                             iii = 0
 
                 if data[2] == "1":
-                    if TheFirstMeasurementDataFlag:
+                    if not TheFirstMeasurementDataFlag:
                         TheFirstMeasurementDataFlag = True
                         iii = 0
                     I_load_offset = (
@@ -498,7 +495,6 @@ def threading_of_update():
                     test2[:-1] = test2[1:]
                     test1[-1] = Load_real
                     test2[-1] = Load_imag
-
                     Xm[-1] = Load_real  # 瞬時値を含むベクトル
                     Xm2[-1] = Load_imag
                     ptr += 1  # 曲線を表示するためのx位置を更新
@@ -645,47 +641,49 @@ def threading_of_update():
                     Q_rcal_quad.append(data2)
 
             # キー処理、データ保存
-            # try:
-            #     if not ifsamplingflag:
-            #         if keyboard.is_pressed("s"):  # if key 's' is pressed
-            #             # ファイルを開いて書き込みの準備
-            #             countsamplingfile += 1
-            #             dataname = "pysavedsampling" + str(countsamplingfile) + "data"
-            #             f1 = open(dataname + "1.txt", "w")
-            #             f2 = open(dataname + "2.txt", "w")
-            #             print("サンプリングの開始")
-            #             ifsamplingflag = True
-            #     else:
-            #         pass
+            try:
+                if not ifsamplingflag:
+                    if keyboard.is_pressed("s"):  # if key 's' is pressed
+                        # ファイルを開いて書き込みの準備
+                        countsamplingfile += 1
+                        dataname = "pysavedsampling" + str(countsamplingfile) + "data"
+                        f1 = open(dataname + "1.txt", "w")
+                        f2 = open(dataname + "2.txt", "w")
+                        print("サンプリングの開始")
+                        ifsamplingflag = True
+                else:
+                    pass
 
-            #     if ifsamplingflag:
-            #         if keyboard.is_pressed("e"):  # if key 'q' is pressed
-            #             print("サンプリングの終了")
-            #             # ファイルを閉じる
-            #             f1.close()
-            #             f2.close()
-            #             ifsamplingflag = False
-            #     else:
-            #         pass
-            # except Exception as e:
-            #     pass
-            #     print(f"Error: {e}")
+                if ifsamplingflag:
+                    if keyboard.is_pressed("e"):  # if key 'q' is pressed
+                        print("サンプリングの終了")
+                        # ファイルを閉じる
+                        f1.close()
+                        f2.close()
+                        ifsamplingflag = False
+                else:
+                    pass
+            except Exception:
+                pass
+                # print(f"Error: {e}")
         else:
             time.sleep(0.001)
 
 
 def threading_of_plot():
     global curve, curve2, ptr, Xm, Xm2, plotcountermark
+
     # キー処理、データ保存
-    # try:
-    #     if keyboard.is_pressed("c"):  # if key 's' is pressed
-    #         plotcountermark = plotcountermark + 1
-    #         if plotcountermark == 3:
-    #             plotcountermark = 0
-    #     else:
-    #         pass
-    # except Exception as e:
-    #     print(f"Error: {e}")
+    try:
+        if keyboard.is_pressed("c"):  # if key 's' is pressed
+            plotcountermark = plotcountermark + 1
+            if plotcountermark == 3:
+                plotcountermark = 0
+        else:
+            pass
+    except Exception:
+        pass
+        # print(f"Error: {e}")
     if plotcountermark == 0:
         curve.setData(Xm, pen="b")  # このデータで曲線を設定
         curve.setPos(ptr, 0)  # グラフのx位置を0に設定
