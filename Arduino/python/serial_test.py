@@ -1,5 +1,4 @@
 import serial
-import binascii
 import time
 
 buffer = ""
