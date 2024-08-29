@@ -299,18 +299,10 @@ def threading_of_update():
     while True:
         c = ser.inWaiting()
         flag = 0
-        print(c)
         if c >= 8:
-            line = ser.readline()  # 一行を読み込む
-            namadata = line.decode("utf-8").strip()[
-                :-2
-            ]  # 改行を削除し、最後の\r\nを除去
+            line = ser.read(16)
+            namadata = str(line)[2:-1]  # 一度に8個のデータを受信（16進数で16個）
             buffer += namadata  # バッファにデータを保存
-            print(namadata)
-            # namadata = str(binascii.b2a_hex(ser.read(8)))[
-            #     2:-1
-            # ]  # 一度に8個のデータを受信（16進数で16個）
-            # buffer += namadata  # バッファにデータを保存
             if (
                 len(buffer) == 16
             ):  # バッファが空のとき、最初に16個の16進数を受信したときに初期処理を行う
