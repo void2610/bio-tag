@@ -1,6 +1,6 @@
 # Import libraries
 from numpy import *
-from numpy import linspace, pi, cos, sin, arctan, sqrt, square, mean
+from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
 import serial
 import binascii
@@ -8,60 +8,70 @@ import time
 import threading
 import keyboard  # using module keyboard
 import sys
-
+import pyautogui
 from PyQt5 import QtWidgets
 
+
+import sys
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
     QVBoxLayout,
     QProgressBar,
+    QPushButton,
     QLineEdit,
+    QStylePainter,
+    QStyleOptionProgressBar,
 )
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QRectF, QObject
-from PyQt5.QtGui import QPainter
+from PyQt5.QtGui import QPainter, QFont, QColor, QTextOption
 
-# メッセージ送信部分
+
+# 消息发送部分
 import socket
 
-# PygameプログラムのIPアドレスとポート番号
-pygame_host = "127.0.0.1"  # ここではPygameプログラムがローカルで実行されていると仮定
-pygame_port = 12345  # Pygameプログラムと通信するためのポート番号
+# Pygame程序的IP地址和端口号
+pygame_host = "127.0.0.1"  # 这里假设Pygame程序在本地运行
+pygame_port = 12345  # 与Pygame程序通信的端口号
 
-# ソケットを作成
+# 创建套接字
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Pygameプログラムに接続
+# 连接到Pygame程序
 client_socket.connect((pygame_host, pygame_port))
 
 
-## 測定前に検査抵抗の大きさを説明する必要がある、さもなければ検査が正しく行われない
+##在测量前必须要交代检验电阻的大小，不然会检验不对
 RCAL = 900 * (1 + (4 / 512))
 
-# 使用前に電流ピーク値を入力することを忘れないでください 単位 uA
+# 每次使用前记得输入电流峰值 单位 uA
 AMPLITUDE_OF_CURRENT_PEAK = 45.25
 
-# シリアルポートオブジェクトを作成
-portName = "/dev/cu.usbserial-12BP0164"  # このポート名をあなたのものに置き換えてください！  # このポート名をあなたのものに置き換えてください！
+# 创建串口对象
+portName = (
+    "/dev/cu.usbserial-12BP0164"  # このポート名をあなたのものに置き換えてください!
+)
 baudrate = 9600
 ser = serial.Serial(portName, baudrate)
 
 
 ### START QtApp #####
-app = QtWidgets.QApplication([])  # これは一度行う必要があります（初期化）
+app = QtWidgets.QApplication([])  # you MUST do this once (initialize things)
 ####################
 
-win = pg.GraphicsLayoutWidget(show=True)  # ウィンドウを作成
-p = win.addPlot(title="Realtime plot")  # ウィンドウ内にプロットのための空間を作成
-curve = p.plot()  # 空の「プロット」を作成（プロットするための曲線）
+win = pg.GraphicsLayoutWidget(show=True)  # creates a window
+p = win.addPlot(title="Realtime plot")  # creates empty space for the plot in the window
+curve = p.plot()  # create an empty "plot" (a curve to plot)
 curve2 = p.plot()
 
 plotcountermark = 0
 
-windowWidth = 1000  # 曲線を表示するウィンドウの幅
-Xm = linspace(0, 0, windowWidth)  # 関連する時間系列を含む配列を作成
+windowWidth = 1000  # width of the window displaying the curve
+Xm = linspace(
+    0, 0, windowWidth
+)  # create array that will contain the relevant time series
 Xm2 = linspace(0, 0, windowWidth)
-ptr = -windowWidth  # 最初のx位置を設定
+ptr = -windowWidth  # set first x position
 
 
 ifsamplingflag = False
@@ -112,7 +122,7 @@ keyboard_state_machine = {
     "41": ",",
     "42": "m",
     "43": "n",
-    "44": ".",  ###TODO:特殊キー入力 まだ定義されていない
+    "44": ".",  ###TODO:特殊键入 还未定义
     "45": "?",
     "46": "Shift",
 }
@@ -159,7 +169,7 @@ class CustomProgressBar(QProgressBar):
     @pyqtSlot(int)
     def updateProgressBar(self, value):
         self.setValue(value)
-        self.setFormat("")  # 既存のフォーマットをクリア
+        self.setFormat("")  # Clear existing format
 
     def paintEvent(self, event):
         if self.paintMark == 0:
@@ -205,7 +215,7 @@ class LoerProgressBar(QProgressBar):
         self.setValue(700)
         self.setTextVisible(False)
 
-        # カスタム信号をテキスト更新のスロットに接続
+        # Connect the custom signal to the slot for updating the text
         self.customSignal.connect(self.updateText)
 
     @pyqtSlot(str)
@@ -223,21 +233,21 @@ class MyWidget(QWidget):
     def initUI(self):
         layout = QVBoxLayout(self)
 
-        # テキストラベルを追加
+        # 添加文本标签
         self.edit = QLineEdit()
-        self.edit.setPlaceholderText("入力を待っています")
+        self.edit.setPlaceholderText("Watting for input")
         layout.addWidget(self.edit)
 
-        # プログレスバーを追加
+        # 添加进度条
         self.upper_progress_bar = CustomProgressBar(self)
         layout.addWidget(self.upper_progress_bar)
 
-        # 下のプログレスバーを追加
+        # 添加下方的进度条
         # self.lower_progress_bar = LoerProgressBar(self)
         self.lower_progress_bar = QProgressBar(self)
         self.lower_progress_bar.setMinimum(0)
         self.lower_progress_bar.setMaximum(700)
-        self.lower_progress_bar.setTextVisible(False)  # テキストを表示しない
+        self.lower_progress_bar.setTextVisible(False)  # 不显示文本
         layout.addWidget(self.lower_progress_bar)
 
         self.show()
@@ -298,57 +308,60 @@ def threading_of_update():
 
     while True:
         c = ser.inWaiting()
-        flag = 0
+        print(c)
         if c >= 8:
-            line = ser.read(16)
-            namadata = str(line)[2:-1]  # 一度に8個のデータを受信（16進数で16個）
-            buffer += namadata  # バッファにデータを保存
+            namadata = str(binascii.b2a_hex(ser.read(8)))[
+                2:-1
+            ]  # 一次只收8个数据 即16个16进制数
+            buffer += namadata  # 在buffer里面存储数据
+
             if (
                 len(buffer) == 16
-            ):  # バッファが空のとき、最初に16個の16進数を受信したときに初期処理を行う
-                # print(namadata)
+            ):  # 在buffer为空时第一次收到16个16进制数时进行一些初始处理
+                print(namadata)
 
-                flag = buffer.find("F0")  # f0に対応する点の開始位置をマーク
+                flag = buffer.find("f0")  # 标记f0对应点的起始位
                 print("flag=", flag, "c=", c)
-                print(buffer[flag + 1 :].find("F0"))
                 if (
-                    buffer[flag + 1 :].find("F0") == -1
-                ):  # このグループに複数のf0がある場合、次のグループを探すためにこのグループを削除
+                    buffer[flag + 1 :].find("f0") == -1
+                ):  # 如果这一组里面有多个f0 我就懒得判断了直接去掉这一组 找下一组
                     buffer = buffer[flag:]
                 else:
                     buffer = ""
+
             if (
                 len(buffer) > 16
-            ):  # 2グループ目から、前のグループの16-flag個のデータとこのグループのflagデータを組み合わせて、最初のグループを出力
-                # 次に来るデータ形式が前回と変わった場合の異常処理
+            ):  # 从第二组开始，将上一组的16-flag个数据和这一组的flag数据拼起来，作为第一组输出
+                # 如果下一次来的数据格式跟上一次发生了变化的异常处理
+
                 if (
-                    namadata[flag : flag + 2] != "F0" and namadata.count("F0") == 1
-                ):  # TODO もし伝送にエラーが発生した場合、flagの位置は大抵f0ではないため、こう判断するが、伝送エラーが発生した場合にこの位置がちょうどf0である可能性もあるため、判断が不完全だが、確率が低いため、暫定的に未実施
+                    namadata[flag : flag + 2] != "f0" and namadata.count("f0") == 1
+                ):  # TODO 如果传输发生错误flag位置大概率不是f0 因此这样判断 但是有可能传输发生错误时这一位置刚好是f0 因此判断不全面 但因为概率低 暂时没做
+                    print(namadata)
                     print(
-                        "データの順序が変わりました\n変動前flag=",
+                        "数据顺序发生了变化\n变动前flag=",
                         flag,
-                        "\n変動後flag=",
-                        namadata.find("F0"),
+                        "\n变动后flag=",
+                        namadata.find("f0"),
                     )
-                    # バッファをクリアし、f0に対応する点の開始位置を再マーク
+                    # 清空buffer 重新标记f0对应点的起始位
                     buffer = ""
-                    flag = namadata.find("F0")
+                    flag = namadata.find("f0")
                     buffer = (
                         buffer + namadata[flag:]
-                    )  # f0の後をバッファに保存し、未完成のフレームとして、次のフレームと組み合わせて完全なフレームを作成する準備
+                    )  # 把f0之后的保存到buffer，作为未完成的一帧,准备与下一帧结合成完整的一帧
                     continue
 
-                elif namadata.find("F0") == -1:
+                elif namadata.find("f0") == -1:
                     buffer = buffer[
                         :-16
-                    ]  # 毎回完全なフレームを出力した後、元のフレームを削除し、バッファの長さを制御
+                    ]  # 每次输出一个完整的帧之后删掉原来的一帧，控制buffer的长度
                     continue
 
-                # すべてが順調であれば、データを正常に接続
-                Xm[:-1] = Xm[1:]  # 時間平均のデータを1サンプル左にシフト
+                # 若一切如意，则将数据正常拼接
+                Xm[:-1] = Xm[1:]  # shift data in the temporal mean 1 sample left
                 Xm2[:-1] = Xm2[1:]
                 data = buffer[-(16 - flag) - 16 : -(16 - flag)]
-                # print(data)
 
                 data1 = (
                     int(data[3:8], 16)
@@ -363,16 +376,16 @@ def threading_of_update():
 
                 # print(data1)
                 # print(data2)
-                # Xm[-1] =  data1  # 瞬時値を含むベクトル
+                # Xm[-1] =  data1  # vector containing the instantaneous values
                 # Xm2[-1] = data2
-                # ptr += 1  # 曲線を表示するためのx位置を更新
+                # ptr += 1  # update x position for displaying the curve
                 buffer = buffer[
                     16:
-                ]  # 毎回完全なフレームを出力した後、元のフレームを削除し、バッファのサイズを小さくする
+                ]  # 每次输出一个完整的帧之后删掉原来的一帧，减小buffer的规模
                 if data[2] == "0":
-                    # gapシンボルが来たとき
-                    if not TheFirstMeasurementDataFlag:
-                        # 正式に測定が始まる最初のデータが来たとき、以前のキャリブレーションデータを使用する、iiiは何番目の周波数のキャリブレーションを示す
+                    # 当gap符号来临时
+                    if TheFirstMeasurementDataFlag == False:
+                        # 正式开始测量的第一个数据来临时把之前的校准数据用上，iii表示第几个频率的校准
                         mean_I_offset.append(
                             mean(I_offset[40:])
                             / (
@@ -458,7 +471,7 @@ def threading_of_update():
                             iii = 0
 
                 if data[2] == "1":
-                    if not TheFirstMeasurementDataFlag:
+                    if TheFirstMeasurementDataFlag == False:
                         TheFirstMeasurementDataFlag = True
                         iii = 0
                     I_load_offset = (
@@ -487,7 +500,7 @@ def threading_of_update():
                     Load_imag = I_cal_imag + Q_cal_imag
                     Load_mag = sqrt(square(Load_real) + square(Load_imag))
                     Load_angle = arctan(Load_imag / Load_real) * (180 / pi)
-                    if ifsamplingflag:
+                    if ifsamplingflag == True:
                         f1.write(str(Load_mag) + ",")
                         f2.write(str(Load_angle) + ",")
 
@@ -495,9 +508,10 @@ def threading_of_update():
                     test2[:-1] = test2[1:]
                     test1[-1] = Load_real
                     test2[-1] = Load_imag
-                    Xm[-1] = Load_real  # 瞬時値を含むベクトル
+
+                    Xm[-1] = Load_real  # vector containing the instantaneous values
                     Xm2[-1] = Load_imag
-                    ptr += 1  # 曲線を表示するためのx位置を更新
+                    ptr += 1  # update x position for displaying the curve
 
                     if test1[-2] - test1[-1] >= 10:
                         counter = 0
@@ -508,7 +522,7 @@ def threading_of_update():
                     elif (
                         abs(test1[-1] - test1[-2]) >= 20
                         and counter == 30
-                        and touch_sensor
+                        and touch_sensor == True
                     ):
                         touch_sensor = False
                         if order < 5 and order > -5:
@@ -536,12 +550,12 @@ def threading_of_update():
                             if keyboard_state_machine[strbuffer] == "Del":
                                 my_widget.edit.backspace()
                             elif keyboard_state_machine[strbuffer] == "Cap":
-                                if not cap_flag:
+                                if cap_flag == False:
                                     cap_flag = True
                                 else:
                                     cap_flag = False
                             elif keyboard_state_machine[strbuffer] == "Shift":
-                                if not shift_flag:
+                                if shift_flag == False:
                                     shift_flag = True
                                 else:
                                     shift_flag = False
@@ -570,7 +584,7 @@ def threading_of_update():
                     elif (
                         abs(test1[-1] - test1[-2]) >= 20
                         and counter != 30
-                        and touch_sensor
+                        and touch_sensor == True
                     ):
                         strbuffer = ""
                         cancel_counter += 1
@@ -586,19 +600,19 @@ def threading_of_update():
                         touch_sensor = False
                         send0.run(0)
 
-                    if touch_sensor and counter != 30:
+                    if touch_sensor == True and counter != 30:
                         counter = counter + 1
                         if counter == 30:
                             record_value = smoothdata(test1[-20:], 20)[0]
 
-                    if touch_sensor and counter == 30:
+                    if touch_sensor == True and counter == 30:
                         cancel_counter = 0
                         order = int(
                             (smoothdata(test1[-80:], 80)[0] - record_value) // 1
                         )
                         map_order = 350 + order * 10
 
-                        ##TODO: これはInteractionデモのため
+                        ##TODO:这里是为了Interaction演示
                         if order < 5 and order > -5:
                             client_socket.send("3".encode())
                         elif order >= 5 and order < 15:
@@ -619,17 +633,17 @@ def threading_of_update():
                         # t4.start()
                         # print(order)
 
-                # Zeroシンボルが来たときの特別なマークと特別な操作
+                # Zero符号来临时的特殊标记和特殊操作
                 if data[2] == "e":
-                    if ifsamplingflag:
+                    if ifsamplingflag == True:
                         f1.write(str("Z") + ",")
                         f2.write(str("Z") + ",")
                     # print(Load_real)
                     # print(Load_imag)
-                    # Xm[-1] =  Load_real   # 瞬時値を含むベクトル
+                    # Xm[-1] =  Load_real   # vector containing the instantaneous values
                     # Xm2[-1] = Load_imag
 
-                # データキャリブレーション時に使用される識別子と操作
+                # 下面是数据校准时使用的一些识别符号和操作
                 elif data[2] == "3":
                     I_offset.append(data1)
                     Q_offset.append(data2)
@@ -640,40 +654,38 @@ def threading_of_update():
                     I_rcal_quad.append(data1)
                     Q_rcal_quad.append(data2)
 
-            # キー処理、データ保存
+            # 按键处理、保存数据
             try:
-                if not ifsamplingflag:
+                if ifsamplingflag == False:
                     if keyboard.is_pressed("s"):  # if key 's' is pressed
-                        # ファイルを開いて書き込みの準備
+                        # 打开文件 准备写入
                         countsamplingfile += 1
                         dataname = "pysavedsampling" + str(countsamplingfile) + "data"
                         f1 = open(dataname + "1.txt", "w")
                         f2 = open(dataname + "2.txt", "w")
-                        print("サンプリングの開始")
+                        print("The start of sampling")
                         ifsamplingflag = True
                 else:
                     pass
 
-                if ifsamplingflag:
+                if ifsamplingflag == True:
                     if keyboard.is_pressed("e"):  # if key 'q' is pressed
-                        print("サンプリングの終了")
-                        # ファイルを閉じる
+                        print("The end of sampling")
+                        # 关闭文件
                         f1.close()
                         f2.close()
                         ifsamplingflag = False
                 else:
                     pass
-            except Exception:
-                pass
-                # print(f"Error: {e}")
+            except:
+                break  # if user pressed a key other than the given key the loop will break
         else:
             time.sleep(0.001)
 
 
 def threading_of_plot():
     global curve, curve2, ptr, Xm, Xm2, plotcountermark
-
-    # キー処理、データ保存
+    # 按键处理、保存数据
     try:
         if keyboard.is_pressed("c"):  # if key 's' is pressed
             plotcountermark = plotcountermark + 1
@@ -681,45 +693,30 @@ def threading_of_plot():
                 plotcountermark = 0
         else:
             pass
-    except Exception:
+    except:
         pass
-        # print(f"Error: {e}")
     if plotcountermark == 0:
-        curve.setData(Xm, pen="b")  # このデータで曲線を設定
-        curve.setPos(ptr, 0)  # グラフのx位置を0に設定
-        curve2.setData(Xm2, pen="r")  # このデータで曲線を設定
-        curve2.setPos(ptr, 0)  # グラフのx位置を0に設定
-        QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
+        curve.setData(Xm, pen="b")  # set the curve with this data
+        curve.setPos(ptr, 0)  # set x position in the graph to 0
+        curve2.setData(Xm2, pen="r")  # set the curve with this data
+        curve2.setPos(ptr, 0)  # set x position in the graph to 0
+        QtWidgets.QApplication.processEvents()  # you MUST process the plot now
 
     if plotcountermark == 1:
-        curve.setData(Xm, pen="b")  # このデータで曲線を設定
-        curve.setPos(ptr, 0)  # グラフのx位置を0に設定
+        curve.setData(Xm, pen="b")  # set the curve with this data
+        curve.setPos(ptr, 0)  # set x position in the graph to 0
         curve2.clear()
-        QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
+        QtWidgets.QApplication.processEvents()  # you MUST process the plot now
 
     if plotcountermark == 2:
-        curve2.setData(Xm2, pen="r")  # このデータで曲線を設定
+        curve2.setData(Xm2, pen="r")  # set the curve with this data
         curve.clear()
-        curve2.setPos(ptr, 0)  # グラフのx位置を0に設定
-        QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
-
-
-def smoothdata(x, windowsize):
-    length = len(x)
-    output = []
-    for i in range(0, length - windowsize + 1):
-        temp = 0
-        for j in range(0, windowsize):
-            temp = temp + x[(i) + j]
-
-        temp = temp / windowsize
-        output.append(temp)
-
-    return output
+        curve2.setPos(ptr, 0)  # set x position in the graph to 0
+        QtWidgets.QApplication.processEvents()  # you MUST process the plot now
 
 
 ### MAIN PROGRAM #####
-# これはリアルタイムデータプロットを呼び出す過酷な無限ループです
+# this is a brutal infinite loop calling your realtime data plot
 if __name__ == "__main__":
     t1 = threading.Thread(target=threading_of_update)
     t1.setDaemon(True)
@@ -738,9 +735,23 @@ if __name__ == "__main__":
     send0.msg.connect(my_widget.lower_progress_bar.setValue)
 
     timer = pg.QtCore.QTimer()
-    timer.timeout.connect(threading_of_plot)  # 定期的にデータ表示を更新
-    timer.start(100)  # 何msごとに呼び出すか
+    timer.timeout.connect(threading_of_plot)  # 定时刷新数据显示
+    timer.start(100)  # 多少ms调用一次
 
     ### END QtApp ####
-    QtWidgets.QApplication.exec_()  # これは最後に置く必要があります
+    QtWidgets.QApplication.exec_()  # you MUST put this at the end
     ##################
+
+
+def smoothdata(x, windowsize):
+    length = len(x)
+    output = []
+    for i in range(0, length - windowsize + 1):
+        temp = 0
+        for j in range(0, windowsize):
+            temp = temp + x[(i) + j]
+
+        temp = temp / windowsize
+        output.append(temp)
+
+    return output

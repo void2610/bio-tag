@@ -7,6 +7,9 @@
 SoftSPI mySPI(11, A0, 13);
 int csPin = 10;
 int buttonPin = 5;
+int powerPin = 6;
+
+bool isSetuped = false;
 
 u8 SendBuff[SEND_BUF_SIZE] = {0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f};
 u8 id = 0x00, i = 255, j = 255, flag = 0, a[10], counter = 0, counter2 = 0, tempREG;
@@ -133,8 +136,8 @@ u8 Sweap(u8 reg0x17, u8 reg0x18, u8 reg0x20)
 {
     u16 read_pointer, write_pointer;
     u32 timecounter;
-    char received_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    char reset_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    // char received_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    // char reset_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     // BIOZ_OFF();
     BIOZ_DRV_Standby();
@@ -167,12 +170,12 @@ u8 Sweap(u8 reg0x17, u8 reg0x18, u8 reg0x20)
                 SendBuff[6] = received_msg[5];
                 SendBuff[7] = 0x0f;
                 show_send_buff();
+                reset_receive_msg();
             }
-            reset_receive_msg();
         }
 
         // ボタン入力でスイープを終了する
-        if (digitalRead(buttonPin) == HIGH)
+        if (digitalRead(buttonPin) == LOW)
         {
             break;
         }
@@ -184,13 +187,18 @@ void setup()
     Serial.begin(9600);
     mySPI.begin();
     mySPI.setDataMode(SPI_MODE0);
-    mySPI.setClockDivider(SPI_CLOCK_DIV2);
+    mySPI.setClockDivider(SPI_CLOCK_DIV8);
     mySPI.setBitOrder(MSBFIRST);
     mySPI.setThreshold(256);
 
     pinMode(csPin, OUTPUT);
     digitalWrite(csPin, HIGH);
+    pinMode(buttonPin, INPUT_PULLUP);
+}
 
+void MAX30009_setup()
+{
+    isSetuped = true;
     for (i = 0; i < 9; i++)
         a[i] = 1;
 
@@ -290,16 +298,20 @@ void setup()
 
 void loop()
 {
+    if (digitalRead(buttonPin) == LOW && !isSetuped)
+    {
+        MAX30009_setup();
+    }
 }
 
 void show_reg(byte regAddress)
 {
-    byte data;
-    data = read_reg(regAddress);
-    Serial.print("Register ");
-    Serial.print(regAddress, HEX);
-    Serial.print(" : ");
-    Serial.println(data, HEX);
+    // byte data;
+    // data = read_reg(regAddress);
+    // Serial.print("Register ");
+    // Serial.print(regAddress, HEX);
+    // Serial.print(" : ");
+    // Serial.println(data, HEX);
 }
 
 byte read_reg(byte regAddress)
@@ -326,13 +338,16 @@ void write_reg(byte regAddress, byte v)
 
 void show_send_buff()
 {
-    Serial.print("SendBuff: ");
     for (int i = 0; i < SEND_BUF_SIZE; i++)
     {
+        if (SendBuff[i] < 0x10)
+        {
+            Serial.print("0"); // 1桁の場合は0を追加
+        }
+        // 2桁で表示するために、0埋めを行う
         Serial.print(SendBuff[i], HEX);
-        Serial.print(" ");
     }
-    Serial.println();
+    // Serial.println();
 }
 
 void set_receive_msg()
@@ -508,20 +523,13 @@ void IQ_PHASE_NOT_change(void) // I解调时钟保持与I同向，Q解调时钟�
 void FrequencyCalibrationGap(void)
 {
     // 毎回特別な識別子をホストコンピュータに送信して、次に何をすべきかを識別する
-    // while (1)
-    //     if (DMA_GetFlagStatus(DMA2_Stream7, DMA_FLAG_TCIF7) != RESET) // DMA2_Stream7の転送完了を待つ
-    //     {
-    //         DMA_ClearFlag(DMA2_Stream7, DMA_FLAG_TCIF7); // DMA2_Stream7の転送完了フラグをクリア
-    //         SendBuff[0] = 0xf0;
-    //         SendBuff[1] = 0x00;
-    //         SendBuff[2] = 0x00;
-    //         SendBuff[3] = 0x00;
-    //         SendBuff[4] = 0x00;
-    //         SendBuff[5] = 0x00;
-    //         SendBuff[6] = 0x00;
-    //         SendBuff[7] = 0x0f;
-    //         MYDMA_Enable(DMA2_Stream7, SEND_BUF_SIZE); // 一度DMA転送を開始する！
-    //         break;
-    //     }
-    Serial.println("FrequencyCalibrationGap");
+    SendBuff[0] = 0xf0;
+    SendBuff[1] = 0x00;
+    SendBuff[2] = 0x00;
+    SendBuff[3] = 0x00;
+    SendBuff[4] = 0x00;
+    SendBuff[5] = 0x00;
+    SendBuff[6] = 0x00;
+    SendBuff[7] = 0x0f;
+    show_send_buff();
 }
