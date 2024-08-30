@@ -17,14 +17,11 @@ RCAL = 900 * (1 + (4 / 512))
 AMPLITUDE_OF_CURRENT_PEAK = 45.25
 
 # シリアルポートオブジェクトを作成
-portName = "/dev/cu.usbserial-12BP0164"  # このポート名をあなたのものに置き換えてください！  # このポート名をあなたのものに置き換えてください！
+portName = "/dev/cu.usbserial-12BP0164"
 baudrate = 9600
 ser = serial.Serial(portName, baudrate)
 
-
-### START QtApp #####
-app = QtWidgets.QApplication([])  # これは一度行う必要があります（初期化）
-####################
+app = QtWidgets.QApplication([])
 
 win = pg.GraphicsLayoutWidget(show=True)  # ウィンドウを作成
 p = win.addPlot(title="Realtime plot")  # ウィンドウ内にプロットのための空間を作成
@@ -43,7 +40,6 @@ f2 = None
 
 ifsamplingflag = False
 buffer = ""
-
 dataname = ""
 countsamplingfile = 0
 
@@ -355,9 +351,7 @@ def start_key_listener():
 
 
 ### MAIN PROGRAM #####
-# これはリアルタイムデータプロットを呼び出す過酷な無限ループです
 if __name__ == "__main__":
-    # キーリスナーを別スレッドで開始
     key_listener_thread = threading.Thread(target=start_key_listener)
     key_listener_thread.setDaemon(True)
     key_listener_thread.start()
@@ -369,9 +363,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     timer = pg.QtCore.QTimer()
-    timer.timeout.connect(threading_of_plot)  # 定期的にデータ表示を更新
-    timer.start(100)  # 何msごとに呼び出すか
+    timer.timeout.connect(threading_of_plot)
+    timer.start(100)
 
-    ### END QtApp ####
-    QtWidgets.QApplication.exec_()  # これは最後に置く必要があります
-    ##################
+    QtWidgets.QApplication.exec_()
