@@ -11,15 +11,16 @@ from PyQt5.QtWidgets import QApplication
 
 
 ## 測定前に検査抵抗の大きさを説明する必要がある、さもなければ検査が正しく行われない
-RCAL = 900 * (1 + (4 / 512))
+RCAL = 10000 * (1 + (4 / 512))
 
 # 使用前に電流ピーク値を入力することを忘れないでください 単位 uA
-AMPLITUDE_OF_CURRENT_PEAK = 45.25
+AMPLITUDE_OF_CURRENT_PEAK = 90.50
 
 # シリアルポートオブジェクトを作成
-portName = "/dev/cu.usbserial-12BP0164"
+portName = "/dev/cu.Bluetooth-Incoming-Port"
 baudrate = 9600
 ser = serial.Serial(portName, baudrate)
+print("Connected to: " + ser.portstr)
 
 app = QtWidgets.QApplication([])
 
@@ -296,8 +297,6 @@ def threading_of_update():
 
 def threading_of_plot():
     global curve, curve2, ptr, Xm, Xm2, plotcountermark
-    print(f"Xm: {Xm[-1]}")
-    print(f"Xm2: {Xm2[-1]}")
     if plotcountermark == 0:
         curve.setData(Xm, pen="b")  # このデータで曲線を設定
         curve.setPos(ptr, 0)  # グラフのx位置を0に設定

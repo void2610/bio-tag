@@ -12,7 +12,7 @@ int powerPin = 6;
 bool isSetuped = false;
 
 u8 SendBuff[SEND_BUF_SIZE] = {0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f};
-u8 id = 0x00, i = 255, j = 255, flag = 0, a[10], counter = 0, counter2 = 0, tempREG;
+u8 id = 0x00, i = 255, j = 255, flag = 0, counter = 0, counter2 = 0, tempREG;
 u16 read_pointer, write_pointer;
 u32 timecounter;
 char received_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -66,7 +66,8 @@ void NewFrequencyCalibration(u8 reg0x17, u8 reg0x18, u8 reg0x20)
     I_Q_close();  // IQチャネルを閉じる、他はそのまま
     NOT_bypass(); // 0x25レジスタの値を確認し、短絡を解除する
 
-    write_reg(0x41, 0x60); // チップ内部抵抗校正を有効化、0x44内の値が0x11の場合、実際の抵抗はR*(1+17/512)、詳細はマニュアルを参照。 （2つ目のチップ、つまりシルク印刷のないチップの値は0x13、実際の抵抗はR*(1+19/512)）
+    // TODO:
+    write_reg(0x42, 0xe0); // チップ内部抵抗校正を有効化、0x44内の値が0x11の場合、実際の抵抗はR*(1+17/512)、詳細はマニュアルを参照。 （2つ目のチップ、つまりシルク印刷のないチップの値は0x13、実際の抵抗はR*(1+19/512)）
     Q_to_I();
     I_Q_open();
     delay(2);
@@ -136,18 +137,13 @@ u8 Sweap(u8 reg0x17, u8 reg0x18, u8 reg0x20)
 {
     u16 read_pointer, write_pointer;
     u32 timecounter;
-    // char received_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    // char reset_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-    // BIOZ_OFF();
     BIOZ_DRV_Standby();
     write_reg(0x20, reg0x20); // DAC/ADC OSR設定とVrefの有効化; PLL_ENを1に設定する前に、BioZ参照を有効にする必要がある(BIOZ_BG_EN[2](0x20)=1)、解決には6msの時間がかかる可能性がある。
     write_reg(0x18, reg0x18); // MDIV低位設定
     write_reg(0x17, reg0x17); // MDIV高位、NDIV=512、KDIV=1、およびPLLを有効化
     PLL_enable();
-    // BIOZ_ON();
     BIOZ_DRV_Current_Drive();
-    // FLUSH_FIFO();
     I_Q_open();
     FLUSH_FIFO(); // 読み取る前にFIFOをクリア
 
@@ -199,8 +195,6 @@ void setup()
 void MAX30009_setup()
 {
     isSetuped = true;
-    for (i = 0; i < 9; i++)
-        a[i] = 1;
 
     write_reg(0x1A, 0x20); // 内部クロック32.768K、微調整周波数
     write_reg(0x19, 0x01); // FCLK参照で高い揺らぎが発生することを避けるためにPHASE_UNLOCK中断のエラーを防ぐ。内部RC発振周波数はあまり安定していないようで、チップが常に位相ロック解除を報告する可能性があり、長時間はんだ付けされたためにチップの電気特性が悪化した可能性がある。とにかく、これを有効にすることで位相ロック解除を大幅に減少させることができる。
@@ -221,77 +215,28 @@ void MAX30009_setup()
     read_reg(0x00); // 中断設定後に自動的にフラグが立つため、少し待ってから任意のレジスタを読み取ることで消去できる
     delay(1);
 
-    write_reg(0x22, 0x28); // 電流源出力、電圧源出力、またはHブリッジ出力を選択し、振幅を制御
-    // write_reg(0x21,0x18); // フィルタリング、スイープ時にフィルタを追加すると応答速度に影響を与えることがある
-
+    write_reg(0x22, 0x38); // 電流源出力、電圧源出力、またはHブリッジ出力を選択し、振幅を制御
     write_reg(0x25, 0xCF); //[7]=1は外部コンデンサを使用；[3:0]=1010はBIAと心抵抗測定において、BIOZ_AMP_RGEとBIOZ_AMP_BWを高い値に設定する必要がある
-
     write_reg(0x28, 0x02); //[3]Qクロック位相をIに移動，[2]Iクロック位相をQに移動，F_BIOZ>54668のとき，[0]は0，[1]は1；F_BIOZ<54668のとき，F_BIOZ=BIOZ_ADC_CLK/8ならば，[0]=1，そうでなければ0，F_BIOZ=BIOZ_ADC_CLK/2ならば，[1]=0，そうでなければ1
-    // write_reg(0x58,0x03); //受信チャネルにリードバイアスを存在させる
 
-    NewFrequencyCalibration(0x4c, 0xf3, 0xFC);
-    FrequencyCalibrationGap();
-    NewFrequencyCalibration(0x4A, 0xF3, 0xF4);
-    FrequencyCalibrationGap();
-    BIOZ_CH_FSEL_ON();
-    NewFrequencyCalibration(0x48, 0xF3, 0xF4);
-    FrequencyCalibrationGap();
-    BIOZ_CH_FSEL_OFF();
-    NewFrequencyCalibration(0x46, 0xF3, 0xEC);
-    FrequencyCalibrationGap();
-    BIOZ_INA_CHOP_EN_OFF();
-    NewFrequencyCalibration(0x44, 0xF3, 0xEC);
-    FrequencyCalibrationGap();
     BIOZ_INA_CHOP_EN_ON();
-    NewFrequencyCalibration(0x42, 0xF3, 0xEC);
-    FrequencyCalibrationGap();
-    NewFrequencyCalibration(0x80, 0x0A, 0xE4);
-    FrequencyCalibrationGap();
-    NewFrequencyCalibration(0x40, 0xFF, 0xA4);
-    FrequencyCalibrationGap();
-    NewFrequencyCalibration(0x40, 0xE7, 0x64);
-    FrequencyCalibrationGap();
-    NewFrequencyCalibration(0x80, 0x37, 0x24);
-    FrequencyCalibrationGap();
-    NewFrequencyCalibration(0xE0, 0x15, 0x24);
+    NewFrequencyCalibration(0x78, 0xff, 0xfc); // 16HZ
     FrequencyCalibrationGap();
 
     I_Q_close();
     IQ_PHASE_NOT_change();
 
-    write_reg(0x41, 0x02); // MUXを有効化
-    //	write_reg(0x42,0x03);			// 外部保護トラッキングドライバ回路を有効化; BINとBIPの入力コンデンサ負荷を補償する回路を有効化。
-    write_reg(0x43, 0xA0); // 測定端子をEL2B EL3Bに接続し、励起をEL1 EL4に接続
+    // write_reg(0x42, 0x00);
+    // write_reg(0x41, 0x02); // MUXを有効化
+    // write_reg(0x43, 0xA0); // 測定端子をEL2B EL3Bに接続し、励起をEL1 EL4に接続
     I_Q_open();
     delay(2);
 
     while (1)
-    {                            // この文からループスイープを開始; スイープの各ポイントは事前にキャリブレーションを行い、ホストコンピュータに送信する必要があります
-        Sweap(0x4C, 0xF3, 0xFC); // 1KHZスイープの開始点
-        FrequencyCalibrationGap();
-        Sweap(0x4A, 0xF3, 0xF4); // 2KHZ
-        FrequencyCalibrationGap();
-        BIOZ_CH_FSEL_ON();
-        Sweap(0x48, 0xF3, 0xF4); // 4K
-        FrequencyCalibrationGap();
-        BIOZ_CH_FSEL_OFF();
-        Sweap(0x46, 0xF3, 0xEC); // 8K
-        FrequencyCalibrationGap();
-        BIOZ_INA_CHOP_EN_OFF();
-        Sweap(0x44, 0xF3, 0xEC); // 16K
-        FrequencyCalibrationGap();
+    {
+        // この文からループスイープを開始; スイープの各ポイントは事前にキャリブレーションを行い、ホストコンピュータに送信する必要があります
         BIOZ_INA_CHOP_EN_ON();
-        Sweap(0x42, 0xF3, 0xEC); // 30.976K
-        FrequencyCalibrationGap();
-        Sweap(0x80, 0x0A, 0xE4); // 66.944K
-        FrequencyCalibrationGap();
-        Sweap(0x40, 0xFF, 0xA4); // 131.072K
-        FrequencyCalibrationGap();
-        Sweap(0x40, 0xE7, 0x64); // 249.856K
-        FrequencyCalibrationGap();
-        Sweap(0x80, 0x37, 0x24); // 581.632K
-        FrequencyCalibrationGap();
-        Sweap(0xE0, 0x15, 0x24); // 808.960K
+        Sweap(0x78, 0xff, 0xfc); // 16HZ
         FrequencyCalibrationGap();
     }
 }
@@ -302,16 +247,6 @@ void loop()
     {
         MAX30009_setup();
     }
-}
-
-void show_reg(byte regAddress)
-{
-    // byte data;
-    // data = read_reg(regAddress);
-    // Serial.print("Register ");
-    // Serial.print(regAddress, HEX);
-    // Serial.print(" : ");
-    // Serial.println(data, HEX);
 }
 
 byte read_reg(byte regAddress)
@@ -368,6 +303,20 @@ void reset_receive_msg()
     {
         received_msg[i] = 0;
     }
+}
+
+void FrequencyCalibrationGap(void)
+{
+    // 毎回特別な識別子をホストコンピュータに送信して、次に何をすべきかを識別する
+    SendBuff[0] = 0xf0;
+    SendBuff[1] = 0x00;
+    SendBuff[2] = 0x00;
+    SendBuff[3] = 0x00;
+    SendBuff[4] = 0x00;
+    SendBuff[5] = 0x00;
+    SendBuff[6] = 0x00;
+    SendBuff[7] = 0x0f;
+    show_send_buff();
 }
 
 void PLL_enable(void) // PLL(位相固定ループ)を有効にする
@@ -518,18 +467,4 @@ void IQ_PHASE_NOT_change(void) // I解调时钟保持与I同向，Q解调时钟�
     tempREG = read_reg(0x28);
     tempREG = tempREG & 0xF3;
     write_reg(0x28, tempREG);
-}
-
-void FrequencyCalibrationGap(void)
-{
-    // 毎回特別な識別子をホストコンピュータに送信して、次に何をすべきかを識別する
-    SendBuff[0] = 0xf0;
-    SendBuff[1] = 0x00;
-    SendBuff[2] = 0x00;
-    SendBuff[3] = 0x00;
-    SendBuff[4] = 0x00;
-    SendBuff[5] = 0x00;
-    SendBuff[6] = 0x00;
-    SendBuff[7] = 0x0f;
-    show_send_buff();
 }
