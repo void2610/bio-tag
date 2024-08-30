@@ -3,10 +3,9 @@ from numpy import *
 from numpy import linspace, pi, cos, sin, arctan, sqrt, square, mean
 import pyqtgraph as pg
 import serial
-import binascii
+from pynput import keyboard as kb
 import time
 import threading
-import keyboard  # using module keyboard
 import sys
 
 from PyQt5 import QtWidgets
@@ -20,20 +19,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QRectF, QObject
 from PyQt5.QtGui import QPainter
-
-# メッセージ送信部分
-import socket
-
-# PygameプログラムのIPアドレスとポート番号
-pygame_host = "127.0.0.1"  # ここではPygameプログラムがローカルで実行されていると仮定
-pygame_port = 12345  # Pygameプログラムと通信するためのポート番号
-
-# ソケットを作成
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Pygameプログラムに接続
-client_socket.connect((pygame_host, pygame_port))
-
 
 ## 測定前に検査抵抗の大きさを説明する必要がある、さもなければ検査が正しく行われない
 RCAL = 900 * (1 + (4 / 512))
@@ -63,6 +48,8 @@ Xm = linspace(0, 0, windowWidth)  # 関連する時間系列を含む配列を�
 Xm2 = linspace(0, 0, windowWidth)
 ptr = -windowWidth  # 最初のx位置を設定
 
+f1 = None
+f2 = None
 
 ifsamplingflag = False
 buffer = ""
@@ -240,7 +227,7 @@ class MyWidget(QWidget):
         self.lower_progress_bar.setTextVisible(False)  # テキストを表示しない
         layout.addWidget(self.lower_progress_bar)
 
-        self.show()
+        # self.show()
 
 
 # Realtime data plot. Each time this function is called, the data display is updated
@@ -502,8 +489,8 @@ def threading_of_update():
                     if test1[-2] - test1[-1] >= 10:
                         counter = 0
                         touch_sensor = True
-                        keyboard.press("space")
-                        keyboard.release("space")
+                        # keyboard.press("space")
+                        # keyboard.release("space")
 
                     elif (
                         abs(test1[-1] - test1[-2]) >= 20
@@ -598,22 +585,6 @@ def threading_of_update():
                         )
                         map_order = 350 + order * 10
 
-                        ##TODO: これはInteractionデモのため
-                        if order < 5 and order > -5:
-                            client_socket.send("3".encode())
-                        elif order >= 5 and order < 15:
-                            client_socket.send("4".encode())
-                        elif order >= 15 and order < 25:
-                            client_socket.send("5".encode())
-                        elif order >= 25:
-                            client_socket.send("6".encode())
-                        elif order > -15 and order <= -5:
-                            client_socket.send("2".encode())
-                        elif order > -25 and order <= -15:
-                            client_socket.send("1".encode())
-                        elif order <= -25:
-                            client_socket.send("0".encode())
-
                         send0.run(map_order)
                         # t4 = threading.Thread(target=threading_of_move_mouse(order))
                         # t4.start()
@@ -639,33 +610,6 @@ def threading_of_update():
                 elif data[2] == "7":
                     I_rcal_quad.append(data1)
                     Q_rcal_quad.append(data2)
-
-            # キー処理、データ保存
-            try:
-                if not ifsamplingflag:
-                    if keyboard.is_pressed("s"):  # if key 's' is pressed
-                        # ファイルを開いて書き込みの準備
-                        countsamplingfile += 1
-                        dataname = "pysavedsampling" + str(countsamplingfile) + "data"
-                        f1 = open(dataname + "1.txt", "w")
-                        f2 = open(dataname + "2.txt", "w")
-                        print("サンプリングの開始")
-                        ifsamplingflag = True
-                else:
-                    pass
-
-                if ifsamplingflag:
-                    if keyboard.is_pressed("e"):  # if key 'q' is pressed
-                        print("サンプリングの終了")
-                        # ファイルを閉じる
-                        f1.close()
-                        f2.close()
-                        ifsamplingflag = False
-                else:
-                    pass
-            except Exception:
-                pass
-                # print(f"Error: {e}")
         else:
             time.sleep(0.001)
 
@@ -673,17 +617,6 @@ def threading_of_update():
 def threading_of_plot():
     global curve, curve2, ptr, Xm, Xm2, plotcountermark
 
-    # キー処理、データ保存
-    try:
-        if keyboard.is_pressed("c"):  # if key 's' is pressed
-            plotcountermark = plotcountermark + 1
-            if plotcountermark == 3:
-                plotcountermark = 0
-        else:
-            pass
-    except Exception:
-        pass
-        # print(f"Error: {e}")
     if plotcountermark == 0:
         curve.setData(Xm, pen="b")  # このデータで曲線を設定
         curve.setPos(ptr, 0)  # グラフのx位置を0に設定
@@ -718,9 +651,52 @@ def smoothdata(x, windowsize):
     return output
 
 
+def on_press(key):
+    global ifsamplingflag, countsamplingfile, plotcountermark, f1, f2
+
+    try:
+        if key.char == "c":  # 's'キーが押された場合
+            plotcountermark = plotcountermark + 1
+            if plotcountermark == 3:
+                plotcountermark = 0
+
+        elif not ifsamplingflag and key.char == "s":
+            countsamplingfile += 1
+            dataname = "pysavedsampling" + str(countsamplingfile) + "data"
+            f1 = open(dataname + "1.txt", "w")
+            f2 = open(dataname + "2.txt", "w")
+            print("サンプリングの開始")
+            ifsamplingflag = True
+
+        elif ifsamplingflag and key.char == "e":  # 'e'キーが押された場合
+            print("サンプリングの終了")
+            f1.close()
+            f2.close()
+            ifsamplingflag = False
+    except AttributeError:
+        # 特殊キー（例：Shift、Ctrlなど）の場合は無視
+        pass
+
+
+def on_release(key):
+    # Escキーが押されたらプログラムを終了する
+    if key == kb.Key.esc:
+        return False
+
+
+def start_key_listener():
+    with kb.Listener(on_press=on_press, on_release=on_release) as listener:
+        listener.join()
+
+
 ### MAIN PROGRAM #####
 # これはリアルタイムデータプロットを呼び出す過酷な無限ループです
 if __name__ == "__main__":
+    # キーリスナーを別スレッドで開始
+    key_listener_thread = threading.Thread(target=start_key_listener)
+    key_listener_thread.setDaemon(True)
+    key_listener_thread.start()
+
     t1 = threading.Thread(target=threading_of_update)
     t1.setDaemon(True)
     t1.start()
@@ -729,12 +705,6 @@ if __name__ == "__main__":
     my_widget = MyWidget()
 
     send0 = Signal_of_PyQt()
-    send1 = Signal_of_PyQt()
-    send2 = Signal_of_PyQt()
-    send3 = Signal_of_PyQt()
-    send4 = Signal_of_PyQt()
-    send5 = Signal_of_PyQt()
-    send6 = Signal_of_PyQt()
     send0.msg.connect(my_widget.lower_progress_bar.setValue)
 
     timer = pg.QtCore.QTimer()
