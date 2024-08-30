@@ -1,5 +1,3 @@
-# Import libraries
-from numpy import *
 from numpy import linspace, pi, cos, sin, arctan, sqrt, square, mean
 import pyqtgraph as pg
 import serial
