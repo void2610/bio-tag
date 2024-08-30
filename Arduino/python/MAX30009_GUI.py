@@ -614,7 +614,8 @@ def threading_of_update():
 
 def threading_of_plot():
     global curve, curve2, ptr, Xm, Xm2, plotcountermark
-
+    print(f"Xm: {Xm[-1]}")
+    print(f"Xm2: {Xm2[-1]}")
     if plotcountermark == 0:
         curve.setData(Xm, pen="b")  # このデータで曲線を設定
         curve.setPos(ptr, 0)  # グラフのx位置を0に設定
