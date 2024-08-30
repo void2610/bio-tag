@@ -7,16 +7,8 @@ import threading
 import sys
 
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication
 
-from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
-    QVBoxLayout,
-    QProgressBar,
-    QLineEdit,
-)
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QRectF, QObject
-from PyQt5.QtGui import QPainter
 
 ## 測定前に検査抵抗の大きさを説明する必要がある、さもなければ検査が正しく行われない
 RCAL = 900 * (1 + (4 / 512))
@@ -54,183 +46,6 @@ buffer = ""
 
 dataname = ""
 countsamplingfile = 0
-
-
-keyboard_state_machine = {
-    "": "",
-    "1": "",
-    "2": "",
-    "3": "",
-    "4": "",
-    "5": "",
-    "6": "",
-    "21": "d",
-    "22": "s",
-    "23": "a",
-    "24": "f",
-    "25": "g",
-    "26": "Cap",
-    "61": "i",
-    "62": "u",
-    "63": "y",
-    "64": "o",
-    "65": "p",
-    "66": "Del",
-    "31": "e",
-    "32": "w",
-    "33": "q",
-    "34": "r",
-    "35": "t",
-    "36": "Num",
-    "51": "k",
-    "52": "j",
-    "53": "h",
-    "54": "l",
-    "55": ";",
-    "56": "'",
-    "11": "c",
-    "12": "x",
-    "13": "z",
-    "14": "v",
-    "15": "b",
-    "16": " ",
-    "41": ",",
-    "42": "m",
-    "43": "n",
-    "44": ".",  ###TODO:特殊キー入力 まだ定義されていない
-    "45": "?",
-    "46": "Shift",
-}
-
-
-class Signal_of_PyQt(QObject):
-    msg = pyqtSignal(int)
-
-    def run(self, value):
-        self.msg.emit(value)
-
-
-class CustomProgressBar(QProgressBar):
-    customSignal = pyqtSignal(int)
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setMinimum(0)
-        self.setMaximum(700)
-        self.setValue(700)
-        self.setTextVisible(False)
-        self.paintMark = 0
-
-        self.setStyleSheet("""
-            QProgressBar::chunk {
-                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                                  stop:0 #FFFFFF,
-                                                  stop:0.1428 #FFFFFF,
-                                                  stop:0.1429 #FFA500,
-                                                  stop:0.2857 #FFA500,
-                                                  stop:0.2858 #FFFF00,
-                                                  stop:0.4286 #FFFF00,
-                                                  stop:0.4287 #008000,
-                                                  stop:0.5714 #008000,
-                                                  stop:0.5715 #0000FF,
-                                                  stop:0.7143 #0000FF,
-                                                  stop:0.7144 #800080,
-                                                  stop:0.8571 #800080,
-                                                  stop:0.8572 #FF00FF,
-                                                  stop:1 #FF00FF);
-            }
-        """)
-
-    @pyqtSlot(int)
-    def updateProgressBar(self, value):
-        self.setValue(value)
-        self.setFormat("")  # 既存のフォーマットをクリア
-
-    def paintEvent(self, event):
-        if self.paintMark == 0:
-            paint_str_list = [
-                "qwert[Num]",
-                "asdfg[Cap]",
-                "zxcvb[ ]",
-                "",
-                "nm,.?[Shift]",
-                "hjkl;[']",
-                "yuiop[Del]",
-            ]
-        elif self.paintMark == 2:
-            paint_str_list = ["a", "s", "d", "[Cancel]", "f", "g", "[Cap]"]
-        elif self.paintMark == 6:
-            paint_str_list = ["y", "u", "i", "[Cancel]", "o", "p", "[Del]"]
-        elif self.paintMark == 3:
-            paint_str_list = ["q", "w", "e", "[Cancel]", "r", "t", "[Num]"]
-        elif self.paintMark == 5:
-            paint_str_list = ["h", "j", "k", "[Cancel]", "l", ";", "[\]"]
-        elif self.paintMark == 1:
-            paint_str_list = ["z", "x", "c", "[Cancel]", "v", "b", "[ ]"]
-        elif self.paintMark == 4:
-            paint_str_list = ["n", "m", ",", "[Cancel]", ".", "?", "[Shift]"]
-        super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        segment_width = self.width() / 7
-        for i in range(7):
-            segment_text = paint_str_list[i]  # Numbers from -3 to 3
-            text_rect = QRectF(i * segment_width, 0, segment_width, self.height())
-            painter.drawText(text_rect, Qt.AlignCenter, segment_text)
-
-
-class LoerProgressBar(QProgressBar):
-    customSignal = pyqtSignal(int)
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setMinimum(0)
-        self.setMaximum(700)
-        self.setValue(700)
-        self.setTextVisible(False)
-
-        # カスタム信号をテキスト更新のスロットに接続
-        self.customSignal.connect(self.updateText)
-
-    @pyqtSlot(str)
-    def updateText(self, text):
-        self.custom_text = text
-        self.update()
-
-
-class MyWidget(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.initUI()
-
-    def initUI(self):
-        layout = QVBoxLayout(self)
-
-        # テキストラベルを追加
-        self.edit = QLineEdit()
-        self.edit.setPlaceholderText("入力を待っています")
-        layout.addWidget(self.edit)
-
-        # プログレスバーを追加
-        self.upper_progress_bar = CustomProgressBar(self)
-        layout.addWidget(self.upper_progress_bar)
-
-        # 下のプログレスバーを追加
-        # self.lower_progress_bar = LoerProgressBar(self)
-        self.lower_progress_bar = QProgressBar(self)
-        self.lower_progress_bar.setMinimum(0)
-        self.lower_progress_bar.setMaximum(700)
-        self.lower_progress_bar.setTextVisible(False)  # テキストを表示しない
-        layout.addWidget(self.lower_progress_bar)
-
-        # self.show()
-
-
-# Realtime data plot. Each time this function is called, the data display is updated
-def threading_of_move_mouse(x):
-    print(x)
 
 
 def threading_of_update():
@@ -271,15 +86,6 @@ def threading_of_update():
     Q_rcal_in = []
     I_rcal_quad = []
     Q_rcal_quad = []
-    test1 = [0] * 200
-    test2 = [0] * 200
-    touch_sensor = False
-    strbuffer = ""
-    order = 0
-    counter = 0
-    cap_flag = False
-    shift_flag = False
-    cancel_counter = 0
 
     while True:
         c = ser.inWaiting()
@@ -291,8 +97,6 @@ def threading_of_update():
             if (
                 len(buffer) == 16
             ):  # バッファが空のとき、最初に16個の16進数を受信したときに初期処理を行う
-                # print(namadata)
-
                 flag = buffer.find("F0")  # f0に対応する点の開始位置をマーク
                 print("flag=", flag, "c=", c)
                 print(buffer[flag + 1 :].find("F0"))
@@ -333,7 +137,6 @@ def threading_of_update():
                 Xm[:-1] = Xm[1:]  # 時間平均のデータを1サンプル左にシフト
                 Xm2[:-1] = Xm2[1:]
                 data = buffer[-(16 - flag) - 16 : -(16 - flag)]
-                # print(data)
 
                 data1 = (
                     int(data[3:8], 16)
@@ -346,11 +149,6 @@ def threading_of_update():
                     else int(data[9:14], 16) - 2**20
                 )
 
-                # print(data1)
-                # print(data2)
-                # Xm[-1] =  data1  # 瞬時値を含むベクトル
-                # Xm2[-1] = data2
-                # ptr += 1  # 曲線を表示するためのx位置を更新
                 buffer = buffer[
                     16:
                 ]  # 毎回完全なフレームを出力した後、元のフレームを削除し、バッファのサイズを小さくする
@@ -476,127 +274,15 @@ def threading_of_update():
                         f1.write(str(Load_mag) + ",")
                         f2.write(str(Load_angle) + ",")
 
-                    test1[:-1] = test1[1:]
-                    test2[:-1] = test2[1:]
-                    test1[-1] = Load_real
-                    test2[-1] = Load_imag
                     Xm[-1] = Load_real  # 瞬時値を含むベクトル
                     Xm2[-1] = Load_imag
                     ptr += 1  # 曲線を表示するためのx位置を更新
-
-                    if test1[-2] - test1[-1] >= 10:
-                        counter = 0
-                        touch_sensor = True
-                        # keyboard.press("space")
-                        # keyboard.release("space")
-
-                    elif (
-                        abs(test1[-1] - test1[-2]) >= 20
-                        and counter == 30
-                        and touch_sensor
-                    ):
-                        touch_sensor = False
-                        if order < 5 and order > -5:
-                            strbuffer += "0"
-                        elif order >= 5 and order < 15:
-                            strbuffer += "4"
-                        elif order >= 15 and order < 25:
-                            strbuffer += "5"
-                        elif order >= 25:
-                            strbuffer += "6"
-                        elif order > -15 and order <= -5:
-                            strbuffer += "1"
-                        elif order > -25 and order <= -15:
-                            strbuffer += "2"
-                        elif order <= -25:
-                            strbuffer += "3"
-                        print(strbuffer)
-
-                        send0.run(0)
-                        if strbuffer not in keyboard_state_machine:
-                            strbuffer = ""
-                            my_widget.upper_progress_bar.paintMark = 0
-                            my_widget.upper_progress_bar.update()
-                        elif len(strbuffer) == 2:
-                            if keyboard_state_machine[strbuffer] == "Del":
-                                my_widget.edit.backspace()
-                            elif keyboard_state_machine[strbuffer] == "Cap":
-                                if not cap_flag:
-                                    cap_flag = True
-                                else:
-                                    cap_flag = False
-                            elif keyboard_state_machine[strbuffer] == "Shift":
-                                if not shift_flag:
-                                    shift_flag = True
-                                else:
-                                    shift_flag = False
-                            else:
-                                if cap_flag and shift_flag:
-                                    my_widget.edit.insert(
-                                        keyboard_state_machine[strbuffer]
-                                    )
-                                elif cap_flag or shift_flag:
-                                    my_widget.edit.insert(
-                                        keyboard_state_machine[strbuffer].upper()
-                                    )
-                                else:
-                                    my_widget.edit.insert(
-                                        keyboard_state_machine[strbuffer]
-                                    )
-                                shift_flag = False
-
-                            strbuffer = ""
-                            my_widget.upper_progress_bar.paintMark = 0
-                            my_widget.upper_progress_bar.update()
-                        elif len(strbuffer) == 1:
-                            my_widget.upper_progress_bar.paintMark = eval(strbuffer)
-                            my_widget.upper_progress_bar.update()
-
-                    elif (
-                        abs(test1[-1] - test1[-2]) >= 20
-                        and counter != 30
-                        and touch_sensor
-                    ):
-                        strbuffer = ""
-                        cancel_counter += 1
-                        if cancel_counter == 4:
-                            my_widget.edit.backspace()
-                            cancel_counter = 0
-                        my_widget.upper_progress_bar.paintMark = 0
-                        my_widget.upper_progress_bar.update()
-                        touch_sensor = False
-                        send0.run(0)
-
-                    elif abs(test1[-1] - test1[-2]) >= 20:
-                        touch_sensor = False
-                        send0.run(0)
-
-                    if touch_sensor and counter != 30:
-                        counter = counter + 1
-                        if counter == 30:
-                            record_value = smoothdata(test1[-20:], 20)[0]
-
-                    if touch_sensor and counter == 30:
-                        cancel_counter = 0
-                        order = int(
-                            (smoothdata(test1[-80:], 80)[0] - record_value) // 1
-                        )
-                        map_order = 350 + order * 10
-
-                        send0.run(map_order)
-                        # t4 = threading.Thread(target=threading_of_move_mouse(order))
-                        # t4.start()
-                        # print(order)
 
                 # Zeroシンボルが来たときの特別なマークと特別な操作
                 if data[2] == "e":
                     if ifsamplingflag:
                         f1.write(str("Z") + ",")
                         f2.write(str("Z") + ",")
-                    # print(Load_real)
-                    # print(Load_imag)
-                    # Xm[-1] =  Load_real   # 瞬時値を含むベクトル
-                    # Xm2[-1] = Load_imag
 
                 # データキャリブレーション時に使用される識別子と操作
                 elif data[2] == "3":
@@ -636,20 +322,6 @@ def threading_of_plot():
         QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
 
 
-def smoothdata(x, windowsize):
-    length = len(x)
-    output = []
-    for i in range(0, length - windowsize + 1):
-        temp = 0
-        for j in range(0, windowsize):
-            temp = temp + x[(i) + j]
-
-        temp = temp / windowsize
-        output.append(temp)
-
-    return output
-
-
 def on_press(key):
     global ifsamplingflag, countsamplingfile, plotcountermark, f1, f2
 
@@ -677,14 +349,8 @@ def on_press(key):
         pass
 
 
-def on_release(key):
-    # Escキーが押されたらプログラムを終了する
-    if key == kb.Key.esc:
-        return False
-
-
 def start_key_listener():
-    with kb.Listener(on_press=on_press, on_release=on_release) as listener:
+    with kb.Listener(on_press=on_press) as listener:
         listener.join()
 
 
@@ -701,10 +367,6 @@ if __name__ == "__main__":
     t1.start()
 
     app = QApplication(sys.argv)
-    my_widget = MyWidget()
-
-    send0 = Signal_of_PyQt()
-    send0.msg.connect(my_widget.lower_progress_bar.setValue)
 
     timer = pg.QtCore.QTimer()
     timer.timeout.connect(threading_of_plot)  # 定期的にデータ表示を更新
