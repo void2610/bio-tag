@@ -14,10 +14,10 @@ from PyQt5.QtWidgets import QApplication
 RCAL = 10000 * (1 + (4 / 512))
 
 # 使用前に電流ピーク値を入力することを忘れないでください 単位 uA
-AMPLITUDE_OF_CURRENT_PEAK = 90.50
+AMPLITUDE_OF_CURRENT_PEAK = 9.05
 
 # シリアルポートオブジェクトを作成
-portName = "/dev/cu.usbserial-110"
+portName = "/dev/cu.usbserial-12BP0164"
 baudrate = 9600
 ser = serial.Serial(portName, baudrate)
 print("Connected to: " + ser.portstr)
@@ -285,12 +285,24 @@ def threading_of_update():
                 elif data[2] == "3":
                     I_offset.append(data1)
                     Q_offset.append(data2)
+
+                    Xm[-1] = data2  # 瞬時値を含むベクトル
+                    Xm2[-1] = data1
+                    ptr += 1  # 曲線を表示するためのx位置を更新
                 elif data[2] == "5":
                     I_rcal_in.append(data1)
                     Q_rcal_in.append(data2)
+
+                    Xm[-1] = data2  # 瞬時値を含むベクトル
+                    Xm2[-1] = data1
+                    ptr += 1  # 曲線を表示するためのx位置を更新
                 elif data[2] == "7":
                     I_rcal_quad.append(data1)
                     Q_rcal_quad.append(data2)
+
+                    Xm[-1] = data2  # 瞬時値を含むベクトル
+                    Xm2[-1] = data1
+                    ptr += 1
         else:
             time.sleep(0.001)
 
