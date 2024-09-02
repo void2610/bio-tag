@@ -17,7 +17,7 @@ RCAL = 10000 * (1 + (4 / 512))
 AMPLITUDE_OF_CURRENT_PEAK = 90.50
 
 # シリアルポートオブジェクトを作成
-portName = "/dev/cu.Bluetooth-Incoming-Port"
+portName = "/dev/cu.usbserial-110"
 baudrate = 9600
 ser = serial.Serial(portName, baudrate)
 print("Connected to: " + ser.portstr)
@@ -325,20 +325,6 @@ def on_press(key):
             plotcountermark = plotcountermark + 1
             if plotcountermark == 3:
                 plotcountermark = 0
-
-        elif not ifsamplingflag and key.char == "s":
-            countsamplingfile += 1
-            dataname = "pysavedsampling" + str(countsamplingfile) + "data"
-            f1 = open(dataname + "1.txt", "w")
-            f2 = open(dataname + "2.txt", "w")
-            print("サンプリングの開始")
-            ifsamplingflag = True
-
-        elif ifsamplingflag and key.char == "e":  # 'e'キーが押された場合
-            print("サンプリングの終了")
-            f1.close()
-            f2.close()
-            ifsamplingflag = False
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
         pass
