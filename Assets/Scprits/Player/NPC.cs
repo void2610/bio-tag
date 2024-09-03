@@ -8,7 +8,7 @@ public class NPC : MonoBehaviour
     public int index = -1;
 
     private Transform target;
-    private float moveSpeed = 3.0f;
+    private float moveSpeed = 5.2f;
     private Animator animator => GetComponent<Animator>();
     private CharacterController cCon => GetComponent<CharacterController>();
     private NavMeshAgent agent => this.GetComponent<NavMeshAgent>();
@@ -32,7 +32,14 @@ public class NPC : MonoBehaviour
     {
         if (target != null && GameManagerBase.instance.gameState == 1)
         {
-            agent.SetDestination(target.position);
+            if (index != GameManagerBase.instance.itIndex)
+            {
+                Flee();
+            }
+            else
+            {
+                agent.SetDestination(target.position);
+            }
             animator.SetFloat("Speed", agent.velocity.magnitude); // アニメーションの速度を設定
             animator.SetFloat("MotionSpeed", 1);
         }
@@ -41,7 +48,22 @@ public class NPC : MonoBehaviour
             animator.SetFloat("Speed", 0); // 停止時のアニメーション
             animator.SetFloat("MotionSpeed", 0);
         }
+    }
 
+    private void Flee()
+    {
+        Vector3 fleeDirection = (transform.position - target.position).normalized;
+        Vector3 fleeTarget = transform.position + fleeDirection * 1;
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(fleeTarget, out hit, 1.0f, NavMesh.AllAreas))
+        {
+            agent.SetDestination(hit.position);
+        }
+        else
+        {
+            // 別の逃げ場所を探すロジックをここに追加
+        }
     }
 
     private void OnTriggerEnter(Collider other)
