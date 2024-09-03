@@ -42,7 +42,7 @@ public class NPCGameManager : GameManagerBase
     public override void ChangeIt(int index)
     {
         Debug.Log(index);
-        if (Time.time - this.lastTagTime > 1 && this.itIndex != index)
+        if (Time.time - this.lastTagTime > 1 && this.itIndex != index && this.gameState == 1)
         {
             itIndex = index;
             lastTagTime = Time.time;
