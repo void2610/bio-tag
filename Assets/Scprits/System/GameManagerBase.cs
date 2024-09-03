@@ -22,8 +22,14 @@ public class GameManagerBase : MonoBehaviourPunCallbacks
 
     public int? gameState { get; protected set; } = 0;
     protected float gameLength = 30.0f;
-    protected int itIndex;
-    protected List<float> playerScores = new List<float>();
+    public int itIndex;
+    public float lastTagTime;
+    public List<float> playerScores = new List<float>();
+    public List<string> playerNames = new List<string>();
+
+    public virtual void ChangeIt(int index)
+    {
+    }
 
     public virtual void StartGame()
     {

@@ -13,14 +13,4 @@ public class GameMessageUI : MonoBehaviour
     {
         messageText = this.GetComponent<TMP_Text>();
     }
-
-    void Update()
-    {
-        if (!PhotonNetwork.InRoom) { return; }
-        PhotonNetwork.CurrentRoom.TryGetGameState(out int gameState);
-        if (gameState == 1)
-        {
-            messageText.text = "";
-        }
-    }
 }
