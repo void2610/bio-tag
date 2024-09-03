@@ -67,6 +67,7 @@ public class NPCGameManager : GameManagerBase
             var n = Instantiate(npcPrefab, new Vector3(Random.Range(-3f, 3f), 1, Random.Range(-3f, 3f)), Quaternion.identity);
             players.Add(n);
             n.GetComponent<NPC>().index = i;
+            n.GetComponent<NPC>().SetTarget(p.transform);
             playerNames.Add("NPC" + i);
         }
     }

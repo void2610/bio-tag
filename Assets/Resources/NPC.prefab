@@ -1901,6 +1901,7 @@ GameObject:
   - component: {fileID: 3017559631962645264}
   - component: {fileID: 2000240599612769373}
   - component: {fileID: -300382469884368005}
+  - component: {fileID: -2127392953989909399}
   m_Layer: 8
   m_Name: NPC
   m_TagString: NPC
@@ -2037,6 +2038,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
   index: -1
+--- !u!195 &-2127392953989909399
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7493163483396742707}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &7776785986142313572
 GameObject:
   m_ObjectHideFlags: 0
