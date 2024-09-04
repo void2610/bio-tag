@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class NPC : MonoBehaviour
 {
@@ -75,32 +76,33 @@ public class NPC : MonoBehaviour
         animator.SetBool("Grounded", false);
 
         agent.updatePosition = false;
+        // プレイヤーの方向を向く
+        transform.LookAt(target);
+        agent.speed = 0;
 
         Vector3 startPos = agent.transform.position;
         Vector3 endPos = agent.currentOffMeshLinkData.endPos + Vector3.up * agent.baseOffset;
 
-        float duration = Vector3.Distance(startPos, endPos) / (moveSpeed * 0.8f);
+        float duration = Vector3.Distance(agent.transform.position, endPos) / (moveSpeed * 0.8f);
 
         float time = 0;
 
+        Vector3 middle = new Vector3((startPos.x + endPos.x) / 2, Mathf.Max(startPos.y, endPos.y) + 0.5f, (startPos.z + endPos.z) / 2);
+        this.transform.DOPath(new Vector3[] { startPos, middle, endPos }, duration).SetEase(Ease.Linear);
+
         while (time < duration)
         {
-            // エージェントの位置を手動で移動
-            agent.transform.position = Vector3.Lerp(startPos, endPos, time / duration);
             time += Time.deltaTime;
             yield return null;
         }
-
-        agent.transform.position = endPos;
         agent.CompleteOffMeshLink();
-
 
         agent.Warp(endPos);
         animator.SetBool("Jump", false);
         animator.SetBool("Grounded", true);
 
         // ジャンプ後の待機時間
-        agent.speed = 0;
+
         yield return new WaitForSeconds(0.3f);
 
         agent.speed = moveSpeed;
