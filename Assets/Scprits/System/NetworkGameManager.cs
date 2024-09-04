@@ -78,7 +78,6 @@ public class NetworkGameManager : GameManagerBase
                 {
                     CancelInvoke("SendScore");
                     PhotonNetwork.CurrentRoom.EndGame();
-                    Debug.Log("Game Over");
                 }
             }
         }

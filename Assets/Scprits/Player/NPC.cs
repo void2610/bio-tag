@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class NPC : MonoBehaviour
 {
@@ -8,10 +9,12 @@ public class NPC : MonoBehaviour
     public int index = -1;
 
     private Transform target;
-    private float moveSpeed = 5.2f;
+    private float moveSpeed = 6f;
+    private bool isJumping = false;
     private Animator animator => GetComponent<Animator>();
     private CharacterController cCon => GetComponent<CharacterController>();
     private NavMeshAgent agent => this.GetComponent<NavMeshAgent>();
+    private int jumpAreaType = 3;
 
     public void SetTarget(Transform target)
     {
@@ -48,21 +51,80 @@ public class NPC : MonoBehaviour
             animator.SetFloat("Speed", 0); // 停止時のアニメーション
             animator.SetFloat("MotionSpeed", 0);
         }
+
+        if (agent.isOnOffMeshLink && !isJumping)
+        {
+            StartCoroutine(ChangeSpeedOnLink());
+        }
+    }
+
+    private IEnumerator ChangeSpeedOnLink()
+    {
+        isJumping = true;
+        animator.SetBool("Jump", true);
+        animator.SetBool("Grounded", false);
+        float originalSpeed = agent.speed;
+
+        // エージェントの自動位置更新を無効化
+        agent.updatePosition = false;
+
+        // オフメッシュリンクのデータを取得
+        OffMeshLinkData linkData = agent.currentOffMeshLinkData;
+
+        Vector3 startPos = agent.transform.position;
+        Vector3 endPos = linkData.endPos + Vector3.up * agent.baseOffset;
+
+        float distance = Vector3.Distance(startPos, endPos);
+        float duration = distance / (originalSpeed * 0.8f); // 移動にかかる時間を計算
+
+        float time = 0;
+
+        while (time < duration)
+        {
+            // エージェントの位置を手動で移動
+            agent.transform.position = Vector3.Lerp(startPos, endPos, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        // 最後にエージェントを目的地に正確に配置
+        agent.transform.position = endPos;
+
+        // オフメッシュリンクの移動を完了
+        agent.CompleteOffMeshLink();
+
+        // NavMeshAgentの位置を強制的に再同期
+        agent.Warp(endPos);
+        animator.SetBool("Jump", false);
+        animator.SetBool("Grounded", true);
+
+        yield return new WaitForSeconds(0.5f);
+
+        // 元のスピードに戻し、エージェントの位置更新を再度有効化
+        agent.speed = originalSpeed;
+        agent.updatePosition = true;
+        isJumping = false;
     }
 
     private void Flee()
     {
-        Vector3 fleeDirection = (transform.position - target.position).normalized;
-        Vector3 fleeTarget = transform.position + fleeDirection * 1;
+        // プレイヤーの反対方向に逃げるベクトルを計算
+        Vector3 fleeDirection = (agent.transform.position - target.position).normalized;
+        Vector3 fleeTarget = agent.transform.position + fleeDirection * 10f; // 逃げる距離を設定
 
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(fleeTarget, out hit, 1.0f, NavMesh.AllAreas))
+        NavMeshPath pathWithLink = new NavMeshPath();
+        agent.CalculatePath(fleeTarget, pathWithLink);
+
+        if (pathWithLink.status == NavMeshPathStatus.PathComplete)
         {
-            agent.SetDestination(hit.position);
-        }
-        else
-        {
-            // 別の逃げ場所を探すロジックをここに追加
+            // 正しい経路が計算された場合、目的地に設定
+            agent.SetDestination(fleeTarget);
+
+            // オフメッシュリンクに到達したらリンクを使う処理
+            if (agent.isOnOffMeshLink && !isJumping)
+            {
+                StartCoroutine(ChangeSpeedOnLink());
+            }
         }
     }
 

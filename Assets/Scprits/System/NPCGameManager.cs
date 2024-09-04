@@ -41,7 +41,6 @@ public class NPCGameManager : GameManagerBase
 
     public override void ChangeIt(int index)
     {
-        Debug.Log(index);
         if (Time.time - this.lastTagTime > 1 && this.itIndex != index && this.gameState == 1)
         {
             itIndex = index;
@@ -80,6 +79,10 @@ public class NPCGameManager : GameManagerBase
 
     protected override void Update()
     {
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            ChangeIt(1);
+        }
         if (gameState == 0)
         {
             if (IsAllPlayerReady())
