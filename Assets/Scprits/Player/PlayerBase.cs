@@ -25,6 +25,10 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     protected Vector3 velocity = Vector3.zero;
     protected float onLandTime = 0f;
 
+    protected virtual void Awake()
+    {
+    }
+
     protected virtual void Start()
     {
         var canvas = GameObject.Find("WorldSpaceCanvas");
@@ -34,7 +38,6 @@ public class PlayerBase : MonoBehaviourPunCallbacks
 
     protected virtual void Update()
     {
-
     }
 
     protected virtual void LocalMoving()
@@ -94,7 +97,6 @@ public class PlayerBase : MonoBehaviourPunCallbacks
             AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(cCon.center), FootstepAudioVolume);
         }
     }
-
     protected virtual void OnLand(AnimationEvent animationEvent)
     {
         if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - onLandTime > 0.1f)

@@ -2352,6 +2352,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1112822911}
+  - component: {fileID: 1112822913}
   - component: {fileID: 1112822912}
   m_Layer: 0
   m_Name: GameManager
@@ -2396,6 +2397,18 @@ MonoBehaviour:
   messageUI: {fileID: 894928438}
   itMarker: {fileID: 1804732966}
   npcCount: 1
+--- !u!114 &1112822913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112822909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bae481688abe741e9b9c8029578f2024, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1204036328
 GameObject:
   m_ObjectHideFlags: 0

@@ -22,7 +22,6 @@ public class ScoreBoard : MonoBehaviour
         {
             isNetworked = true;
         }
-        Debug.Log($"isNetworked: {isNetworked}");
     }
 
     private void Update()
