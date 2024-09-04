@@ -6,6 +6,9 @@ TagManager:
   tags:
   - CinemachineTarget
   - NPC
+  - PlayerTrigger
+  - NPCTrigger
+  - PlayerSensorTrigger
   layers:
   - Default
   - TransparentFX

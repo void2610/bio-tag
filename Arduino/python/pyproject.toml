@@ -6,7 +6,7 @@ authors = ["void2610 <izumisan2610@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.13" # Pythonのバージョン制約を修正
 numpy = "^2.1.0"
 pyqtgraph = "^0.13.7"
 pyserial = "^3.5"
@@ -15,6 +15,7 @@ PyQt5 = "^5.15.11"
 pygame = "^2.6.0"
 keyboard = "^0.13.5"
 pynput = "^1.7.7"
+bleak = "^0.22.2"
 
 
 [build-system]
