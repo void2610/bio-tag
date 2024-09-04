@@ -31,7 +31,7 @@ public class PlayerNameUI : MonoBehaviour
         {
             playerCamera = GameObject.Find("PlayerCamera").transform;
         }
-        this.transform.position = targetPlayer.transform.position + new Vector3(0, 2, 0);
+        this.transform.position = targetPlayer.transform.position + new Vector3(0, 2.5f, 0);
         // プレイヤーの名前UIをカメラの方向に向ける
         this.transform.rotation = playerCamera.rotation;
     }

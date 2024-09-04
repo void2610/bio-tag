@@ -11,7 +11,7 @@ public class NPC : MonoBehaviour
     public int index = -1;
 
     private Transform target;
-    private float moveSpeed = 6f;
+    private float moveSpeed = 8f;
     private bool isJumping = false;
     private List<Transform> fleeAnchors = new List<Transform>();
     private Animator animator => GetComponent<Animator>();
