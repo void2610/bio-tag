@@ -1,16 +1,18 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class NPC : MonoBehaviour
 {
     [SerializeField]
-    protected GameObject playerNameUIPrefab;
+    private GameObject playerNameUIPrefab;
     public int index = -1;
 
     private Transform target;
     private float moveSpeed = 6f;
     private bool isJumping = false;
+    private List<Transform> fleeAnchors = new List<Transform>();
     private Animator animator => GetComponent<Animator>();
     private CharacterController cCon => GetComponent<CharacterController>();
     private NavMeshAgent agent => this.GetComponent<NavMeshAgent>();
@@ -19,6 +21,15 @@ public class NPC : MonoBehaviour
     public void SetTarget(Transform target)
     {
         this.target = target;
+    }
+
+    void Awake()
+    {
+        var anchors = GameObject.Find("NPCFleeAnchors");
+        for (int i = 0; i < anchors.transform.childCount; i++)
+        {
+            fleeAnchors.Add(anchors.transform.GetChild(i));
+        }
     }
 
     void Start()
@@ -108,17 +119,37 @@ public class NPC : MonoBehaviour
 
     private void Flee()
     {
-        // プレイヤーの反対方向に逃げるベクトルを計算
-        Vector3 fleeDirection = (agent.transform.position - target.position).normalized;
-        Vector3 fleeTarget = agent.transform.position + fleeDirection * 10f; // 逃げる距離を設定
+        // アンカーポイントの中から、最もプレイヤーから遠いものを選択
+        Transform farthestAnchor = null;
+        float maxDistance = float.MinValue;
 
-        NavMeshPath pathWithLink = new NavMeshPath();
-        agent.CalculatePath(fleeTarget, pathWithLink);
-
-        if (pathWithLink.status == NavMeshPathStatus.PathComplete)
+        foreach (var anchor in fleeAnchors)
         {
-            // 正しい経路が計算された場合、目的地に設定
-            agent.SetDestination(fleeTarget);
+            float distanceToTarget = Vector3.Distance(anchor.position, target.position);
+            if (distanceToTarget > maxDistance)
+            {
+                // NavMesh上で有効な経路かどうかを確認
+                NavMeshPath path = new NavMeshPath();
+                agent.CalculatePath(anchor.position, path);
+
+                if (path.status == NavMeshPathStatus.PathComplete)
+                {
+                    maxDistance = distanceToTarget;
+                    farthestAnchor = anchor;
+                }
+            }
+        }
+
+        if (farthestAnchor != null)
+        {
+            // 計算されたアンカーポイントに向けてエージェントを移動させる
+            NavMeshPath path = new NavMeshPath();
+            agent.CalculatePath(farthestAnchor.position, path);
+
+            if (path.status == NavMeshPathStatus.PathComplete)
+            {
+                agent.SetDestination(farthestAnchor.position);
+            }
 
             // オフメッシュリンクに到達したらリンクを使う処理
             if (agent.isOnOffMeshLink && !isJumping)

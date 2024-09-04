@@ -1900,8 +1900,8 @@ GameObject:
   - component: {fileID: 7979500563668944940}
   - component: {fileID: 3017559631962645264}
   - component: {fileID: 2000240599612769373}
-  - component: {fileID: -300382469884368005}
   - component: {fileID: -2127392953989909399}
+  - component: {fileID: 90863776188037623}
   m_Layer: 8
   m_Name: NPC
   m_TagString: NPC
@@ -2024,20 +2024,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &-300382469884368005
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7493163483396742707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c665fba35a7f44632bccf69a2f9081ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
-  index: -1
 --- !u!195 &-2127392953989909399
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2060,6 +2046,26 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &90863776188037623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7493163483396742707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c665fba35a7f44632bccf69a2f9081ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
+  fleeAnchors:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  index: -1
 --- !u!1 &7776785986142313572
 GameObject:
   m_ObjectHideFlags: 0

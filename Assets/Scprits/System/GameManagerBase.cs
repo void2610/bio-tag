@@ -21,7 +21,7 @@ public class GameManagerBase : MonoBehaviourPunCallbacks
     }
 
     public int? gameState { get; protected set; } = 0;
-    protected float gameLength = 30.0f;
+    protected float gameLength = 60.0f;
     public int itIndex;
     public float lastTagTime;
     public List<float> playerScores = new List<float>();
