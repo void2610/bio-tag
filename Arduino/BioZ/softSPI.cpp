@@ -1,4 +1,4 @@
-#include <SoftSPI.h>
+#include "softSPI.h"
 
 SoftSPI::SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sck)
 {

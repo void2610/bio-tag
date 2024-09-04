@@ -1,7 +1,9 @@
 {
-    "files.associations": {
-        "*.cs": "csharp",
-        "*.ttml": "xml",
-        "*.ttss": "css"
-    }
+ "files.associations": {
+  "*.cs": "csharp",
+  "*.ttml": "xml",
+  "*.ttss": "css",
+  "__locale": "cpp",
+  "locale": "cpp"
+ }
 }
