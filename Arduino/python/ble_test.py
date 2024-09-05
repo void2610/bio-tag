@@ -3,11 +3,8 @@ from bleak import BleakClient
 
 # デバイスUUID
 DEVICE_UUID = "9108929D-B8E4-0946-232F-7EE1DDD2654C"
-
 # キャラクタリスティックUUID
 CHARACTERISTIC_UUID = "2A56"
-
-is_started = False
 
 
 # データ受信時のコールバック関数

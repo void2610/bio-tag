@@ -1,26 +1,34 @@
 from numpy import linspace, pi, cos, sin, arctan, sqrt, square, mean
 import pyqtgraph as pg
-import serial
 from pynput import keyboard as kb
 import time
 import threading
 import sys
+import asyncio
+from bleak import BleakClient
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
 
 ## 測定前に検査抵抗の大きさを説明する必要がある、さもなければ検査が正しく行われない
-RCAL = 10000 * (1 + (4 / 512))
+RCAL = 101000 * (1 + (4 / 512))
 
 # 使用前に電流ピーク値を入力することを忘れないでください 単位 uA
-AMPLITUDE_OF_CURRENT_PEAK = 9.05
+AMPLITUDE_OF_CURRENT_PEAK = 0.452
+
+
+# デバイスUUID
+DEVICE_UUID = "9108929D-B8E4-0946-232F-7EE1DDD2654C"
+# キャラクタリスティックUUID
+CHARACTERISTIC_UUID = "2A56"
+ble_input = ""
 
 # シリアルポートオブジェクトを作成
-portName = "/dev/cu.usbserial-12BP0164"
-baudrate = 9600
-ser = serial.Serial(portName, baudrate)
-print("Connected to: " + ser.portstr)
+# portName = "/dev/cu.usbserial-12BP0164"
+# baudrate = 9600
+# ser = serial.Serial(portName, baudrate)
+# print("Connected to: " + ser.portstr)
 
 app = QtWidgets.QApplication([])
 
@@ -59,9 +67,10 @@ def threading_of_update():
         data1, \
         data2, \
         my_widget, \
-        send0
+        send0, \
+        ble_input
     TheFirstMeasurementDataFlag = False
-    ser.flushInput()
+    # ser.flushInput()
     iii = 0
     mean_I_offset = []
     mean_Q_offset = []
@@ -85,11 +94,14 @@ def threading_of_update():
     Q_rcal_quad = []
 
     while True:
-        c = ser.inWaiting()
+        # c = ser.inWaiting()
+        c = len(ble_input)
         flag = 0
         if c >= 8:
-            line = ser.read(16)
-            namadata = str(line)[2:-1]  # 一度に8個のデータを受信（16進数で16個）
+            # line = ser.read(16)
+            # namadata = str(line)[2:-1]  # 一度に8個のデータを受信（16進数で16個）
+            namadata = ble_input
+            ble_input = ""
             buffer += namadata  # バッファにデータを保存
             if (
                 len(buffer) == 16
@@ -133,6 +145,7 @@ def threading_of_update():
                 # すべてが順調であれば、データを正常に接続
                 Xm[:-1] = Xm[1:]  # 時間平均のデータを1サンプル左にシフト
                 Xm2[:-1] = Xm2[1:]
+                # print(Xm[-1])
                 data = buffer[-(16 - flag) - 16 : -(16 - flag)]
 
                 data1 = (
@@ -234,7 +247,7 @@ def threading_of_update():
                         iii = iii + 1
                     elif TheFirstMeasurementDataFlag:
                         iii = iii + 1
-                        if iii == 11:
+                        if iii == 1:
                             iii = 0
 
                 if data[2] == "1":
@@ -359,14 +372,51 @@ def start_key_listener():
         listener.join()
 
 
+# データ受信時のコールバック関数
+async def notification_handler(sender, data):
+    global ble_input
+    if data.hex().upper() != "5354415254":
+        print(data.hex().upper())  # 16進数として出力
+        ble_input = data.hex().upper()
+
+
+# BLE通信を行う関数
+async def ble_run():
+    while True:  # 無限ループで接続を試みる
+        try:
+            async with BleakClient(DEVICE_UUID) as client:
+                print(f"Connected: {client.is_connected}")
+
+                # キャラクタリスティックの通知を有効化
+                await client.start_notify(CHARACTERISTIC_UUID, notification_handler)
+
+                while True:
+                    await asyncio.sleep(1)
+                    # STARTと送信
+                    await client.write_gatt_char(
+                        CHARACTERISTIC_UUID, "START".encode("utf-8")
+                    )
+
+                await asyncio.sleep(99999)
+                await client.stop_notify(CHARACTERISTIC_UUID)
+
+        except Exception as e:
+            print(f"Connection failed: {e}")  # エラーを表示
+            print("Reconnecting...")
+            await asyncio.sleep(2)  # 再接続までの待機時間
+
+
 ### MAIN PROGRAM #####
 if __name__ == "__main__":
     key_listener_thread = threading.Thread(target=start_key_listener)
-    key_listener_thread.setDaemon(True)
+    key_listener_thread.daemon = True
     key_listener_thread.start()
 
+    loop = asyncio.get_event_loop()
+    loop.create_task(ble_run())  # ble_runをタスクとして作成
+
     t1 = threading.Thread(target=threading_of_update)
-    t1.setDaemon(True)
+    t1.daemon = True  # setDaemon()の代わりにdaemon属性を使用
     t1.start()
 
     app = QApplication(sys.argv)
@@ -375,4 +425,10 @@ if __name__ == "__main__":
     timer.timeout.connect(threading_of_plot)
     timer.start(100)
 
-    QtWidgets.QApplication.exec_()
+    # イベントループをPyQt5のウィンドウと同時に実行
+    async def run_app():
+        while True:
+            await asyncio.sleep(0.1)  # asyncioのイベントループを少し待機
+            app.processEvents()  # PyQt5のイベントを処理
+
+    loop.run_until_complete(run_app())  # run_appを実行
