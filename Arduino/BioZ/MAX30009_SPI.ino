@@ -1,14 +1,16 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <softSPI.h>
+#include <ArduinoBLE.h>
 
 #define SEND_BUF_SIZE 8
 
+BLEService customService("180C");                                        // カスタムサービスUUID
+BLECharacteristic customCharacteristic("2A56", BLERead | BLENotify, 16); // 読み取りと通知可能なキャラクタリスティック
+BLEDevice central;
+
 SoftSPI mySPI(11, A0, 13);
 int csPin = 10;
-int buttonPin = 5;
-int powerPin = 6;
-bool isSetuped = false;
 
 uint8_t SendBuff[SEND_BUF_SIZE] = {0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f}; // 发送数据缓冲区
 uint8_t id = 0x00, i = 255, j = 255, flag = 0, a[10], counter = 0, counter2 = 0, tempREG;
@@ -178,11 +180,11 @@ void MAX30009_setup()
     {
         delay(500);
         id = read_reg(0xFF);
-        Serial.print("MAX30009 Finding id: ");
-        Serial.println(id);
+
         if (id == 0x42)
         {
-            Serial.println("MAX30009 Found");
+            Serial.print("MAX30009 Found id: ");
+            Serial.println(id, HEX);
             delay(5000);
             break;
         }
@@ -227,15 +229,49 @@ void MAX30009_setup()
 
 void setup()
 {
+    // シリアル通信の初期化
     Serial.begin(9600);
+    while (1)
+    {
+        if (Serial)
+            break;
+    }
+    delay(1000);
+    Serial.println("Serial Start");
+    // SPIの初期化
     mySPI.begin();
     mySPI.setDataMode(SPI_MODE0);
     // mySPI.setClockDivider(SPI_CLOCK_DIV8);
     mySPI.setBitOrder(MSBFIRST);
     mySPI.setThreshold(256);
+    Serial.println("SPI Start");
+    // ピンの初期化
     pinMode(csPin, OUTPUT);
     digitalWrite(csPin, HIGH);
-    pinMode(buttonPin, INPUT_PULLUP);
+    Serial.println("Pin Start");
+    // BLEの初期化
+    if (!BLE.begin())
+    {
+        while (1)
+        {
+        }
+    }
+    BLE.setLocalName("Nano33BLEDevice");
+    BLE.setAdvertisedService(customService);
+    customService.addCharacteristic(customCharacteristic);
+    BLE.addService(customService);
+    BLE.advertise();
+    Serial.println("BLE Start");
+    while (1)
+    {
+        central = BLE.central();
+        if (central)
+        {
+            Serial.print("Connected to central: ");
+            Serial.println(central.address());
+            break;
+        }
+    }
 
     MAX30009_setup();
 }
@@ -279,6 +315,7 @@ void show_send_buff()
     }
     // TODO: 実際の時はコメントアウトする
     Serial.println();
+    customCharacteristic.writeValue(SendBuff, sizeof(SendBuff));
 }
 
 void set_receive_msg()
