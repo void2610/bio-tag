@@ -5,14 +5,15 @@
 
 #define SEND_BUF_SIZE 8
 
-BLEService customService("180C");                                        // カスタムサービスUUID
-BLECharacteristic customCharacteristic("2A56", BLERead | BLENotify, 16); // 読み取りと通知可能なキャラクタリスティック
+BLEService customService("180C");                                                   // カスタムサービスUUID
+BLECharacteristic customCharacteristic("2A56", BLEWrite | BLERead | BLENotify, 16); // 読み取りと通知可能なキャラクタリスティック
 BLEDevice central;
+bool ble_connected = false;
 
 SoftSPI mySPI(11, A0, 13);
 int csPin = 10;
 
-uint8_t SendBuff[SEND_BUF_SIZE] = {0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f}; // 发送数据缓冲区
+uint8_t SendBuff[SEND_BUF_SIZE] = {0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f}; // 送信データバッファ
 uint8_t id = 0x00, i = 255, j = 255, flag = 0, a[10], counter = 0, counter2 = 0, tempREG;
 uint16_t read_pointer, write_pointer;
 uint32_t timecounter;
@@ -23,20 +24,21 @@ int data = 0;
 
 void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
 {
+    Serial.println("Calibration start");
     uint8_t tempREG1;
     uint8_t tempREG2;
-    write_reg(0x20, reg0x20); // DAC/ADC OSR设置并使能Vref; 在PLL_EN设置为1之前，BioZ参考必须被启用(BIOZ_BG_EN[2](0x20)=1)，并且可能需要6ms的时间来解决。
-    write_reg(0x18, reg0x18); // MDIV低位配置
-    write_reg(0x17, reg0x17); // MDIV高位、NDIV=512、KDIV=1，以及PLL使能
+    write_reg(0x20, reg0x20); // DAC/ADC OSRの設定とVrefの有効化; PLL_ENが1に設定される前にBioZリファレンスを有効にする必要があります(BIOZ_BG_EN[2](0x20)=1)。解決には6msの時間がかかる可能性があります。
+    write_reg(0x18, reg0x18); // MDIVの下位ビットの設定
+    write_reg(0x17, reg0x17); // MDIVの上位ビット、NDIV=512、KDIV=1、およびPLLの有効化
     PLL_enable();
-    tempREG1 = read_reg(0x22); // 设定电流最小并记录保存的电流值
+    tempREG1 = read_reg(0x22); // 電流を最小に設定し、保存された電流値を記録
     tempREG2 = tempREG1 & 0xC3;
     write_reg(0x22, tempREG2);
-    bypass(); // 查看0x25寄存器值并让其短路测量偏置
+    bypass(); // 0x25レジスタの値を確認し、短絡測定バイアスを有効にする
     I_Q_open();
     delay(2);
-    FLUSH_FIFO(); // 读之前清空FIFO
-    // 检测MAX30009是否发送新的数据，并发送65535次短路数据给上位机
+    FLUSH_FIFO(); // FIFOをクリア
+    // MAX30009が新しいデータを送信しているかどうかを確認し、上位機器に65535回の短絡データを送信
     for (timecounter = 0; timecounter < 100;)
     {
         read_pointer = read_reg(0x09);
@@ -47,7 +49,7 @@ void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
             set_receive_msg();
             SendBuff[0] = 0xf0;
             tempREG = received_msg[0];
-            // 原本MAX30009数据为0x1ooooo2ooooo，改为0x3ooooo4ooooo以方便上位机识别校验进行到哪一步，后面同理
+            // 元のMAX30009データは0x1ooooo2oooooで、0x3ooooo4oooooに変更して上位機器がどこまで校正を行っているかを識別できるようにしました。以降も同様です。
             tempREG = tempREG & 0x0f;
             SendBuff[1] = tempREG | 0x30;
             SendBuff[2] = received_msg[1];
@@ -62,16 +64,16 @@ void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
             show_send_buff();
         }
     }
-    I_Q_close();               // 关闭IQ通道，其他不变
-    write_reg(0x22, tempREG1); // 输出电流调整回去
-    NOT_bypass();              // 查看0x25寄存器值并让其不再短路
-    write_reg(0x41, 0x00);     // 开启芯片内部电阻校验，由于0x44内的值为0x11，真实电阻为R*(1+17/512)，详见手册。 （第二块芯片，即没有丝印的那块值为0x13，真实电阻是R*(1+19/512)）
+    I_Q_close();               // IQチャンネルを閉じる
+    write_reg(0x22, tempREG1); // 出力電流を元に戻す
+    NOT_bypass();              // 0x25レジスタの値を確認し、短絡測定バイアスを無効にする
+    write_reg(0x41, 0x00);     // チップ内部の抵抗校正を有効にする。0x44の値が0x11であるため、実際の抵抗はR*(1+17/512)です。詳細はマニュアルを参照してください。(2番目のチップ、つまり印刷されていないチップの値は0x13で、実際の抵抗はR*(1+19/512)です)
     write_reg(0x42, 0x60);
     Q_to_I();
     I_Q_open();
     delay(2);
-    FLUSH_FIFO(); // 读之前清空FIFO
-    // 发送65535次Q时钟相位移到I的矫正电阻的数据
+    FLUSH_FIFO(); // FIFOをクリア
+    // 65535回のQクロック位相をIの校正抵抗に移動するデータを送信
     for (timecounter = 0; timecounter < 100;)
     {
         read_pointer = read_reg(0x09);
@@ -82,7 +84,7 @@ void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
             set_receive_msg();
             SendBuff[0] = 0xf0;
             tempREG = received_msg[0];
-            // 原本MAX30009数据为0x1ooooo2ooooo，改为0x3ooooo4ooooo以方便上位机识别校验进行到哪一步，后面同理
+            // 元のMAX30009データは0x1ooooo2oooooで、0x3ooooo4oooooに変更して上位機器がどこまで校正を行っているかを識別できるようにしました。以降も同様です。
             tempREG = tempREG & 0x0f;
             SendBuff[1] = tempREG | 0x50;
             SendBuff[2] = received_msg[1];
@@ -101,9 +103,9 @@ void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
     I_Q_close();
     I_to_Q();
     I_Q_open();
-    FLUSH_FIFO(); // 读之前清空FIFO
+    FLUSH_FIFO(); // FIFOをクリア
 
-    // 发送65535次Q时钟相位移到I的矫正电阻的数据
+    // 65535回のQクロック位相をIの校正抵抗に移動するデータを送信
     for (timecounter = 0; timecounter < 100;)
     {
         read_pointer = read_reg(0x09);
@@ -114,7 +116,7 @@ void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
             set_receive_msg();
             SendBuff[0] = 0xf0;
             tempREG = received_msg[0];
-            // 原本MAX30009数据为0x1ooooo2ooooo，改为0x3ooooo4ooooo以方便上位机识别校验进行到哪一步，后面同理
+            // 元のMAX30009データは0x1ooooo2oooooで、0x3ooooo4oooooに変更して上位機器がどこまで校正を行っているかを識別できるようにしました。以降も同様です。
             tempREG = tempREG & 0x0f;
             SendBuff[1] = tempREG | 0x70;
             SendBuff[2] = received_msg[1];
@@ -134,19 +136,20 @@ void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
 
 uint8_t Sweap(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
 {
+    Serial.println("Sweap start");
     // BIOZ_OFF();
     BIOZ_DRV_Standby();
-    write_reg(0x20, reg0x20); // DAC/ADC OSR设置并使能Vref; 在PLL_EN设置为1之前，BioZ参考必须被启用(BIOZ_BG_EN[2](0x20)=1)，并且可能需要6ms的时间来解决。
-    write_reg(0x18, reg0x18); // MDIV低位配置
-    write_reg(0x17, reg0x17); // MDIV高位、NDIV=512、KDIV=1，以及PLL使能
+    write_reg(0x20, reg0x20); // DAC/ADC OSRの設定とVrefの有効化; PLL_ENが1に設定される前にBioZリファレンスを有効にする必要があります(BIOZ_BG_EN[2](0x20)=1)。解決には6msの時間がかかる可能性があります。
+    write_reg(0x18, reg0x18); // MDIVの下位ビットの設定
+    write_reg(0x17, reg0x17); // MDIVの上位ビット、NDIV=512、KDIV=1、およびPLLの有効化
     PLL_enable();
     // BIOZ_ON();
     BIOZ_DRV_Current_Drive();
     // FLUSH_FIFO();
     I_Q_open();
-    FLUSH_FIFO(); // 读之前清空FIFO
+    FLUSH_FIFO(); // FIFOをクリア
 
-    while (1)
+    while (central.connected())
     {
         read_pointer = read_reg(0x09);
         write_pointer = read_reg(0x08);
@@ -169,10 +172,12 @@ uint8_t Sweap(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
             reset_receive_msg();
         }
     }
+    Serial.println("BLE is disconnected");
 }
 
 void MAX30009_setup()
 {
+    Serial.println("MAX30009 start");
     digitalWrite(csPin, HIGH);
 
     // MAX3000の初期化が終わるまで待つ
@@ -189,42 +194,41 @@ void MAX30009_setup()
             break;
         }
     }
-    write_reg(0x1A, 0x20); // 内部时钟32.768K，微调频率
-    write_reg(0x19, 0x01); // 避免在FCLK参考有高抖动时出现错误的PHASE_UNLOCK中断。使用内部RC震荡频率似乎不太稳定的样子，使得芯片一直说相位失锁，也有可能是焊得太久把芯片电气属性弄差了，总之打开可以大幅减少相位失锁
-    write_reg(0x20, 0xA4); // DAC/ADC OSR设置并使能Vref; 在PLL_EN设置为1之前，BioZ参考必须被启用(BIOZ_BG_EN[2](0x20)=1)，并且可能需要6ms的时间来解决。
-    delay(200);            // 使能后等待200ms
-    write_reg(0x18, 0xFF); // MDIV低位配置
-    write_reg(0x17, 0x40); // MDIV高位、NDIV=512、KDIV=1，以及PLL使能
+    write_reg(0x1A, 0x20); // 内部時計32.768K、微調周波数
+    write_reg(0x19, 0x01); // FCLK参照が高いジッターを持つ場合にエラーが発生するのを避ける。内部RC振動周波数は安定しないように見えるため、チップが常に位相ロックを失うという問題があります。おそらくははんだ付けが長すぎてチップの電気特性を悪化させたため、とにかくオープンにすると位相ロックが大幅に減少します
+    write_reg(0x20, 0xA4); // DAC/ADC OSRの設定とVrefの有効化; PLL_ENが1に設定される前にBioZリファレンスを有効にする必要があります(BIOZ_BG_EN[2](0x20)=1)。解決には6msの時間がかかる可能性があります。
+    delay(200);            // 有効化後、200ms待つ
+    write_reg(0x18, 0xFF); // MDIVの下位ビットの設定
+    write_reg(0x17, 0x40); // MDIVの上位ビット、NDIV=512、KDIV=1、およびPLLの有効化
     PLL_enable();
-    delay(200);            // 使能后等待200ms
-    write_reg(0x80, 0x00); // 中断由MAX30009的什么行为发出，由这个寄存器控制
-    write_reg(0x13, 0x04); // 中断触发方式选择
-    write_reg(0x12, 0x08); // 中断开启，并设置其清零方式；这个寄存器同样控制TRIG触发方式是上升沿还是下降沿
+    delay(200);            // 有効化後、200ms待つ
+    write_reg(0x80, 0x00); // 割り込みはMAX30009のどの動作によって発生するかを制御するレジスタ
+    write_reg(0x13, 0x04); // 割り込みトリガーモードの選択
+    write_reg(0x12, 0x08); // 割り込みの有効化とリセット方法の設定; このレジスタはTRIGトリガーモードが立ち上がりエッジか立ち下がりエッジかを制御します
     delay(1);
-    read_reg(0x00); // 中断设置完后会自动置位一次，似乎等一小段时间后读一次任意寄存器即可消除
+    read_reg(0x00); // 割り込みが設定されると自動的に1回リセットされます。おそらくは少し待ってから任意のレジスタを1回読むだけでリセットできるようです
     delay(1);
-    write_reg(0x22, 0x04); // 选择是电流源输出还是电压源输出还是H桥输出，并控制幅值
-    //	write_reg(0x21,0x08);			//滤波，发现在扫频时，加入滤波会比较影响响应速度
-    write_reg(0x25, 0xC4); //[7]=1使用外部电容；[3:0]=1010对于BIA和心阻抗测量中，BIOZ_AMP_RGE和BIOZ_AMP_BW需要被设置为较高的值
-    write_reg(0x28, 0x02); //[3]Q时钟相位移到I，[2]I时钟相位移到Q，当F_BIOZ>54668时，[0]为0，[1]为1；当F_BIOZ<54668时，如果F_BIOZ=BIOZ_ADC_CLK/8,[0]=1，否则为0，如果F_BIOZ=BIOZ_ADC_CLK/2，[1]=0否则为1
-                           // write_reg(0x58,0x03);		//让接受通道中存在一个lead bias
+    write_reg(0x22, 0x04); // 電流源出力か電圧源出力かHブリッジ出力かを選択し、振幅を制御
+    //	write_reg(0x21,0x08);			//フィルタリング、スイープ中にフィルタリングを追加すると応答速度がかなり低下することがわかりました
+    write_reg(0x25, 0xC4); //[7]=1外部キャパシタを使用;[3:0]=1010BIAと心電図測定では、BIOZ_AMP_RGEとBIOZ_AMP_BWを比較的高い値に設定する必要があります
+    write_reg(0x28, 0x02); //[3]Qクロック位相をIに移動、[2]Iクロック位相をQに移動、F_BIOZ>54668の場合、[0]は0、[1]は1; F_BIOZ<54668の場合、F_BIOZ=BIOZ_ADC_CLK/8の場合、[0]=1、それ以外の場合は0、F_BIOZ=BIOZ_ADC_CLK/2の場合、[1]=0、それ以外は1
+                           // write_reg(0x58,0x03);		//受信チャンネルにリードバイアスを1つ追加
     BIOZ_INA_CHOP_EN_ON();
-    NewFrequencyCalibration(0x78, 0xff, 0xfc); // 16HZ
+    NewFrequencyCalibration(0x78, 0xff, 0xfc); // 16Hz
     FrequencyCalibrationGap();
     I_Q_close();
     IQ_PHASE_NOT_change();
     //	write_reg(0x42, 0x00);
-    write_reg(0x41, 0x02); // 启用MUX
-    write_reg(0x42, 0x03); // 使能外部保护跟踪驱动电路;使能补偿BIN和BIP上的输入电容负载的电路。
-    write_reg(0x43, 0xA0); // 测量端连接到EL2B EL3B，激励连接到EL1 EL4
+    write_reg(0x41, 0x02); // MUXを有効にする
+    write_reg(0x42, 0x03); // 外部保護トラッキングドライブ回路を有効にし、BINとBIPの入力キャパシタ負荷の補償を有効にします。
+    write_reg(0x43, 0xA0); // 測定端をEL2B EL3Bに接続、励起をEL1 EL4に接続
     I_Q_open();
     delay(2);
-    while (1)
-    { // 从这一句开始一直开始循环扫频；千万注意，扫频的【每一个点都必须提前进行校准】并发送给上位机
-        BIOZ_INA_CHOP_EN_ON();
-        Sweap(0x78, 0xff, 0xfc); // 16Hz
-        FrequencyCalibrationGap();
-    }
+
+    // ここからは常にスイープを実行します。注意：スイープの【各ポイントで事前にキャリブレーションを行う必要があります】、上位機器に送信します
+    BIOZ_INA_CHOP_EN_ON();
+    Sweap(0x78, 0xff, 0xfc); // 16Hz
+    FrequencyCalibrationGap();
 }
 
 void setup()
@@ -272,12 +276,38 @@ void setup()
             break;
         }
     }
-
-    MAX30009_setup();
 }
 
 void loop(void)
 {
+    // BLE通信の命令を受信した場合
+    if (central.connected())
+    {
+        if (customCharacteristic.written())
+        {
+            char r[16];
+            int length = customCharacteristic.valueLength();
+            if (length > 15)
+                length = 15;
+            memcpy(r, customCharacteristic.value(), length);
+            r[length] = '\0'; // NULL終端を追加
+
+            Serial.print("Received: ");
+            Serial.println(r);
+            // 受信したデータが「START」の場合
+            if (strcmp(r, "START") == 0)
+            {
+                Serial.println("START!!!");
+                ble_connected = true;
+                MAX30009_setup(); // MAX30009のセットアップを呼び出す
+            }
+        }
+    }
+    else
+    {
+        Serial.println("Not Connected");
+    }
+    delay(500);
 }
 
 byte read_reg(byte regAddress)
@@ -304,17 +334,16 @@ void write_reg(byte regAddress, byte v)
 
 void show_send_buff()
 {
-    for (int i = 0; i < SEND_BUF_SIZE; i++)
-    {
-        if (SendBuff[i] < 0x10)
-        {
-            Serial.print("0"); // 1桁の場合は0を追加
-        }
-        // 2桁で表示するために、0埋めを行う
-        Serial.print(SendBuff[i], HEX);
-    }
-    // TODO: 実際の時はコメントアウトする
-    Serial.println();
+    // for (int i = 0; i < SEND_BUF_SIZE; i++)
+    // {
+    //     if (SendBuff[i] < 0x10)
+    //     {
+    //         Serial.print("0"); // 1桁の場合は0を追加
+    //     }
+    //     // 2桁で表示するために、0埋めを行う
+    //     Serial.print(SendBuff[i], HEX);
+    // }
+    // Serial.println();
     customCharacteristic.writeValue(SendBuff, sizeof(SendBuff));
 }
 

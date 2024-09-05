@@ -333,10 +333,22 @@ def on_press(key):
     global ifsamplingflag, countsamplingfile, plotcountermark, f1, f2
 
     try:
-        if key.char == "c":  # 's'キーが押された場合
+        if key.char == "c":
             plotcountermark = plotcountermark + 1
             if plotcountermark == 3:
                 plotcountermark = 0
+        elif key.char == "s":
+            countsamplingfile += 1
+            dataname = "pysavedsampling" + str(countsamplingfile) + "data"
+            f1 = open(dataname + "1.txt", "w")
+            f2 = open(dataname + "2.txt", "w")
+            print("The start of sampling")
+            ifsamplingflag = True
+        elif key.char == "e":
+            print("The end of sampling")
+            f1.close()
+            f2.close()
+            ifsamplingflag = False
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
         pass
