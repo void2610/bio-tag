@@ -350,7 +350,10 @@ def on_press(key):
         f1, \
         f2, \
         dataname, \
-        windowWidth
+        windowWidth, \
+        Xm, \
+        Xm2, \
+        ptr
 
     try:
         if key.char == "c":
@@ -373,6 +376,11 @@ def on_press(key):
             windowWidth += 100
             if windowWidth > 2000:
                 windowWidth = 100
+            tmp = Xm[-1]
+            tmp2 = Xm2[-1]
+            Xm = linspace(tmp, tmp, windowWidth)  # 関連する時間系列を含む配列を作成
+            Xm2 = linspace(tmp2, tmp2, windowWidth)
+            ptr = -windowWidth  # 最初のx位置を設定
 
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
