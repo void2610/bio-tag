@@ -7,6 +7,7 @@ import sys
 import asyncio
 from bleak import BleakClient
 import numpy as np  # 追加: numpyをインポート
+import math
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
@@ -335,7 +336,6 @@ def gaussian_filter(data, sigma):
 
 
 def moving_average_filter(data, window_size):
-    """移動平均フィルタを実装"""
     filtered_data = np.convolve(
         data, np.ones(window_size) / window_size, mode="same"
     )  # 移動平均を計算
@@ -358,18 +358,23 @@ def threading_of_plot():
         curve2.setData(Xm2_smoothed, pen="r")  # 更新: 平滑化されたデータで曲線を設定
         curve2.setPos(ptr, 0)  # グラフのx位置を0に設定
         QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
+        curve.setData(Xm_smoothed, pen="b")
+        curve.setPos(ptr, 0)
+        curve2.setData(Xm2_smoothed, pen="r")
+        curve2.setPos(ptr, 0)
+        QtWidgets.QApplication.processEvents()
 
     if plotcountermark == 1:
-        curve.setData(Xm_smoothed, pen="b")  # 更新: 平滑化されたデータで曲線を設定
-        curve.setPos(ptr, 0)  # グラフのx位置を0に設定
+        curve.setData(Xm_smoothed, pen="b")
+        curve.setPos(ptr, 0)
         curve2.clear()
-        QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
+        QtWidgets.QApplication.processEvents()
 
     if plotcountermark == 2:
-        curve2.setData(Xm2_smoothed, pen="r")  # 更新: 平滑化されたデータで曲線を設定
+        curve2.setData(Xm2_smoothed, pen="r")
         curve.clear()
-        curve2.setPos(ptr, 0)  # グラフのx位置を0に設定
-        QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
+        curve2.setPos(ptr, 0)
+        QtWidgets.QApplication.processEvents()
 
 
 def on_press(key):
