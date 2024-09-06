@@ -345,19 +345,10 @@ def moving_average_filter(data, window_size):
 def threading_of_plot():
     global curve, curve2, ptr, Xm, Xm2, plotcountermark, sigma
 
-    Xm_smoothed = moving_average_filter(
-        Xm, sigma
-    )  # 変更: 自作のガウシアンフィルタを適用
-    Xm2_smoothed = moving_average_filter(
-        Xm2, sigma
-    )  # 変更: 自作のガウシアンフィルタを適用
+    Xm_smoothed = moving_average_filter(Xm, sigma)
+    Xm2_smoothed = moving_average_filter(Xm2, sigma)
 
     if plotcountermark == 0:
-        curve.setData(Xm_smoothed, pen="b")  # 更新: 平滑化されたデータで曲線を設定
-        curve.setPos(ptr, 0)  # グラフのx位置を0に設定
-        curve2.setData(Xm2_smoothed, pen="r")  # 更新: 平滑化されたデータで曲線を設定
-        curve2.setPos(ptr, 0)  # グラフのx位置を0に設定
-        QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
         curve.setData(Xm_smoothed, pen="b")
         curve.setPos(ptr, 0)
         curve2.setData(Xm2_smoothed, pen="r")
