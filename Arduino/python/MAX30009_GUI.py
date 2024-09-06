@@ -6,6 +6,7 @@ import threading
 import sys
 import asyncio
 from bleak import BleakClient
+import numpy as np  # 追加: numpyをインポート
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
@@ -51,6 +52,7 @@ ifsamplingflag = False
 buffer = ""
 dataname = ""
 countsamplingfile = 0
+sigma = 1
 
 
 def threading_of_update():
@@ -121,7 +123,7 @@ def threading_of_update():
                 # 次に来るデータ形式が前回と変わった場合の異常処理
                 if (
                     namadata[flag : flag + 2] != "F0" and namadata.count("F0") == 1
-                ):  # TODO もし伝送にエラーが発生した場合、flagの位置は大抵f0ではないため、こう判断するが、伝送エラーが発生した場合にこの位置がちょうどf0である可能性もあるため、判断が不完全だが、確率が低いため、暫定的に未実施
+                ):  # もし伝送にエラーが発生した場合、flagの位置は大抵f0ではないため、こう判断するが、伝送エラーが発生した場合にこの位置がちょうどf0である可能性もあるため、判断が不完全だが、確率が低いため、暫定的に未実施
                     print(
                         "データの順序が変わりました\n変動前flag=",
                         flag,
@@ -320,23 +322,51 @@ def threading_of_update():
             time.sleep(0.001)
 
 
+def gaussian_filter(data, sigma):
+    kernel_size = int(6 * sigma + 1)  # カーネルサイズを計算
+    kernel_size = kernel_size + 1 if kernel_size % 2 == 0 else kernel_size  # 奇数に調整
+    kernel = np.exp(
+        -0.5 * (np.arange(kernel_size) - kernel_size // 2) ** 2 / sigma**2
+    )  # ガウスカーネルを生成
+    kernel /= kernel.sum()  # 正規化
+
+    filtered_data = np.convolve(data, kernel, mode="same")  # 畳み込みを実行
+    return filtered_data  # フィルタリングされたデータを返す
+
+
+def moving_average_filter(data, window_size):
+    """移動平均フィルタを実装"""
+    filtered_data = np.convolve(
+        data, np.ones(window_size) / window_size, mode="same"
+    )  # 移動平均を計算
+    return filtered_data  # フィルタリングされたデータを返す
+
+
 def threading_of_plot():
-    global curve, curve2, ptr, Xm, Xm2, plotcountermark
+    global curve, curve2, ptr, Xm, Xm2, plotcountermark, sigma
+
+    Xm_smoothed = moving_average_filter(
+        Xm, sigma
+    )  # 変更: 自作のガウシアンフィルタを適用
+    Xm2_smoothed = moving_average_filter(
+        Xm2, sigma
+    )  # 変更: 自作のガウシアンフィルタを適用
+
     if plotcountermark == 0:
-        curve.setData(Xm, pen="b")  # このデータで曲線を設定
+        curve.setData(Xm_smoothed, pen="b")  # 更新: 平滑化されたデータで曲線を設定
         curve.setPos(ptr, 0)  # グラフのx位置を0に設定
-        curve2.setData(Xm2, pen="r")  # このデータで曲線を設定
+        curve2.setData(Xm2_smoothed, pen="r")  # 更新: 平滑化されたデータで曲線を設定
         curve2.setPos(ptr, 0)  # グラフのx位置を0に設定
         QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
 
     if plotcountermark == 1:
-        curve.setData(Xm, pen="b")  # このデータで曲線を設定
+        curve.setData(Xm_smoothed, pen="b")  # 更新: 平滑化されたデータで曲線を設定
         curve.setPos(ptr, 0)  # グラフのx位置を0に設定
         curve2.clear()
         QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
 
     if plotcountermark == 2:
-        curve2.setData(Xm2, pen="r")  # このデータで曲線を設定
+        curve2.setData(Xm2_smoothed, pen="r")  # 更新: 平滑化されたデータで曲線を設定
         curve.clear()
         curve2.setPos(ptr, 0)  # グラフのx位置を0に設定
         QtWidgets.QApplication.processEvents()  # プロットを処理する必要があります
@@ -353,7 +383,8 @@ def on_press(key):
         windowWidth, \
         Xm, \
         Xm2, \
-        ptr
+        ptr, \
+        sigma
 
     try:
         if key.char == "c":
@@ -381,6 +412,11 @@ def on_press(key):
             Xm = linspace(tmp, tmp, windowWidth)  # 関連する時間系列を含む配列を作成
             Xm2 = linspace(tmp2, tmp2, windowWidth)
             ptr = -windowWidth  # 最初のx位置を設定
+        elif key.char == "g":
+            sigma += 1
+            if sigma > 500:
+                sigma = 1
+            print("sigma=", sigma)
 
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
@@ -396,7 +432,7 @@ def start_key_listener():
 async def notification_handler(sender, data):
     global ble_input
     if data.hex().upper() != "5354415254":
-        print(data.hex().upper())  # 16進数として出力
+        # print(data.hex().upper())  # 16進数として出力
         ble_input = data.hex().upper()
 
 
