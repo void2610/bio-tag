@@ -39,7 +39,7 @@ curve2 = p.plot()
 
 plotcountermark = 0
 
-windowWidth = 1000  # 曲線を表示するウィンドウの幅
+windowWidth = 200  # 曲線を表示するウィンドウの幅
 Xm = linspace(0, 0, windowWidth)  # 関連する時間系列を含む配列を作成
 Xm2 = linspace(0, 0, windowWidth)
 ptr = -windowWidth  # 最初のx位置を設定
@@ -167,7 +167,7 @@ def threading_of_update():
                     if not TheFirstMeasurementDataFlag:
                         # 正式に測定が始まる最初のデータが来たとき、以前のキャリブレーションデータを使用する、iiiは何番目の周波数のキャリブレーションを示す
                         mean_I_offset.append(
-                            mean(I_offset[40:])
+                            mean(I_offset[400:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -176,7 +176,7 @@ def threading_of_update():
                             )
                         )
                         mean_Q_offset.append(
-                            mean(Q_offset[40:])
+                            mean(Q_offset[400:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -185,7 +185,7 @@ def threading_of_update():
                             )
                         )
                         mean_I_rcal_in.append(
-                            mean(I_rcal_in[40:])
+                            mean(I_rcal_in[400:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -194,7 +194,7 @@ def threading_of_update():
                             )
                         )
                         mean_Q_rcal_in.append(
-                            mean(Q_rcal_in[40:])
+                            mean(Q_rcal_in[400:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -203,7 +203,7 @@ def threading_of_update():
                             )
                         )
                         mean_I_rcal_quad.append(
-                            mean(I_rcal_quad[40:])
+                            mean(I_rcal_quad[400:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -212,7 +212,7 @@ def threading_of_update():
                             )
                         )
                         mean_Q_rcal_quad.append(
-                            mean(Q_rcal_quad[40:])
+                            mean(Q_rcal_quad[400:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -343,7 +343,14 @@ def threading_of_plot():
 
 
 def on_press(key):
-    global ifsamplingflag, countsamplingfile, plotcountermark, f1, f2
+    global \
+        ifsamplingflag, \
+        countsamplingfile, \
+        plotcountermark, \
+        f1, \
+        f2, \
+        dataname, \
+        windowWidth
 
     try:
         if key.char == "c":
@@ -362,6 +369,11 @@ def on_press(key):
             f1.close()
             f2.close()
             ifsamplingflag = False
+        elif key.char == "w":
+            windowWidth += 100
+            if windowWidth > 2000:
+                windowWidth = 100
+
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
         pass
