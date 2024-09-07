@@ -323,23 +323,14 @@ def threading_of_update():
             time.sleep(0.001)
 
 
-def gaussian_filter(data, sigma):
-    kernel_size = int(6 * sigma + 1)  # カーネルサイズを計算
-    kernel_size = kernel_size + 1 if kernel_size % 2 == 0 else kernel_size  # 奇数に調整
-    kernel = np.exp(
-        -0.5 * (np.arange(kernel_size) - kernel_size // 2) ** 2 / sigma**2
-    )  # ガウスカーネルを生成
-    kernel /= kernel.sum()  # 正規化
-
-    filtered_data = np.convolve(data, kernel, mode="same")  # 畳み込みを実行
-    return filtered_data  # フィルタリングされたデータを返す
-
-
 def moving_average_filter(data, window_size):
-    filtered_data = np.convolve(
-        data, np.ones(window_size) / window_size, mode="same"
-    )  # 移動平均を計算
-    return filtered_data  # フィルタリングされたデータを返す
+    filtered_data = np.zeros(len(data))
+    for i in range(len(data)):
+        if i < window_size:
+            filtered_data[i] = mean(data[: i + 1])
+        else:
+            filtered_data[i] = mean(data[i - window_size + 1 : i + 1])
+    return filtered_data
 
 
 def threading_of_plot():
