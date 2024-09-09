@@ -6,8 +6,7 @@ import threading
 import sys
 import asyncio
 from bleak import BleakClient
-import numpy as np  # 追加: numpyをインポート
-import math
+import numpy as np
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
@@ -41,7 +40,7 @@ curve2 = p.plot()
 
 plotcountermark = 0
 
-windowWidth = 200  # 曲線を表示するウィンドウの幅
+windowWidth = 2000  # 曲線を表示するウィンドウの幅
 Xm = linspace(0, 0, windowWidth)  # 関連する時間系列を含む配列を作成
 Xm2 = linspace(0, 0, windowWidth)
 ptr = -windowWidth  # 最初のx位置を設定
@@ -54,6 +53,7 @@ buffer = ""
 dataname = ""
 countsamplingfile = 0
 sigma = 1
+num_filter = 1
 
 
 def threading_of_update():
@@ -324,12 +324,19 @@ def threading_of_update():
 
 
 def moving_average_filter(data, window_size):
-    filtered_data = np.zeros(len(data))
+    """
+    平滑化フィルタを適用する関数
+    :param data: 入力の時系列データ（リストまたはNumPy配列）
+    :param window_size: 移動平均のウィンドウサイズ
+    :return: 平滑化されたデータを格納した配列
+    """
+    filtered_data = np.zeros(len(data))  # フィルタ後のデータを格納する配列
     for i in range(len(data)):
-        if i < window_size:
-            filtered_data[i] = mean(data[: i + 1])
-        else:
-            filtered_data[i] = mean(data[i - window_size + 1 : i + 1])
+        start = max(0, i - window_size // 2)
+        end = min(len(data), i + window_size // 2 + 1)
+        filtered_data[i] = np.mean(
+            data[start:end]
+        )  # 指定されたウィンドウの平均値を計算
     return filtered_data
 
 
@@ -338,6 +345,9 @@ def threading_of_plot():
 
     Xm_smoothed = moving_average_filter(Xm, sigma)
     Xm2_smoothed = moving_average_filter(Xm2, sigma)
+    for i in range(num_filter - 1):
+        Xm_smoothed = moving_average_filter(Xm_smoothed, sigma)
+        Xm2_smoothed = moving_average_filter(Xm2_smoothed, sigma)
 
     if plotcountermark == 0:
         curve.setData(Xm_smoothed, pen="b")
@@ -371,7 +381,8 @@ def on_press(key):
         Xm, \
         Xm2, \
         ptr, \
-        sigma
+        sigma, \
+        num_filter
 
     try:
         if key.char == "c":
@@ -396,14 +407,19 @@ def on_press(key):
                 windowWidth = 100
             tmp = Xm[-1]
             tmp2 = Xm2[-1]
-            Xm = linspace(tmp, tmp, windowWidth)  # 関連する時間系列を含む配列を作成
+            Xm = linspace(tmp, tmp, windowWidth)
             Xm2 = linspace(tmp2, tmp2, windowWidth)
-            ptr = -windowWidth  # 最初のx位置を設定
+            ptr = -windowWidth
         elif key.char == "g":
             sigma += 1
             if sigma > 500:
                 sigma = 1
             print("sigma=", sigma)
+        elif key.char == "f":
+            num_filter += 1
+            if num_filter < 50:
+                num_filter = 1
+            print("num_filter=", num_filter)
 
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
@@ -459,7 +475,7 @@ if __name__ == "__main__":
     loop.create_task(ble_run())  # ble_runをタスクとして作成
 
     t1 = threading.Thread(target=threading_of_update)
-    t1.daemon = True  # setDaemon()の代わりにdaemon属性を使用
+    t1.daemon = True
     t1.start()
 
     app = QApplication(sys.argv)
@@ -468,10 +484,9 @@ if __name__ == "__main__":
     timer.timeout.connect(threading_of_plot)
     timer.start(100)
 
-    # イベントループをPyQt5のウィンドウと同時に実行
     async def run_app():
         while True:
-            await asyncio.sleep(0.1)  # asyncioのイベントループを少し待機
-            app.processEvents()  # PyQt5のイベントを処理
+            await asyncio.sleep(0.1)
+            app.processEvents()
 
-    loop.run_until_complete(run_app())  # run_appを実行
+    loop.run_until_complete(run_app())
