@@ -8,7 +8,6 @@ import asyncio
 from bleak import BleakClient
 import numpy as np
 import socket
-
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
@@ -20,9 +19,7 @@ RCAL = 101000 * (1 + (4 / 512))
 AMPLITUDE_OF_CURRENT_PEAK = 0.452
 
 
-# デバイスUUID
 DEVICE_UUID = "9108929D-B8E4-0946-232F-7EE1DDD2654C"
-# キャラクタリスティックUUID
 CHARACTERISTIC_UUID = "2A56"
 ble_input = ""
 
@@ -72,7 +69,6 @@ def threading_of_update():
         send0, \
         ble_input
     TheFirstMeasurementDataFlag = False
-    # ser.flushInput()
     iii = 0
     mean_I_offset = []
     mean_Q_offset = []
@@ -96,15 +92,12 @@ def threading_of_update():
     Q_rcal_quad = []
 
     while True:
-        # c = ser.inWaiting()
         c = len(ble_input)
         flag = 0
         if c >= 8:
-            # line = ser.read(16)
-            # namadata = str(line)[2:-1]  # 一度に8個のデータを受信（16進数で16個）
             namadata = ble_input
             ble_input = ""
-            buffer += namadata  # バッファにデータを保存
+            buffer += namadata
             if (
                 len(buffer) == 16
             ):  # バッファが空のとき、最初に16個の16進数を受信したときに初期処理を行う
@@ -147,7 +140,6 @@ def threading_of_update():
                 # すべてが順調であれば、データを正常に接続
                 Xm[:-1] = Xm[1:]  # 時間平均のデータを1サンプル左にシフト
                 Xm2[:-1] = Xm2[1:]
-                # print(Xm[-1])
                 data = buffer[-(16 - flag) - 16 : -(16 - flag)]
 
                 data1 = (
@@ -300,38 +292,24 @@ def threading_of_update():
                 elif data[2] == "3":
                     I_offset.append(data1)
                     Q_offset.append(data2)
-
-                    Xm[-1] = data2  # 瞬時値を含むベクトル
-                    Xm2[-1] = data1
-                    ptr += 1  # 曲線を表示するためのx位置を更新
                 elif data[2] == "5":
                     I_rcal_in.append(data1)
                     Q_rcal_in.append(data2)
-
-                    Xm[-1] = data2  # 瞬時値を含むベクトル
-                    Xm2[-1] = data1
-                    ptr += 1  # 曲線を表示するためのx位置を更新
                 elif data[2] == "7":
                     I_rcal_quad.append(data1)
                     Q_rcal_quad.append(data2)
-
-                    Xm[-1] = data2  # 瞬時値を含むベクトル
-                    Xm2[-1] = data1
-                    ptr += 1
         else:
             time.sleep(0.001)
 
 
 def gaussian_filter(data, sigma):
-    kernel_size = int(6 * sigma + 1)  # カーネルサイズを計算
-    kernel_size = kernel_size + 1 if kernel_size % 2 == 0 else kernel_size  # 奇数に調整
-    kernel = np.exp(
-        -0.5 * (np.arange(kernel_size) - kernel_size // 2) ** 2 / sigma**2
-    )  # ガウスカーネルを生成
-    kernel /= kernel.sum()  # 正規化
+    kernel_size = int(6 * sigma + 1)
+    kernel_size = kernel_size + 1 if kernel_size % 2 == 0 else kernel_size
+    kernel = np.exp(-0.5 * (np.arange(kernel_size) - kernel_size // 2) ** 2 / sigma**2)
+    kernel /= kernel.sum()
 
-    filtered_data = np.convolve(data, kernel, mode="same")  # 畳み込みを実行
-    return filtered_data  # フィルタリングされたデータを返す
+    filtered_data = np.convolve(data, kernel, mode="same")
+    return filtered_data
 
 
 def threading_of_plot():
@@ -417,7 +395,6 @@ def on_press(key):
             if num_filter > 30:
                 num_filter = 1
             print("num_filter=", num_filter)
-
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
         pass
@@ -432,34 +409,27 @@ def start_key_listener():
 async def notification_handler(sender, data):
     global ble_input
     if data.hex().upper() != "5354415254":
-        # print(data.hex().upper())  # 16進数として出力
         ble_input = data.hex().upper()
 
 
 # BLE通信を行う関数
 async def ble_run():
-    while True:  # 無限ループで接続を試みる
+    while True:
         try:
             async with BleakClient(DEVICE_UUID) as client:
                 print(f"Connected: {client.is_connected}")
-
-                # キャラクタリスティックの通知を有効化
                 await client.start_notify(CHARACTERISTIC_UUID, notification_handler)
-
                 while True:
-                    await asyncio.sleep(1)
-                    # STARTと送信
+                    await asyncio.sleep(0.5)
                     await client.write_gatt_char(
                         CHARACTERISTIC_UUID, "START".encode("utf-8")
                     )
-
                 await asyncio.sleep(99999)
                 await client.stop_notify(CHARACTERISTIC_UUID)
-
         except Exception as e:
-            print(f"Connection failed: {e}")  # エラーを表示
+            print(f"Connection failed: {e}")
             print("Reconnecting...")
-            await asyncio.sleep(2)  # 再接続までの待機時間
+            await asyncio.sleep(1)
 
 
 ### MAIN PROGRAM #####
@@ -471,7 +441,7 @@ if __name__ == "__main__":
     key_listener_thread.start()
 
     loop = asyncio.get_event_loop()
-    loop.create_task(ble_run())  # ble_runをタスクとして作成
+    loop.create_task(ble_run())
 
     t1 = threading.Thread(target=threading_of_update)
     t1.daemon = True
