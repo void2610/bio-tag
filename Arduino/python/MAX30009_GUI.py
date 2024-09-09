@@ -7,6 +7,7 @@ import sys
 import asyncio
 from bleak import BleakClient
 import numpy as np
+import socket
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
@@ -25,11 +26,9 @@ DEVICE_UUID = "9108929D-B8E4-0946-232F-7EE1DDD2654C"
 CHARACTERISTIC_UUID = "2A56"
 ble_input = ""
 
-# シリアルポートオブジェクトを作成
-# portName = "/dev/cu.usbserial-12BP0164"
-# baudrate = 9600
-# ser = serial.Serial(portName, baudrate)
-# print("Connected to: " + ser.portstr)
+HOST = "127.0.0.1"
+PORT = 50007
+udp_client = None
 
 app = QtWidgets.QApplication([])
 
@@ -344,6 +343,9 @@ def threading_of_plot():
         Xm_smoothed = gaussian_filter(Xm_smoothed, sigma)
         Xm2_smoothed = gaussian_filter(Xm2_smoothed, sigma)
 
+    result = str(Xm_smoothed[-1])
+    udp_client.sendto(result.encode("utf-8"), (HOST, PORT))
+
     if plotcountermark == 0:
         curve.setData(Xm_smoothed, pen="b")
         curve.setPos(ptr, 0)
@@ -462,6 +464,8 @@ async def ble_run():
 
 ### MAIN PROGRAM #####
 if __name__ == "__main__":
+    udp_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
     key_listener_thread = threading.Thread(target=start_key_listener)
     key_listener_thread.daemon = True
     key_listener_thread.start()
