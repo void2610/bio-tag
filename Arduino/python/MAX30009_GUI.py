@@ -308,7 +308,7 @@ def gaussian_filter(data, sigma):
     kernel = np.exp(-0.5 * (np.arange(kernel_size) - kernel_size // 2) ** 2 / sigma**2)
     kernel /= kernel.sum()
 
-    filtered_data = np.convolve(data, kernel, mode="same")
+    filtered_data = np.convolve(data, kernel, mode="valid")
     return filtered_data
 
 
