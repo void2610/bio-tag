@@ -39,7 +39,7 @@ curve2 = p.plot()
 
 plotcountermark = 0
 
-windowWidth = 7000  # 曲線を表示するウィンドウの幅
+windowWidth = 3500  # 曲線を表示するウィンドウの幅
 Xm = linspace(0, 0, windowWidth)  # 関連する時間系列を含む配列を作成
 Xm2 = linspace(0, 0, windowWidth)
 ptr = -windowWidth  # 最初のx位置を設定
