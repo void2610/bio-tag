@@ -40,7 +40,7 @@ curve2 = p.plot()
 
 plotcountermark = 0
 
-windowWidth = 2000  # 曲線を表示するウィンドウの幅
+windowWidth = 7000  # 曲線を表示するウィンドウの幅
 Xm = linspace(0, 0, windowWidth)  # 関連する時間系列を含む配列を作成
 Xm2 = linspace(0, 0, windowWidth)
 ptr = -windowWidth  # 最初のx位置を設定
@@ -52,8 +52,8 @@ ifsamplingflag = False
 buffer = ""
 dataname = ""
 countsamplingfile = 0
-sigma = 1
-num_filter = 1
+sigma = 50
+num_filter = 5
 
 
 def threading_of_update():
@@ -323,31 +323,26 @@ def threading_of_update():
             time.sleep(0.001)
 
 
-def moving_average_filter(data, window_size):
-    """
-    平滑化フィルタを適用する関数
-    :param data: 入力の時系列データ（リストまたはNumPy配列）
-    :param window_size: 移動平均のウィンドウサイズ
-    :return: 平滑化されたデータを格納した配列
-    """
-    filtered_data = np.zeros(len(data))  # フィルタ後のデータを格納する配列
-    for i in range(len(data)):
-        start = max(0, i - window_size // 2)
-        end = min(len(data), i + window_size // 2 + 1)
-        filtered_data[i] = np.mean(
-            data[start:end]
-        )  # 指定されたウィンドウの平均値を計算
-    return filtered_data
+def gaussian_filter(data, sigma):
+    kernel_size = int(6 * sigma + 1)  # カーネルサイズを計算
+    kernel_size = kernel_size + 1 if kernel_size % 2 == 0 else kernel_size  # 奇数に調整
+    kernel = np.exp(
+        -0.5 * (np.arange(kernel_size) - kernel_size // 2) ** 2 / sigma**2
+    )  # ガウスカーネルを生成
+    kernel /= kernel.sum()  # 正規化
+
+    filtered_data = np.convolve(data, kernel, mode="same")  # 畳み込みを実行
+    return filtered_data  # フィルタリングされたデータを返す
 
 
 def threading_of_plot():
     global curve, curve2, ptr, Xm, Xm2, plotcountermark, sigma
 
-    Xm_smoothed = moving_average_filter(Xm, sigma)
-    Xm2_smoothed = moving_average_filter(Xm2, sigma)
-    for i in range(num_filter - 1):
-        Xm_smoothed = moving_average_filter(Xm_smoothed, sigma)
-        Xm2_smoothed = moving_average_filter(Xm2_smoothed, sigma)
+    Xm_smoothed = Xm
+    Xm2_smoothed = Xm2
+    for i in range(num_filter):
+        Xm_smoothed = gaussian_filter(Xm_smoothed, sigma)
+        Xm2_smoothed = gaussian_filter(Xm2_smoothed, sigma)
 
     if plotcountermark == 0:
         curve.setData(Xm_smoothed, pen="b")
@@ -402,9 +397,9 @@ def on_press(key):
             f2.close()
             ifsamplingflag = False
         elif key.char == "w":
-            windowWidth += 100
-            if windowWidth > 2000:
-                windowWidth = 100
+            windowWidth += 500
+            if windowWidth > 10000:
+                windowWidth = 500
             tmp = Xm[-1]
             tmp2 = Xm2[-1]
             Xm = linspace(tmp, tmp, windowWidth)
@@ -412,12 +407,12 @@ def on_press(key):
             ptr = -windowWidth
         elif key.char == "g":
             sigma += 1
-            if sigma > 500:
+            if sigma > 300:
                 sigma = 1
             print("sigma=", sigma)
         elif key.char == "f":
             num_filter += 1
-            if num_filter < 50:
+            if num_filter > 30:
                 num_filter = 1
             print("num_filter=", num_filter)
 
