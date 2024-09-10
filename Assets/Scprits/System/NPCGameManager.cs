@@ -54,6 +54,11 @@ public class NPCGameManager : GameManagerBase
         return isPlayerReady;
     }
 
+    protected float GetPlayerDistance()
+    {
+        return Vector3.Distance(players[0].transform.position, players[1].transform.position);
+    }
+
     protected override void Awake()
     {
         base.Awake();
@@ -103,6 +108,7 @@ public class NPCGameManager : GameManagerBase
                 gameState = 2;
                 Debug.Log("Game Over");
             }
+            UDP.instance.SendData(GetPlayerDistance());
         }
         else if (gameState == 2)
         {

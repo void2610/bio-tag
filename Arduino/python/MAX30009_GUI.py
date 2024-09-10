@@ -1,4 +1,4 @@
-from numpy import linspace, pi, cos, sin, arctan, sqrt, square, mean
+from numpy import linspace, pi, cos, sin, arctan, mean
 import pyqtgraph as pg
 from pynput import keyboard as kb
 import time
@@ -24,7 +24,8 @@ CHARACTERISTIC_UUID = "2A56"
 ble_input = ""
 
 HOST = "127.0.0.1"
-PORT = 50007
+SEND_PORT = 50007
+RECV_PORT = 50008
 udp_client = None
 
 app = QtWidgets.QApplication([])
@@ -273,14 +274,14 @@ def threading_of_update():
                     )
                     Load_real = I_cal_real - Q_cal_real
                     Load_imag = I_cal_imag + Q_cal_imag
-                    Load_mag = sqrt(square(Load_real) + square(Load_imag))
-                    Load_angle = arctan(Load_imag / Load_real) * (180 / pi)
+                    # Load_mag = sqrt(square(Load_real) + square(Load_imag))
+                    # Load_angle = arctan(Load_imag / Load_real) * (180 / pi)
                     if ifsamplingflag:
                         f1.write(str(Load_real) + ",")
                         f2.write(str(Load_imag) + ",")
 
                     Xm[-1] = Load_real  # 瞬時値を含むベクトル
-                    Xm2[-1] = Load_imag
+                    # Xm2[-1] = Load_imag
                     ptr += 1  # 曲線を表示するためのx位置を更新
 
                 # Zeroシンボルが来たときの特別なマークと特別な操作
@@ -322,8 +323,8 @@ def threading_of_plot():
         Xm_smoothed = gaussian_filter(Xm_smoothed, sigma)
         Xm2_smoothed = gaussian_filter(Xm2_smoothed, sigma)
 
-    result = str(Xm_smoothed[-1])
-    udp_client.sendto(result.encode("utf-8"), (HOST, PORT))
+    # result = str(Xm_smoothed[-1])
+    # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
 
     if plotcountermark == 0:
         curve.setData(Xm_smoothed, pen="b")
@@ -365,14 +366,14 @@ def on_press(key):
             plotcountermark = plotcountermark + 1
             if plotcountermark == 3:
                 plotcountermark = 0
-        elif key.char == "s":
+        elif key.char == "o":
             countsamplingfile += 1
             dataname = "pysavedsampling" + str(countsamplingfile) + "data"
             f1 = open(dataname + "1.txt", "w")
             f2 = open(dataname + "2.txt", "w")
             print("The start of sampling")
             ifsamplingflag = True
-        elif key.char == "e":
+        elif key.char == "p":
             print("The end of sampling")
             f1.close()
             f2.close()
@@ -434,9 +435,23 @@ async def ble_run():
             await asyncio.sleep(1)
 
 
+def udp_receive():
+    global udp_client
+    while True:
+        data, addr = udp_client.recvfrom(1024)  # 受信バッファサイズを指定
+        data = data.decode("utf-8")
+        print(f"Received message: {data} from {addr}")
+        Xm2[-1] = float(data)
+
+
 ### MAIN PROGRAM #####
 if __name__ == "__main__":
     udp_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_client.bind((HOST, RECV_PORT))  # UDPソケットをバインド
+    # UDP受信スレッドを開始
+    udp_thread = threading.Thread(target=udp_receive)
+    udp_thread.daemon = True
+    udp_thread.start()
 
     key_listener_thread = threading.Thread(target=start_key_listener)
     key_listener_thread.daemon = True

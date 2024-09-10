@@ -9,19 +9,55 @@ using System.Threading;
 
 public class UDP : MonoBehaviour
 {
+    public static UDP instance;
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
+    }
+
+
     static UdpClient udp;
     IPEndPoint remoteEP = null;
     int i = 0;
 
+    // 追加: 送信先のIPアドレスとポート
+    private string REMOTE_IP = "127.0.0.1"; // 受信側のIPアドレス
+    private int REMOTE_PORT = 50008; // 受信側のポート
+    int LOCA_LPORT = 50007;
+
     // Use this for initialization
     void Start()
     {
-        int LOCA_LPORT = 50007;
+
         udp = new UdpClient(LOCA_LPORT);
         udp.Client.ReceiveTimeout = 2000;
 
         // 非同期で受信開始
         udp.BeginReceive(new AsyncCallback(ReceiveCallback), null);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SendData(i++);
+        }
+    }
+
+    // 追加: 数値を送信するメソッド
+    public void SendData(float value)
+    {
+        string message = value.ToString();
+        byte[] data = Encoding.UTF8.GetBytes(message);
+        udp.Send(data, data.Length, REMOTE_IP, REMOTE_PORT);
+        Debug.Log("Send: " + message);
     }
 
     // 非同期受信のコールバック
@@ -31,7 +67,7 @@ public class UDP : MonoBehaviour
         {
             byte[] data = udp.EndReceive(ar, ref remoteEP);
             string text = Encoding.UTF8.GetString(data);
-            Debug.Log(text);
+            Debug.Log("Receive: " + text);
 
             // 再度受信を開始
             udp.BeginReceive(new AsyncCallback(ReceiveCallback), null);
@@ -40,5 +76,10 @@ public class UDP : MonoBehaviour
         {
             Debug.LogError("SocketException: " + e.Message);
         }
+    }
+
+    private void OnDestroy()
+    {
+        udp.Close();
     }
 }
