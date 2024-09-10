@@ -36,7 +36,7 @@ curve2 = p.plot()
 
 plotcountermark = 0
 
-windowWidth = 3500  # 曲線を表示するウィンドウの幅
+windowWidth = 500  # 曲線を表示するウィンドウの幅
 Xm = linspace(0, 0, windowWidth)  # 関連する時間系列を含む配列を作成
 Xm2 = linspace(0, 0, windowWidth)
 ptr = -windowWidth  # 最初のx位置を設定
@@ -48,8 +48,9 @@ ifsamplingflag = False
 buffer = ""
 dataname = ""
 countsamplingfile = 0
-sigma = 50
-num_filter = 5
+sigma = 5
+num_filter = 1
+calib = 400
 
 
 def threading_of_update():
@@ -161,7 +162,7 @@ def threading_of_update():
                     if not TheFirstMeasurementDataFlag:
                         # 正式に測定が始まる最初のデータが来たとき、以前のキャリブレーションデータを使用する、iiiは何番目の周波数のキャリブレーションを示す
                         mean_I_offset.append(
-                            mean(I_offset[400:])
+                            mean(I_offset[calib:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -170,7 +171,7 @@ def threading_of_update():
                             )
                         )
                         mean_Q_offset.append(
-                            mean(Q_offset[400:])
+                            mean(Q_offset[calib:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -179,7 +180,7 @@ def threading_of_update():
                             )
                         )
                         mean_I_rcal_in.append(
-                            mean(I_rcal_in[400:])
+                            mean(I_rcal_in[calib:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -188,7 +189,7 @@ def threading_of_update():
                             )
                         )
                         mean_Q_rcal_in.append(
-                            mean(Q_rcal_in[400:])
+                            mean(Q_rcal_in[calib:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -197,7 +198,7 @@ def threading_of_update():
                             )
                         )
                         mean_I_rcal_quad.append(
-                            mean(I_rcal_quad[400:])
+                            mean(I_rcal_quad[calib:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -206,7 +207,7 @@ def threading_of_update():
                             )
                         )
                         mean_Q_rcal_quad.append(
-                            mean(Q_rcal_quad[400:])
+                            mean(Q_rcal_quad[calib:])
                             / (
                                 (2**19)
                                 * (2 / pi)
@@ -275,8 +276,8 @@ def threading_of_update():
                     Load_mag = sqrt(square(Load_real) + square(Load_imag))
                     Load_angle = arctan(Load_imag / Load_real) * (180 / pi)
                     if ifsamplingflag:
-                        f1.write(str(Load_mag) + ",")
-                        f2.write(str(Load_angle) + ",")
+                        f1.write(str(Load_real) + ",")
+                        f2.write(str(Load_imag) + ",")
 
                     Xm[-1] = Load_real  # 瞬時値を含むベクトル
                     Xm2[-1] = Load_imag
@@ -377,22 +378,23 @@ def on_press(key):
             f2.close()
             ifsamplingflag = False
         elif key.char == "w":
-            windowWidth += 500
-            if windowWidth > 10000:
-                windowWidth = 500
+            windowWidth += 100
+            if windowWidth > 5000:
+                windowWidth = 100
             tmp = Xm[-1]
             tmp2 = Xm2[-1]
             Xm = linspace(tmp, tmp, windowWidth)
             Xm2 = linspace(tmp2, tmp2, windowWidth)
             ptr = -windowWidth
+            print("windowWidth=", windowWidth)
         elif key.char == "g":
             sigma += 1
-            if sigma > 300:
+            if sigma > 30:
                 sigma = 1
             print("sigma=", sigma)
         elif key.char == "f":
             num_filter += 1
-            if num_filter > 30:
+            if num_filter > 10:
                 num_filter = 1
             print("num_filter=", num_filter)
     except AttributeError:
