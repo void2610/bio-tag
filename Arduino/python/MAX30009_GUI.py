@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import QApplication
 RCAL = 101000 * (1 + (4 / 512))
 
 # 使用前に電流ピーク値を入力することを忘れないでください 単位 uA
-AMPLITUDE_OF_CURRENT_PEAK = 0.452
+AMPLITUDE_OF_CURRENT_PEAK = 0.904
 
 
 DEVICE_UUID = "9108929D-B8E4-0946-232F-7EE1DDD2654C"
@@ -294,12 +294,18 @@ def threading_of_update():
                 elif data[2] == "3":
                     I_offset.append(data1)
                     Q_offset.append(data2)
+                    Xm[-1] = data1
+                    ptr += 1
                 elif data[2] == "5":
                     I_rcal_in.append(data1)
                     Q_rcal_in.append(data2)
+                    Xm[-1] = data1
+                    ptr += 1
                 elif data[2] == "7":
                     I_rcal_quad.append(data1)
                     Q_rcal_quad.append(data2)
+                    Xm[-1] = data1
+                    ptr += 1
         else:
             time.sleep(0.001)
 
@@ -314,33 +320,37 @@ def gaussian_filter(data, sigma):
     return filtered_data
 
 
+def moving_average(data, window_size):
+    return np.convolve(data, np.ones(window_size) / window_size, mode="valid")
+
+
 def threading_of_plot():
     global curve, curve2, ptr, Xm, Xm2, plotcountermark, sigma
 
     Xm_smoothed = Xm
     Xm2_smoothed = Xm2
     for i in range(num_filter):
-        Xm_smoothed = gaussian_filter(Xm_smoothed, sigma)
-        Xm2_smoothed = gaussian_filter(Xm2_smoothed, sigma)
+        Xm_smoothed = moving_average(Xm_smoothed, sigma)
+        # Xm2_smoothed = gaussian_filter(Xm2_smoothed, sigma)
 
     # result = str(Xm_smoothed[-1])
     # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
 
     if plotcountermark == 0:
-        curve.setData(Xm_smoothed, pen="b")
+        curve.setData(Xm_smoothed, pen="w")
         curve.setPos(ptr, 0)
-        curve2.setData(Xm2_smoothed, pen="r")
+        curve2.setData(Xm2_smoothed, pen="b")
         curve2.setPos(ptr, 0)
         QtWidgets.QApplication.processEvents()
 
     if plotcountermark == 1:
-        curve.setData(Xm_smoothed, pen="b")
+        curve.setData(Xm_smoothed, pen="w")
         curve.setPos(ptr, 0)
         curve2.clear()
         QtWidgets.QApplication.processEvents()
 
     if plotcountermark == 2:
-        curve2.setData(Xm2_smoothed, pen="r")
+        curve2.setData(Xm2_smoothed, pen="b")
         curve.clear()
         curve2.setPos(ptr, 0)
         QtWidgets.QApplication.processEvents()
@@ -378,7 +388,7 @@ def on_press(key):
             f1.close()
             f2.close()
             ifsamplingflag = False
-        elif key.char == "w":
+        elif key.char == "t":
             windowWidth += 100
             if windowWidth > 5000:
                 windowWidth = 100
@@ -390,7 +400,7 @@ def on_press(key):
             print("windowWidth=", windowWidth)
         elif key.char == "g":
             sigma += 1
-            if sigma > 30:
+            if sigma > 300:
                 sigma = 1
             print("sigma=", sigma)
         elif key.char == "f":

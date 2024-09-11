@@ -21,11 +21,11 @@ char received_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 char reset_msg[9] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 char Sendingstr[3];
 int data = 0;
-int calib = 250;
+int calib = 500;
 
 void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
 {
-    Serial.println("Calibration start");
+    // Serial.println("Calibration start");
     uint8_t tempREG1;
     uint8_t tempREG2;
     write_reg(0x20, reg0x20); // DAC/ADC OSRの設定とVrefの有効化; PLL_ENが1に設定される前にBioZリファレンスを有効にする必要があります(BIOZ_BG_EN[2](0x20)=1)。解決には6msの時間がかかる可能性があります。
@@ -137,8 +137,8 @@ void NewFrequencyCalibration(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
 
 uint8_t Sweap(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
 {
-    Serial.println("Sweap start");
-    // BIOZ_OFF();
+    // Serial.println("Sweap start");
+    //  BIOZ_OFF();
     BIOZ_DRV_Standby();
     write_reg(0x20, reg0x20); // DAC/ADC OSRの設定とVrefの有効化; PLL_ENが1に設定される前にBioZリファレンスを有効にする必要があります(BIOZ_BG_EN[2](0x20)=1)。解決には6msの時間がかかる可能性があります。
     write_reg(0x18, reg0x18); // MDIVの下位ビットの設定
@@ -173,12 +173,12 @@ uint8_t Sweap(uint8_t reg0x17, uint8_t reg0x18, uint8_t reg0x20)
             reset_receive_msg();
         }
     }
-    Serial.println("BLE is disconnected");
+    // Serial.println("BLE is disconnected");
 }
 
 void MAX30009_setup()
 {
-    Serial.println("MAX30009 start");
+    // Serial.println("MAX30009 start");
     digitalWrite(csPin, HIGH);
 
     // MAX3000の初期化が終わるまで待つ
@@ -189,8 +189,8 @@ void MAX30009_setup()
 
         if (id == 0x42)
         {
-            Serial.print("MAX30009 Found id: ");
-            Serial.println(id, HEX);
+            // Serial.print("MAX30009 Found id: ");
+            // Serial.println(id, HEX);
             delay(5000);
             break;
         }
@@ -209,14 +209,15 @@ void MAX30009_setup()
     delay(1);
     read_reg(0x00); // 割り込みが設定されると自動的に1回リセットされます。おそらくは少し待ってから任意のレジスタを1回読むだけでリセットできるようです
     delay(1);
-    write_reg(0x22, 0x04); // 電流源出力か電圧源出力かHブリッジ出力かを選択し、振幅を制御
+    write_reg(0x22, 0x14); // 電流源出力か電圧源出力かHブリッジ出力かを選択し、振幅を制御
     // write_reg(0x21, 0x08); // フィルタリング、スイープ中にフィルタリングを追加すると応答速度がかなり低下することがわかりました
-    write_reg(0x25, 0x52); //[7]=1外部キャパシタを使用;[3:0]=1010BIAと心電図測定では、BIOZ_AMP_RGEとBIOZ_AMP_BWを比較的高い値に設定する必要があります
+    write_reg(0x25, 0xC4); //[7]=1外部キャパシタを使用;[3:0]=1010BIAと心電図測定では、BIOZ_AMP_RGEとBIOZ_AMP_BWを比較的高い値に設定する必要があります
     write_reg(0x28, 0x02); //[3]Qクロック位相をIに移動、[2]Iクロック位相をQに移動、F_BIOZ>54668の場合、[0]は0、[1]は1; F_BIOZ<54668の場合、F_BIOZ=BIOZ_ADC_CLK/8の場合、[0]=1、それ以外の場合は0、F_BIOZ=BIOZ_ADC_CLK/2の場合、[1]=0、それ以外は1
                            // write_reg(0x58,0x03);		//受信チャンネルにリードバイアスを1つ追加
     BIOZ_INA_CHOP_EN_ON();
-    NewFrequencyCalibration(0x78, 0xff, 0xfc); // 16Hz
+    // NewFrequencyCalibration(0x78, 0xff, 0xfc); // 16Hz
     // NewFrequencyCalibration(0x54, 0xab, 0xf4); // 53Hz
+    NewFrequencyCalibration(0x52, 0xf3, 0xfc); // 31.25Hz
     FrequencyCalibrationGap();
     I_Q_close();
     IQ_PHASE_NOT_change();
@@ -229,8 +230,9 @@ void MAX30009_setup()
 
     // ここからは常にスイープを実行します。注意：スイープの【各ポイントで事前にキャリブレーションを行う必要があります】、上位機器に送信します
     BIOZ_INA_CHOP_EN_ON();
-    Sweap(0x78, 0xff, 0xfc); // 16Hz
+    // Sweap(0x78, 0xff, 0xfc); // 16Hz
     // Sweap(0x54, 0xab, 0xf4); // 53z
+    Sweap(0x52, 0xf3, 0xfc); // 31.25Hz
     FrequencyCalibrationGap();
 }
 

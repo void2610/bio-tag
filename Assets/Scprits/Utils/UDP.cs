@@ -43,14 +43,6 @@ public class UDP : MonoBehaviour
         udp.BeginReceive(new AsyncCallback(ReceiveCallback), null);
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SendData(i++);
-        }
-    }
-
     // 追加: 数値を送信するメソッド
     public void SendData(float value)
     {

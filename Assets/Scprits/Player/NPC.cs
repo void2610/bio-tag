@@ -18,6 +18,7 @@ public class NPC : MonoBehaviour
     private CharacterController cCon => GetComponent<CharacterController>();
     private NavMeshAgent agent => this.GetComponent<NavMeshAgent>();
     private int jumpAreaType = 3;
+    private bool isMovable = true;
 
     public void Wait(float time)
     {
@@ -49,7 +50,7 @@ public class NPC : MonoBehaviour
 
     void Update()
     {
-        if (target != null && GameManagerBase.instance.gameState == 1)
+        if (target != null && GameManagerBase.instance.gameState == 1 && isMovable)
         {
             if (index != GameManagerBase.instance.itIndex)
             {
@@ -76,7 +77,9 @@ public class NPC : MonoBehaviour
 
     private IEnumerator WaitCoroutine(float time)
     {
+        isMovable = false;
         yield return new WaitForSeconds(time);
+        isMovable = true;
     }
 
     private IEnumerator ChangeSpeedOnLink()
