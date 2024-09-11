@@ -34,16 +34,4 @@ public class SinglePlayer : PlayerBase
 
         circleImage.transform.localScale = Vector3.one * defaultImageSize * (1.0f + concentrationLevel * 0.5f);
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        // if (other.CompareTag("NPCTrigger"))
-        // {
-        //     isMovable = false;
-        //     // 吹き飛ばされる
-        //     Vector3 direction = (transform.position - other.transform.position).normalized;
-        //     direction.y = 1f;
-        //     velocity = direction * 10f;
-        // }
-    }
 }

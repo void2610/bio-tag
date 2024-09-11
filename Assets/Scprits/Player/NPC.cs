@@ -19,6 +19,11 @@ public class NPC : MonoBehaviour
     private NavMeshAgent agent => this.GetComponent<NavMeshAgent>();
     private int jumpAreaType = 3;
 
+    public void Wait(float time)
+    {
+        StartCoroutine(WaitCoroutine(time));
+    }
+
     public void SetTarget(Transform target)
     {
         this.target = target;
@@ -69,6 +74,11 @@ public class NPC : MonoBehaviour
         }
     }
 
+    private IEnumerator WaitCoroutine(float time)
+    {
+        yield return new WaitForSeconds(time);
+    }
+
     private IEnumerator ChangeSpeedOnLink()
     {
         isJumping = true;
@@ -100,8 +110,6 @@ public class NPC : MonoBehaviour
         agent.Warp(endPos);
         animator.SetBool("Jump", false);
         animator.SetBool("Grounded", true);
-
-        // ジャンプ後の待機時間
 
         yield return new WaitForSeconds(0.3f);
 

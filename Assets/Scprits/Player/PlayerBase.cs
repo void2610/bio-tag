@@ -23,10 +23,10 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     protected GameObject playerCamera = null;
     protected float animationBlend = 0f;
     protected Vector3 lookDirection = Vector3.zero;
-    protected Vector3 velocity = Vector3.zero;
     protected float onLandTime = 0f;
     protected bool isMovable = true;
-    protected bool isGrounded = false;
+    public bool isGrounded = false;
+    public Vector3 velocity = Vector3.zero;
 
     protected virtual void Awake()
     {
