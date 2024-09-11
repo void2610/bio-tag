@@ -29,7 +29,7 @@ public class NPCGameManager : GameManagerBase
         {
             playerScores.Add(0);
         }
-        itIndex = Random.Range(0, npcCount + 1);
+        itIndex = 1;
         startTime = Time.time;
         itMarker.SetTarget(players[itIndex].transform);
     }

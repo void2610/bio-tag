@@ -19,11 +19,13 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     protected float FootstepAudioVolume = 0.5f;
     protected Animator animator => GetComponent<Animator>();
     protected CharacterController cCon => GetComponent<CharacterController>();
+    protected Rigidbody rb => GetComponent<Rigidbody>();
     protected GameObject playerCamera = null;
     protected float animationBlend = 0f;
     protected Vector3 lookDirection = Vector3.zero;
     protected Vector3 velocity = Vector3.zero;
     protected float onLandTime = 0f;
+    protected bool isMovable = true;
 
     protected virtual void Awake()
     {
@@ -49,6 +51,13 @@ public class PlayerBase : MonoBehaviourPunCallbacks
 
     protected virtual void UpdateCharacterController(Vector3 input, Vector3 playerDirection, bool isJump)
     {
+        if (!isMovable)
+        {
+            velocity.y += Physics.gravity.y * Time.deltaTime;
+            cCon.Move(velocity * Time.deltaTime);
+            return;
+        }
+
         if (cCon.isGrounded)
         {
             velocity = Vector3.zero;

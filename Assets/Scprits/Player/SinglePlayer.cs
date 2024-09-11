@@ -4,8 +4,6 @@ public class SinglePlayer : PlayerBase
 {
     [SerializeField]
     private GameObject circleImage;
-    [SerializeField]
-    private CapsuleCollider capsuleCollider;
     public int index = -1;
 
     private float concentrationLevel = 1f;
@@ -34,16 +32,18 @@ public class SinglePlayer : PlayerBase
 
         concentrationLevel = SensorManager.instance.value;
 
-        capsuleCollider.radius = 1.0f + concentrationLevel * 0.5f;
         circleImage.transform.localScale = Vector3.one * defaultImageSize * (1.0f + concentrationLevel * 0.5f);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // TODO: 子オブジェクトの判定も取ってしまうので、修正が必要
         if (other.CompareTag("NPCTrigger"))
         {
-            NPCGameManager.instance.ChangeIt(index);
+            isMovable = false;
+            // 吹き飛ばされる
+            Vector3 direction = (transform.position - other.transform.position).normalized;
+            direction.y = 1f;
+            velocity = direction * 10f;
         }
     }
 }

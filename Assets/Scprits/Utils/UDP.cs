@@ -57,7 +57,6 @@ public class UDP : MonoBehaviour
         string message = value.ToString();
         byte[] data = Encoding.UTF8.GetBytes(message);
         udp.Send(data, data.Length, REMOTE_IP, REMOTE_PORT);
-        Debug.Log("Send: " + message);
     }
 
     // 非同期受信のコールバック
