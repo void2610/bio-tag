@@ -37,13 +37,13 @@ public class SinglePlayer : PlayerBase
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("NPCTrigger"))
-        {
-            isMovable = false;
-            // 吹き飛ばされる
-            Vector3 direction = (transform.position - other.transform.position).normalized;
-            direction.y = 1f;
-            velocity = direction * 10f;
-        }
+        // if (other.CompareTag("NPCTrigger"))
+        // {
+        //     isMovable = false;
+        //     // 吹き飛ばされる
+        //     Vector3 direction = (transform.position - other.transform.position).normalized;
+        //     direction.y = 1f;
+        //     velocity = direction * 10f;
+        // }
     }
 }

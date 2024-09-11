@@ -26,6 +26,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     protected Vector3 velocity = Vector3.zero;
     protected float onLandTime = 0f;
     protected bool isMovable = true;
+    protected bool isGrounded = false;
 
     protected virtual void Awake()
     {
@@ -54,17 +55,16 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         if (!isMovable)
         {
             velocity.y += Physics.gravity.y * Time.deltaTime;
-            cCon.Move(velocity * Time.deltaTime);
+            rb.linearVelocity = velocity;
             return;
         }
 
-        if (cCon.isGrounded)
+        if (isGrounded)
         {
-            velocity = Vector3.zero;
+            velocity = new Vector3(0, rb.linearVelocity.y, 0);
             animator.SetBool("Grounded", true);
             animator.SetBool("FreeFall", false);
             animator.SetBool("Jump", false);
-
 
             if (input.magnitude > 0f)
             {
@@ -74,7 +74,8 @@ public class PlayerBase : MonoBehaviourPunCallbacks
             if (isJump)
             {
                 animator.SetBool("Jump", true);
-                velocity.y += jumpPower;
+                isGrounded = false;
+                velocity.y = jumpPower;
             }
         }
         else
@@ -82,6 +83,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
             animator.SetBool("Grounded", false);
             animator.SetBool("FreeFall", true);
             animator.SetFloat("Speed", 0);
+            velocity.y += Physics.gravity.y * Time.deltaTime;
         }
 
         animationBlend = Mathf.Lerp(animationBlend, input.magnitude > 0f ? input.normalized.magnitude : 0, Time.deltaTime * 10);
@@ -89,12 +91,16 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         animator.SetFloat("MotionSpeed", input.normalized.magnitude);
 
 
-        velocity.y += Physics.gravity.y * Time.deltaTime;
-        cCon.Move(velocity * Time.deltaTime);
+        rb.linearVelocity = velocity;
         if (new Vector3(playerDirection.x, 0, playerDirection.z).magnitude > 0.1f)
         {
             this.transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.LookRotation(new Vector3(playerDirection.x, 0, playerDirection.z)), Time.deltaTime * 10);
         }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        isGrounded = true;
     }
 
 
@@ -103,7 +109,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
             var index = Random.Range(0, FootstepAudioClips.Length);
-            AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(cCon.center), FootstepAudioVolume);
+            AudioSource.PlayClipAtPoint(FootstepAudioClips[index], this.transform.position, FootstepAudioVolume);
         }
     }
     protected virtual void OnLand(AnimationEvent animationEvent)
@@ -111,7 +117,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - onLandTime > 0.1f)
         {
             onLandTime = Time.time;
-            AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(cCon.center), FootstepAudioVolume);
+            AudioSource.PlayClipAtPoint(LandingAudioClip, this.transform.position, FootstepAudioVolume);
         }
     }
 }

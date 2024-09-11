@@ -9,11 +9,12 @@ TagManager:
   - PlayerTrigger
   - NPCTrigger
   - PlayerSensorTrigger
+  - Ground
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - 
