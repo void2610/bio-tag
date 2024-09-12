@@ -34,6 +34,8 @@ win = pg.GraphicsLayoutWidget(show=True)  # ウィンドウを作成
 p = win.addPlot(title="Realtime plot")  # ウィンドウ内にプロットのための空間を作成
 curve = p.plot()  # 空の「プロット」を作成（プロットするための曲線）
 curve2 = p.plot()
+th_plot = p.plot()
+th_plot2 = p.plot()
 
 plotcountermark = 0
 
@@ -52,24 +54,12 @@ countsamplingfile = 0
 sigma = 5
 num_filter = 1
 calib = 400
+th = 5
 
 
 def threading_of_update():
-    global \
-        curve, \
-        curve2, \
-        ptr, \
-        Xm, \
-        Xm2, \
-        buffer, \
-        ifsamplingflag, \
-        dataname, \
-        countsamplingfile, \
-        data1, \
-        data2, \
-        my_widget, \
-        send0, \
-        ble_input
+    global ptr, Xm, Xm2, buffer, data1, data2, ble_input
+
     TheFirstMeasurementDataFlag = False
     iii = 0
     mean_I_offset = []
@@ -324,33 +314,71 @@ def moving_average(data, window_size):
     return np.convolve(data, np.ones(window_size) / window_size, mode="valid")
 
 
-def threading_of_plot():
-    global curve, curve2, ptr, Xm, Xm2, plotcountermark, sigma
+def diff_filter(data):
+    diff_data = np.diff(data)
+    return diff_data
 
+
+excited_carry = 0
+
+
+# 興奮状態の判定
+def is_excited(data: np.ndarray, th: float) -> bool:
+    global excited_carry
+
+    if abs(data[-1]) > th:
+        return True
+    else:
+        if abs(data[-2]) > th:
+            start = len(data) - 2
+            end = 0
+            # 閾値を下回る部分まで遡る
+            for i in range(2, len(data)):
+                if abs(data[-i]) < th:
+                    excited_carry = i
+                    break
+    return False
+
+
+def threading_of_plot():
+    color = "w"
     Xm_smoothed = Xm
-    Xm2_smoothed = Xm2
+
     for i in range(num_filter):
         Xm_smoothed = moving_average(Xm_smoothed, sigma)
-        # Xm2_smoothed = gaussian_filter(Xm2_smoothed, sigma)
 
-    # result = str(Xm_smoothed[-1])
-    # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
+    Xm_smoothed = diff_filter(Xm_smoothed)
+
+    if is_excited(Xm_smoothed, th) or excited_carry > 0:
+        color = "r"
+        # result = "true"
+        # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
+    else:
+        color = "w"
+        # result = "false"
+        # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
+
+    # thの値に横線を引く
+    th_plot.setData([th for _ in range(len(Xm_smoothed))], pen="y")
+    th_plot.setPos(ptr, 0)
+    th_plot2.setData([-th for _ in range(len(Xm_smoothed))], pen="y")
+    th_plot2.setPos(ptr, 0)
 
     if plotcountermark == 0:
-        curve.setData(Xm_smoothed, pen="w")
+        curve.setData(Xm_smoothed, pen=color)
         curve.setPos(ptr, 0)
-        curve2.setData(Xm2_smoothed, pen="b")
+        curve2.setData(Xm2, pen="b")
         curve2.setPos(ptr, 0)
         QtWidgets.QApplication.processEvents()
 
     if plotcountermark == 1:
-        curve.setData(Xm_smoothed, pen="w")
+        curve.setData(Xm_smoothed, pen=color)
         curve.setPos(ptr, 0)
         curve2.clear()
         QtWidgets.QApplication.processEvents()
 
     if plotcountermark == 2:
-        curve2.setData(Xm2_smoothed, pen="b")
+        curve2.setData(Xm2, pen="b")
         curve.clear()
         curve2.setPos(ptr, 0)
         QtWidgets.QApplication.processEvents()
@@ -369,7 +397,8 @@ def on_press(key):
         Xm2, \
         ptr, \
         sigma, \
-        num_filter
+        num_filter, \
+        th
 
     try:
         if key.char == "c":
@@ -400,7 +429,7 @@ def on_press(key):
             print("windowWidth=", windowWidth)
         elif key.char == "g":
             sigma += 1
-            if sigma > 300:
+            if sigma > 756:
                 sigma = 1
             print("sigma=", sigma)
         elif key.char == "f":
@@ -408,6 +437,10 @@ def on_press(key):
             if num_filter > 10:
                 num_filter = 1
             print("num_filter=", num_filter)
+        elif key.char == "h":
+            th += 1
+            if th > 20:
+                th = 1
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
         pass
@@ -446,7 +479,6 @@ async def ble_run():
 
 
 def udp_receive():
-    global udp_client
     while True:
         data, addr = udp_client.recvfrom(1024)  # 受信バッファサイズを指定
         data = data.decode("utf-8")
