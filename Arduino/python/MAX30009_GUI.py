@@ -3,13 +3,13 @@ import pyqtgraph as pg
 from pynput import keyboard as kb
 import time
 import threading
-import sys
 import asyncio
 from bleak import BleakClient
-import numpy as np
 import socket
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
+
+from functions import moving_average, diff_filter, is_excited
 
 
 ## 測定前に検査抵抗の大きさを説明する必要がある、さもなければ検査が正しく行われない
@@ -51,8 +51,8 @@ ifsamplingflag = False
 buffer = ""
 dataname = ""
 countsamplingfile = 0
-sigma = 5
-num_filter = 1
+sigma = 16
+num_filter = 5
 calib = 400
 th = 5
 
@@ -300,44 +300,7 @@ def threading_of_update():
             time.sleep(0.001)
 
 
-def gaussian_filter(data, sigma):
-    kernel_size = int(6 * sigma + 1)
-    kernel_size = kernel_size + 1 if kernel_size % 2 == 0 else kernel_size
-    kernel = np.exp(-0.5 * (np.arange(kernel_size) - kernel_size // 2) ** 2 / sigma**2)
-    kernel /= kernel.sum()
-
-    filtered_data = np.convolve(data, kernel, mode="valid")
-    return filtered_data
-
-
-def moving_average(data, window_size):
-    return np.convolve(data, np.ones(window_size) / window_size, mode="valid")
-
-
-def diff_filter(data):
-    diff_data = np.diff(data)
-    return diff_data
-
-
 excited_carry = 0
-
-
-# 興奮状態の判定
-def is_excited(data: np.ndarray, th: float) -> bool:
-    global excited_carry
-
-    if abs(data[-1]) > th:
-        return True
-    else:
-        if abs(data[-2]) > th:
-            start = len(data) - 2
-            end = 0
-            # 閾値を下回る部分まで遡る
-            for i in range(2, len(data)):
-                if abs(data[-i]) < th:
-                    excited_carry = i
-                    break
-    return False
 
 
 def threading_of_plot():
@@ -506,7 +469,7 @@ if __name__ == "__main__":
     t1.daemon = True
     t1.start()
 
-    app = QApplication(sys.argv)
+    app = QApplication([])
 
     timer = pg.QtCore.QTimer()
     timer.timeout.connect(threading_of_plot)
