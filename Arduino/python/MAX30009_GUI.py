@@ -6,6 +6,7 @@ import threading
 import asyncio
 from bleak import BleakClient
 import socket
+import os
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
@@ -371,8 +372,9 @@ def on_press(key):
         elif key.char == "o":
             countsamplingfile += 1
             dataname = "pysavedsampling" + str(countsamplingfile) + "data"
-            f1 = open(dataname + "1.txt", "w")
-            f2 = open(dataname + "2.txt", "w")
+            os.makedirs("saved_data", exist_ok=True)
+            f1 = open("saved_data/" + dataname + "1.txt", "w")
+            f2 = open("saved_data/" + dataname + "2.txt", "w")
             print("The start of sampling")
             ifsamplingflag = True
         elif key.char == "p":
@@ -402,8 +404,9 @@ def on_press(key):
             print("num_filter=", num_filter)
         elif key.char == "h":
             th += 1
-            if th > 20:
+            if th > 10:
                 th = 1
+            print("threshold=", th)
     except AttributeError:
         # 特殊キー（例：Shift、Ctrlなど）の場合は無視
         pass
