@@ -7,6 +7,7 @@ import asyncio
 from bleak import BleakClient
 import socket
 import os
+from datetime import datetime  # datetimeモジュールをインポート
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
@@ -371,7 +372,8 @@ def on_press(key):
                 plotcountermark = 0
         elif key.char == "o":
             countsamplingfile += 1
-            dataname = "pysavedsampling" + str(countsamplingfile) + "data"
+            timestamp = datetime.now().strftime("%m%d_%H%M%S")
+            dataname = f"{timestamp}"
             os.makedirs("saved_data", exist_ok=True)
             f1 = open("saved_data/" + dataname + "1.txt", "w")
             f2 = open("saved_data/" + dataname + "2.txt", "w")
