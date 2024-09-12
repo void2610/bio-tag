@@ -18,21 +18,3 @@ def moving_average(data, window_size):
 def diff_filter(data):
     diff_data = np.diff(data)
     return diff_data
-
-
-# 興奮状態の判定
-def is_excited(data: np.ndarray, th: float) -> bool:
-    global excited_carry
-
-    if abs(data[-1]) > th:
-        return True
-    else:
-        if abs(data[-2]) > th:
-            # start = len(data) - 2
-            # end = 0
-            # 閾値を下回る部分まで遡る
-            for i in range(2, len(data)):
-                if abs(data[-i]) < th:
-                    excited_carry = i
-                    break
-    return False

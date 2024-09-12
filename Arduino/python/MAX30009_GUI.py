@@ -7,11 +7,13 @@ import asyncio
 from bleak import BleakClient
 import socket
 import os
+import numpy as np
 from datetime import datetime  # datetimeモジュールをインポート
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
-from functions import moving_average, diff_filter, is_excited
+
+from functions import moving_average, diff_filter
 
 
 ## 測定前に検査抵抗の大きさを説明する必要がある、さもなければ検査が正しく行われない
@@ -55,7 +57,7 @@ dataname = ""
 countsamplingfile = 0
 sigma = 16
 num_filter = 5
-calib = 400
+calib = 100
 th = 5
 
 
@@ -303,6 +305,29 @@ def threading_of_update():
 
 
 excited_carry = 0
+
+
+# 興奮状態の判定
+def is_excited(data, th):
+    global excited_carry
+
+    if abs(data[-1]) > th:
+        return True
+    else:
+        if abs(data[-2]) > th:
+            start = len(data) - 2
+            end = 0
+            # 閾値を下回る部分まで遡る
+            for i in range(2, len(data)):
+                if abs(data[-i]) < th:
+                    end = len(data) - i
+                    break
+
+            area = np.trapezoid(data[start:end])
+            print(area)
+            return True
+        else:
+            return False
 
 
 def threading_of_plot():
