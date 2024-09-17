@@ -8,7 +8,7 @@ from bleak import BleakClient
 import socket
 import os
 import numpy as np
-from datetime import datetime  # datetimeモジュールをインポート
+from datetime import datetime
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
@@ -244,6 +244,9 @@ def threading_of_update():
                     if not TheFirstMeasurementDataFlag:
                         TheFirstMeasurementDataFlag = True
                         iii = 0
+                    if len(mean_I_offset) <= iii:
+                        print("mean_I_offset is not ready yet.")
+                        continue
                     I_load_offset = (
                         data1
                         / ((2**19) * (2 / pi) * AMPLITUDE_OF_CURRENT_PEAK * (10**-6))
@@ -311,23 +314,40 @@ excited_carry = 0
 def is_excited(data, th):
     global excited_carry
 
-    if abs(data[-1]) > th:
-        return True
-    else:
-        if abs(data[-2]) > th:
-            start = len(data) - 2
-            end = 0
-            # 閾値を下回る部分まで遡る
-            for i in range(2, len(data)):
-                if abs(data[-i]) < th:
-                    end = len(data) - i
-                    break
+    carry_c = 0.1
 
-            area = np.trapezoid(data[start:end])
-            print(area)
-            return True
-        else:
-            return False
+    if excited_carry > 0:
+        excited_carry -= 0.1
+        excited_carry = max(0.0, excited_carry)
+    if abs(data[-1]) >= th:
+        return True
+
+    if abs(data[-1]) <= th and abs(data[-2]) >= th:
+        start = len(data)
+        sign = 1 if data[-2] > 0 else -1
+        # 閾値を下回る部分まで遡る
+        for i in range(2, len(data)):
+            if abs(data[-i]) < th:
+                start = len(data) - i + 1
+                break
+        area = abs(np.trapezoid(data[start:-1] - (sign * th)))
+        excited_carry = min(excited_carry + area * carry_c, 10)
+        return True
+    elif abs(data[-2]) <= th and abs(data[-3]) >= th:
+        start = len(data)
+        sign = 1 if data[-3] > 0 else -1
+        # 閾値を下回る部分まで遡る
+        for i in range(3, len(data)):
+            if abs(data[-i]) < th:
+                start = len(data) - i + 1
+                break
+        area = abs(np.trapezoid(data[start:-1] - (sign * th)))
+        excited_carry = min(excited_carry + area * carry_c, 10)
+        return True
+
+    if excited_carry > 0:
+        return True
+    return False
 
 
 def threading_of_plot():
@@ -339,7 +359,7 @@ def threading_of_plot():
 
     Xm_smoothed = diff_filter(Xm_smoothed)
 
-    if is_excited(Xm_smoothed, th) or excited_carry > 0:
+    if is_excited(Xm_smoothed, th):
         color = "r"
         # result = "true"
         # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
@@ -347,6 +367,7 @@ def threading_of_plot():
         color = "w"
         # result = "false"
         # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
+    print(excited_carry)
 
     # thの値に横線を引く
     th_plot.setData([th for _ in range(len(Xm_smoothed))], pen="y")
