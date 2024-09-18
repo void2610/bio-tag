@@ -50,6 +50,7 @@ public class NPC : MonoBehaviour
 
     void Update()
     {
+        agent.isStopped = !isMovable;
         if (target != null && GameManagerBase.instance.gameState == 1 && isMovable)
         {
             if (index != GameManagerBase.instance.itIndex)
@@ -165,6 +166,12 @@ public class NPC : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.tag);
+        if (other.CompareTag("PlayerSensorTrigger"))
+        {
+
+            NPCGameManager.instance.ChangeIt(index);
+        }
     }
 
     private void OnFootstep()

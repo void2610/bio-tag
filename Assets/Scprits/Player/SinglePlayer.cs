@@ -4,6 +4,8 @@ public class SinglePlayer : PlayerBase
 {
     [SerializeField]
     private GameObject circleImage;
+    [SerializeField]
+    private CapsuleCollider capsuleCollider;
     public int index = -1;
 
     private float concentrationLevel = 1f;
@@ -33,5 +35,11 @@ public class SinglePlayer : PlayerBase
         concentrationLevel = SensorManager.instance.value;
 
         circleImage.transform.localScale = Vector3.one * defaultImageSize * (1.0f + concentrationLevel * 0.5f);
+        capsuleCollider.radius = 1.0f + concentrationLevel * 0.5f;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        NPCGameManager.instance.ChangeIt(index);
     }
 }

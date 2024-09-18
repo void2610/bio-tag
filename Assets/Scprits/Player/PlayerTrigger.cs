@@ -5,8 +5,6 @@ public class PlayerTrigger : MonoBehaviour
     [SerializeField]
     private GameObject player;
 
-    private float lastTime = 0f;
-
     private void OnTriggerEnter(Collider other)
     {
         if (GameManagerBase.instance.gameState != 1)
@@ -14,7 +12,7 @@ public class PlayerTrigger : MonoBehaviour
             return;
         }
 
-        if (other.CompareTag("ItPlayer") && Time.time - lastTime > 3f)
+        if (other.CompareTag("ItPlayer"))
         {
             if (GameManagerBase.instance.GetType() == typeof(NetworkGameManager))
             {
@@ -22,14 +20,9 @@ public class PlayerTrigger : MonoBehaviour
             }
             else
             {
-                // 吹き飛ばされる
-                Vector3 direction = (player.transform.position - other.transform.position).normalized;
-                direction.y = 1f;
-                player.GetComponent<SinglePlayer>().velocity = direction * 7f;
-
-                other.GetComponent<NPC>().Wait(3f);
+                NPCGameManager.instance.ChangeIt(player.GetComponent<SinglePlayer>().index);
+                other.GetComponent<NPC>().Wait(2f);
             }
-            lastTime = Time.time;
         }
     }
 }

@@ -1975,7 +1975,7 @@ GameObject:
   - component: {fileID: 8475851060614978462}
   m_Layer: 0
   m_Name: Trigger
-  m_TagString: Untagged
+  m_TagString: PlayerSensorTrigger
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2146,6 +2146,7 @@ MonoBehaviour:
   walkSpeed: 6
   velocity: {x: 0, y: 0, z: 0}
   circleImage: {fileID: 5223684533337876083}
+  capsuleCollider: {fileID: 3860795488969320418}
   index: -1
 --- !u!143 &-8425628456057148448
 CharacterController:
