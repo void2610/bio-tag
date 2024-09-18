@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.VFX;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -46,6 +47,13 @@ public class NPC : MonoBehaviour
         ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, "NPC" + index);
 
         agent.speed = moveSpeed;
+
+        // VFXをセンサーマネージャーに登録
+        var vfxs = GetComponentsInChildren<VisualEffect>();
+        foreach (var vfx in vfxs)
+        {
+            SensorManager.instance.AddVFX(vfx);
+        }
     }
 
     void Update()
