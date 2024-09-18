@@ -59,8 +59,8 @@ public class UDP : MonoBehaviour
         {
             byte[] data = udp.EndReceive(ar, ref remoteEP);
             string text = Encoding.UTF8.GetString(data);
-            isConcentrated = text == "true";
             Debug.Log("Receive: " + text);
+            GSRGraph.instance.AddData(float.Parse(text));
 
             // 再度受信を開始
             udp.BeginReceive(new AsyncCallback(ReceiveCallback), null);

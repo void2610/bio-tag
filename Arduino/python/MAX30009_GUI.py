@@ -358,16 +358,9 @@ def threading_of_plot():
         Xm_smoothed = moving_average(Xm_smoothed, sigma)
 
     Xm_smoothed = diff_filter(Xm_smoothed)
+    color = "r" if is_excited(Xm_smoothed, th) else "w"
 
-    if is_excited(Xm_smoothed, th):
-        color = "r"
-        # result = "true"
-        # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
-    else:
-        color = "w"
-        # result = "false"
-        # udp_client.sendto(result.encode("utf-8"), (HOST, SEND_PORT))
-    print(excited_carry)
+    udp_client.sendto(str(Xm_smoothed[-1]).encode("utf-8"), (HOST, SEND_PORT))
 
     # thの値に横線を引く
     th_plot.setData([th for _ in range(len(Xm_smoothed))], pen="y")
