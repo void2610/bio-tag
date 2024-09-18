@@ -19,6 +19,7 @@ public class NPC : MonoBehaviour
     private NavMeshAgent agent => this.GetComponent<NavMeshAgent>();
     private int jumpAreaType = 3;
     private bool isMovable = true;
+    private Vector3 lastFootPrintPosition = Vector3.zero;
 
     public void Wait(float time)
     {
@@ -63,6 +64,12 @@ public class NPC : MonoBehaviour
             }
             animator.SetFloat("Speed", agent.velocity.magnitude);
             animator.SetFloat("MotionSpeed", 1);
+
+            if (Vector3.Distance(lastFootPrintPosition, transform.position) > 1.0f)
+            {
+                FootPrintManager.instance.CreateFootPrint(transform.position, transform.rotation, index);
+                lastFootPrintPosition = transform.position;
+            }
         }
         else
         {
