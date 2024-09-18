@@ -7,8 +7,6 @@ public class SinglePlayer : PlayerBase
     [SerializeField]
     private CapsuleCollider capsuleCollider;
     public int index = -1;
-
-    private float concentrationLevel = 1f;
     private float defaultImageSize = 1f;
 
     protected override void Awake()
@@ -32,10 +30,9 @@ public class SinglePlayer : PlayerBase
         }
         LocalMoving();
 
-        concentrationLevel = SensorManager.instance.value;
-
-        circleImage.transform.localScale = Vector3.one * defaultImageSize * (1.0f + concentrationLevel * 0.5f);
-        capsuleCollider.radius = 1.0f + concentrationLevel * 0.5f;
+        float r = SensorManager.instance.value ? 5.0f : 0.0f;
+        circleImage.transform.localScale = Vector3.one * defaultImageSize * (1.0f + r * 0.5f);
+        capsuleCollider.radius = 1.0f + r * 0.5f;
     }
 
     private void OnTriggerEnter(Collider other)

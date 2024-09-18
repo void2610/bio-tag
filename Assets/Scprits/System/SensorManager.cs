@@ -15,18 +15,18 @@ public class SensorManager : MonoBehaviour
         }
     }
 
-    public float value { get; protected set; } = 0f;
-    private float sensorValue = 0f;
+    public bool value { get; protected set; } = false;
+    private bool sensorValue = false;
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.J))
         {
-            sensorValue++;
+            sensorValue = true;
         }
         else if (Input.GetKeyDown(KeyCode.H))
         {
-            sensorValue--;
+            sensorValue = false;
         }
         //TODO: 実際はキャリブレーション等を行う
         value = sensorValue;
