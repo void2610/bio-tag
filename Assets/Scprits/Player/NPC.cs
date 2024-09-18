@@ -174,11 +174,10 @@ public class NPC : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.tag);
-        if (other.CompareTag("PlayerSensorTrigger"))
+        if (other.CompareTag("Player"))
         {
-
             NPCGameManager.instance.ChangeIt(index);
+            this.Wait(2f);
         }
     }
 

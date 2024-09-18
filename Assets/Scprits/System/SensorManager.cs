@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.VFX;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
-using DG.Tweening; // DoTweenの名前空間を追加
+using DG.Tweening;
 
 public class SensorManager : MonoBehaviour
 {
@@ -21,7 +23,8 @@ public class SensorManager : MonoBehaviour
     public bool value { get; protected set; } = false;
     private bool sensorValue = false;
     private List<VisualEffect> vfxs = new List<VisualEffect>();
-    private Tween alphaTween;
+    private List<Tween> tweens = new List<Tween>();
+    private Volume volume;
 
     public void AddVFX(VisualEffect vfx)
     {
@@ -32,12 +35,39 @@ public class SensorManager : MonoBehaviour
     {
         foreach (var vfx in vfxs)
         {
-            if (alphaTween != null && alphaTween.IsActive())
-            {
-                alphaTween.Kill();
-            }
-            alphaTween = DOTween.To(() => vfx.GetFloat("alpha"), x => vfx.SetFloat("alpha", x), a, d);
+            var t = DOTween.To(() => vfx.GetFloat("alpha"), x => vfx.SetFloat("alpha", x), a, d);
+            tweens.Add(t);
         }
+    }
+
+    private void ChangeToExcited()
+    {
+        foreach (var t in tweens)
+        {
+            t.Kill();
+        }
+        tweens.Clear();
+        SetAlpha(0.0f, 1f);
+        volume.profile.TryGet(out Vignette vignette);
+        var tw = DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 0.5f, 1f);
+        tweens.Add(tw);
+    }
+    private void ChangeToCalm()
+    {
+        foreach (var t in tweens)
+        {
+            t.Kill();
+        }
+        tweens.Clear();
+        SetAlpha(1.0f, 3f);
+        volume.profile.TryGet(out Vignette vignette);
+        var tw = DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 0f, 1f);
+        tweens.Add(tw);
+    }
+
+    private void Start()
+    {
+        volume = FindObjectOfType<Volume>();
     }
 
     private void Update()
@@ -45,12 +75,12 @@ public class SensorManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.J))
         {
             sensorValue = true;
-            SetAlpha(1.0f, 2f);
+            ChangeToExcited();
         }
         else if (Input.GetKeyDown(KeyCode.H))
         {
             sensorValue = false;
-            SetAlpha(0.0f, 1f);
+            ChangeToCalm();
         }
 
         value = sensorValue;

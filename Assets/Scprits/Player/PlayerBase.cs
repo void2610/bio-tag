@@ -37,7 +37,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
 
     protected virtual void Update()
     {
-
+        walkSpeed = SensorManager.instance.value ? 4f : 6.5f;
     }
 
     protected virtual void LocalMoving()
