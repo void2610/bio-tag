@@ -20,7 +20,6 @@ public class SensorManager : MonoBehaviour
         }
     }
 
-    public bool value { get; protected set; } = false;
     private bool sensorValue = false;
     private List<VisualEffect> vfxs = new List<VisualEffect>();
     private List<Tween> tweens = new List<Tween>();
@@ -72,17 +71,15 @@ public class SensorManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.J))
+        sensorValue = GSRGraph.instance.isExcited;
+
+        if (Input.GetKeyDown(KeyCode.J) || sensorValue)
         {
-            sensorValue = true;
             ChangeToExcited();
         }
-        else if (Input.GetKeyDown(KeyCode.H))
+        else if (Input.GetKeyDown(KeyCode.H) || !sensorValue)
         {
-            sensorValue = false;
             ChangeToCalm();
         }
-
-        value = sensorValue;
     }
 }
