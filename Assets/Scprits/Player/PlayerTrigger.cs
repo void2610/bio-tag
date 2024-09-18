@@ -25,7 +25,6 @@ public class PlayerTrigger : MonoBehaviour
                 // 吹き飛ばされる
                 Vector3 direction = (player.transform.position - other.transform.position).normalized;
                 direction.y = 1f;
-                player.GetComponent<SinglePlayer>().isGrounded = false;
                 player.GetComponent<SinglePlayer>().velocity = direction * 7f;
 
                 other.GetComponent<NPC>().Wait(3f);

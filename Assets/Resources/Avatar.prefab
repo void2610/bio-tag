@@ -2001,6 +2001,8 @@ MonoBehaviour:
   LandingAudioClip: {fileID: 8300000, guid: 1e27bdb7813524c9791edadb30b134c1, type: 3}
   jumpPower: 6
   walkSpeed: 6
+  isGrounded: 0
+  velocity: {x: 0, y: 0, z: 0}
 --- !u!114 &6368321461493701097
 MonoBehaviour:
   m_ObjectHideFlags: 0

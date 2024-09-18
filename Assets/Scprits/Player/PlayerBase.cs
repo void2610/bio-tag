@@ -19,18 +19,14 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     protected float FootstepAudioVolume = 0.5f;
     protected Animator animator => GetComponent<Animator>();
     protected CharacterController cCon => GetComponent<CharacterController>();
-    protected Rigidbody rb => GetComponent<Rigidbody>();
     protected GameObject playerCamera = null;
     protected float animationBlend = 0f;
     protected Vector3 lookDirection = Vector3.zero;
+    public Vector3 velocity = Vector3.zero;
     protected float onLandTime = 0f;
     protected bool isMovable = true;
-    public bool isGrounded = false;
-    public Vector3 velocity = Vector3.zero;
 
-    protected virtual void Awake()
-    {
-    }
+    protected virtual void Awake() { }
 
     protected virtual void Start()
     {
@@ -41,6 +37,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
 
     protected virtual void Update()
     {
+
     }
 
     protected virtual void LocalMoving()
@@ -55,16 +52,17 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         if (!isMovable)
         {
             velocity.y += Physics.gravity.y * Time.deltaTime;
-            rb.linearVelocity = velocity;
+            cCon.Move(velocity * Time.deltaTime);
             return;
         }
 
-        if (isGrounded)
+        if (cCon.isGrounded)
         {
-            velocity = new Vector3(0, rb.linearVelocity.y, 0);
+            velocity = Vector3.zero;
             animator.SetBool("Grounded", true);
             animator.SetBool("FreeFall", false);
             animator.SetBool("Jump", false);
+
 
             if (input.magnitude > 0f)
             {
@@ -74,16 +72,14 @@ public class PlayerBase : MonoBehaviourPunCallbacks
             if (isJump)
             {
                 animator.SetBool("Jump", true);
-                isGrounded = false;
-                velocity.y = jumpPower;
+                velocity.y += jumpPower;
             }
         }
         else
         {
             animator.SetBool("Grounded", false);
-            animator.SetBool("FreeFall", true);
+            // animator.SetBool("FreeFall", true);
             animator.SetFloat("Speed", 0);
-            velocity.y += Physics.gravity.y * Time.deltaTime;
         }
 
         animationBlend = Mathf.Lerp(animationBlend, input.magnitude > 0f ? input.normalized.magnitude : 0, Time.deltaTime * 10);
@@ -91,16 +87,12 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         animator.SetFloat("MotionSpeed", input.normalized.magnitude);
 
 
-        rb.linearVelocity = velocity;
+        velocity.y += Physics.gravity.y * Time.deltaTime;
+        cCon.Move(velocity * Time.deltaTime);
         if (new Vector3(playerDirection.x, 0, playerDirection.z).magnitude > 0.1f)
         {
             this.transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.LookRotation(new Vector3(playerDirection.x, 0, playerDirection.z)), Time.deltaTime * 10);
         }
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        isGrounded = true;
     }
 
 
@@ -109,15 +101,16 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
             var index = Random.Range(0, FootstepAudioClips.Length);
-            AudioSource.PlayClipAtPoint(FootstepAudioClips[index], this.transform.position, FootstepAudioVolume);
+            AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(cCon.center), FootstepAudioVolume);
         }
     }
+
     protected virtual void OnLand(AnimationEvent animationEvent)
     {
         if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - onLandTime > 0.1f)
         {
             onLandTime = Time.time;
-            AudioSource.PlayClipAtPoint(LandingAudioClip, this.transform.position, FootstepAudioVolume);
+            AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(cCon.center), FootstepAudioVolume);
         }
     }
 }

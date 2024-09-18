@@ -11,7 +11,7 @@ public class SinglePlayer : PlayerBase
 
     protected override void Awake()
     {
-        base.Start();
+        base.Awake();
         defaultImageSize = circleImage.transform.localScale.x;
     }
 

@@ -2042,8 +2042,8 @@ GameObject:
   - component: {fileID: 3677766485405940899}
   - component: {fileID: 1046156731043585764}
   - component: {fileID: 3017559631962645264}
-  - component: {fileID: 2000240599612769373}
   - component: {fileID: -1502476831106821833}
+  - component: {fileID: -8425628456057148448}
   m_Layer: 6
   m_Name: SinglePlayer
   m_TagString: Player
@@ -2116,33 +2116,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
---- !u!54 &2000240599612769373
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7493163483396742707}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
 --- !u!114 &-1502476831106821833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2171,10 +2144,34 @@ MonoBehaviour:
   LandingAudioClip: {fileID: 8300000, guid: 1e27bdb7813524c9791edadb30b134c1, type: 3}
   jumpPower: 6
   walkSpeed: 6
-  isGrounded: 0
   velocity: {x: 0, y: 0, z: 0}
   circleImage: {fileID: 5223684533337876083}
   index: -1
+--- !u!143 &-8425628456057148448
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7493163483396742707}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &7776785986142313572
 GameObject:
   m_ObjectHideFlags: 0
