@@ -26,9 +26,9 @@ public class UDP : MonoBehaviour
 
     static UdpClient udp;
     IPEndPoint remoteEP = null;
-    int i = 0;
 
-    // 追加: 送信先のIPアドレスとポート
+    private float value = 0;
+    private int count = 0;
     private string REMOTE_IP = "127.0.0.1"; // 受信側のIPアドレス
     private int REMOTE_PORT = 50008; // 受信側のポート
     int LOCA_LPORT = 50007;
@@ -60,7 +60,8 @@ public class UDP : MonoBehaviour
             byte[] data = udp.EndReceive(ar, ref remoteEP);
             string text = Encoding.UTF8.GetString(data);
             Debug.Log("Receive: " + text);
-            GSRGraph.instance.AddData(float.Parse(text));
+            value = float.Parse(text);
+            count++;
 
             // 再度受信を開始
             udp.BeginReceive(new AsyncCallback(ReceiveCallback), null);
@@ -69,6 +70,16 @@ public class UDP : MonoBehaviour
         {
             Debug.LogError("SocketException: " + e.Message);
         }
+    }
+
+    private void Update()
+    {
+        if (count > 0)
+        {
+            GSRGraph.instance.AddData(value);
+            count--;
+        }
+
     }
 
     private void OnDestroy()

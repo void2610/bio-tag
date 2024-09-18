@@ -24,16 +24,16 @@ public class GSRGraph : MonoBehaviour
     [SerializeField]
     private Vector2 panelEndPos;
 
-    public List<Vector2> data = new List<Vector2>();
-    private UILineRenderer lr => GetComponent<UILineRenderer>();
+    public List<Vector3> data = new List<Vector3>();
+    private LineRenderer lr => GetComponent<LineRenderer>();
 
     public void AddData(float d)
     {
         for (int i = dataLength - 1; i > 1; i--)
         {
-            data[i] = data[i - 1];
+            data[i - 1] = data[i];
         }
-        var p = new Vector2(0, d);
+        var p = new Vector3(0, d, 0);
 
         data[dataLength - 1] = p;
         AdjustAndApplyData();
@@ -43,7 +43,7 @@ public class GSRGraph : MonoBehaviour
     {
         float max = data[0].y;
         float min = data[0].y;
-        List<Vector2> d = new List<Vector2>(data);
+        List<Vector3> d = new List<Vector3>(data);
         for (int i = 1; i < data.Count; i++)
         {
             if (d[i].y > max)
@@ -56,19 +56,29 @@ public class GSRGraph : MonoBehaviour
             }
         }
 
+        float range = max - min;
+        if (Mathf.Approximately(range, 0f))
+        {
+            range = 1f; // ゼロ除算を防ぐ
+        }
+
         for (int i = 0; i < data.Count; i++)
         {
-            d[i] = new Vector2(panelStartPos.x + i * (panelEndPos.x - panelStartPos.x) / dataLength, (data[i].y - min) / (max - min) * (panelEndPos.y - panelStartPos.y) + panelStartPos.y);
+            float normalizedY = (data[i].y - min) / range;
+            float xPos = panelStartPos.x + i * (panelEndPos.x - panelStartPos.x) / dataLength;
+            float yPos = normalizedY * (panelEndPos.y - panelStartPos.y) + panelStartPos.y; m
+            d[i] = new Vector3(xPos, data[i].y, 0);
         }
-        lr.Points = d.ToArray();
+        lr.positionCount = dataLength;
+        lr.SetPositions(d.ToArray());
     }
 
     private void Start()
     {
-        data = new List<Vector2>(dataLength);
+        data = new List<Vector3>(dataLength);
         for (int i = data.Count; i < dataLength; i++)
         {
-            data.Add(Vector2.zero);
+            data.Add(Vector3.zero);
         }
 
         // すべて0で初期化
