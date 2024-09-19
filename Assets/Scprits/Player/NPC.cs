@@ -174,10 +174,10 @@ public class NPC : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && index != GameManagerBase.instance.itIndex)
         {
             NPCGameManager.instance.ChangeIt(index);
-            this.Wait(2f);
+            this.Wait(1f);
         }
     }
 
