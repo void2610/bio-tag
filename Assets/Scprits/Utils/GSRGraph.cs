@@ -61,6 +61,9 @@ public class GSRGraph : MonoBehaviour
     {
         max = data.Max(v => v.y);
         min = data.Min(v => v.y);
+        max = Mathf.Max(max, threshold * 1.5f);
+        min = Mathf.Min(min, -threshold * 1.5f);
+
         float range = max - min;
         if (Mathf.Approximately(range, 0f))
         {
