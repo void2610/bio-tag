@@ -23,6 +23,10 @@ public class GSRGraph : MonoBehaviour
     [SerializeField]
     private float threshold = 5f;
     [SerializeField]
+    private float threshold2 = 1.5f;
+    [SerializeField]
+    private float checkLength = 0.1f;
+    [SerializeField]
     private Vector2 panelStartPos;
     [SerializeField]
     private Vector2 panelEndPos;
@@ -75,6 +79,27 @@ public class GSRGraph : MonoBehaviour
         lr.SetPositions(d);
     }
 
+    private bool CheckExcited(List<float> d)
+    {
+        // 最新の値をチェック
+        if (Mathf.Abs(d[d.Count - 1]) > threshold)
+        {
+            return true;
+        }
+
+        // 過去の値をチェック（閾値の1.5倍を大きく超えると定義）
+        float significantThreshold = threshold * threshold2;
+        for (int i = d.Count - 1; i >= 0 && d.Count - 1 - i < checkLength * dataLength; i--)
+        {
+            if (Mathf.Abs(d[i]) > significantThreshold)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void Start()
     {
         lr = GetComponent<LineRenderer>();
@@ -113,7 +138,7 @@ public class GSRGraph : MonoBehaviour
         thresholdLine2.SetPosition(0, new Vector3(panelStartPos.x, t2, 1000));
         thresholdLine2.SetPosition(1, new Vector3(panelEndPos.x, t2, 1000));
 
-        isExcited = data[data.Count - 1].y > threshold || data[data.Count - 1].y < -threshold;
+        isExcited = CheckExcited(data.Select(v => v.y).ToList());
         lr.material.color = isExcited ? Color.red : Color.white;
 
         if (Input.GetKeyDown(KeyCode.Y))

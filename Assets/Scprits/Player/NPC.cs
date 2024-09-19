@@ -20,6 +20,7 @@ public class NPC : MonoBehaviour
     private NavMeshAgent agent => this.GetComponent<NavMeshAgent>();
     private int jumpAreaType = 3;
     private bool isMovable = true;
+    private VisualEffect itEffect;
 
     public void Wait(float time)
     {
@@ -49,11 +50,9 @@ public class NPC : MonoBehaviour
         agent.speed = moveSpeed;
 
         // VFXをセンサーマネージャーに登録
-        var vfxs = GetComponentsInChildren<VisualEffect>();
-        foreach (var vfx in vfxs)
-        {
-            SensorManager.instance.AddVFX(vfx);
-        }
+        var vfx = transform.Find("PlayerTrail").GetComponent<VisualEffect>();
+        SensorManager.instance.AddVFX(vfx);
+        itEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
     }
 
     void Update()
@@ -81,6 +80,15 @@ public class NPC : MonoBehaviour
         if (agent.isOnOffMeshLink && !isJumping)
         {
             StartCoroutine(ChangeSpeedOnLink());
+        }
+
+        if (index == GameManagerBase.instance.itIndex)
+        {
+            itEffect.SetInt("Rate", 30);
+        }
+        else
+        {
+            itEffect.SetInt("Rate", 0);
         }
     }
 

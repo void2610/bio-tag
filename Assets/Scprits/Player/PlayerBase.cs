@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.VFX;
 using Photon.Pun;
 
 public class PlayerBase : MonoBehaviourPunCallbacks
