@@ -59,7 +59,6 @@ public class UDP : MonoBehaviour
         {
             byte[] data = udp.EndReceive(ar, ref remoteEP);
             string text = Encoding.UTF8.GetString(data);
-            Debug.Log("Receive: " + text);
             value = float.Parse(text);
             count++;
 

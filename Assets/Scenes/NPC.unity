@@ -2140,7 +2140,7 @@ GameObject:
   - component: {fileID: 836973677}
   - component: {fileID: 836973676}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: GraphBG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3632,10 +3632,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d91d89cb507b0490bbfa6fc52dd81d68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dataLength: 300
+  dataLength: 150
   panelStartPos: {x: -11, y: -14.8}
   panelEndPos: {x: 14.5, y: -3.8}
   ZPos: 1000
+  lineMaterial: {fileID: 2100000, guid: 889fd4f4e6399463dba266c78d0bbfb5, type: 2}
   data: []
 --- !u!120 &1385678459
 LineRenderer:
