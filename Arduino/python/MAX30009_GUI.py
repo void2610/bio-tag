@@ -6,12 +6,10 @@ import threading
 import asyncio
 from bleak import BleakClient
 import socket
-import os
-import numpy as np
-from datetime import datetime
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
 
+# import os
+import numpy as np
+# from datetime import datetime
 
 from functions import moving_average, diff_filter
 
@@ -31,15 +29,6 @@ HOST = "127.0.0.1"
 SEND_PORT = 50007
 RECV_PORT = 50008
 udp_client = None
-
-app = QtWidgets.QApplication([])
-
-win = pg.GraphicsLayoutWidget(show=True)  # ウィンドウを作成
-p = win.addPlot(title="Realtime plot")  # ウィンドウ内にプロットのための空間を作成
-curve = p.plot()  # 空の「プロット」を作成（プロットするための曲線）
-curve2 = p.plot()
-th_plot = p.plot()
-th_plot2 = p.plot()
 
 plotcountermark = 0
 
@@ -351,106 +340,36 @@ def is_excited(data, th):
 
 
 def threading_of_plot():
-    color = "w"
     Xm_smoothed = Xm
 
     for i in range(num_filter):
         Xm_smoothed = moving_average(Xm_smoothed, sigma)
 
     Xm_smoothed = diff_filter(Xm_smoothed)
-    color = "r" if is_excited(Xm_smoothed, th) else "w"
-
     udp_client.sendto(str(Xm_smoothed[-1]).encode("utf-8"), (HOST, SEND_PORT))
-
-    # thの値に横線を引く
-    th_plot.setData([th for _ in range(len(Xm_smoothed))], pen="y")
-    th_plot.setPos(ptr, 0)
-    th_plot2.setData([-th for _ in range(len(Xm_smoothed))], pen="y")
-    th_plot2.setPos(ptr, 0)
-
-    if plotcountermark == 0:
-        curve.setData(Xm_smoothed, pen=color)
-        curve.setPos(ptr, 0)
-        curve2.setData(Xm2, pen="b")
-        curve2.setPos(ptr, 0)
-        QtWidgets.QApplication.processEvents()
-
-    if plotcountermark == 1:
-        curve.setData(Xm_smoothed, pen=color)
-        curve.setPos(ptr, 0)
-        curve2.clear()
-        QtWidgets.QApplication.processEvents()
-
-    if plotcountermark == 2:
-        curve2.setData(Xm2, pen="b")
-        curve.clear()
-        curve2.setPos(ptr, 0)
-        QtWidgets.QApplication.processEvents()
 
 
 def on_press(key):
-    global \
-        ifsamplingflag, \
-        countsamplingfile, \
-        plotcountermark, \
-        f1, \
-        f2, \
-        dataname, \
-        windowWidth, \
-        Xm, \
-        Xm2, \
-        ptr, \
-        sigma, \
-        num_filter, \
-        th
+    global ifsamplingflag, countsamplingfile, f1, f2, dataname
 
-    try:
-        if key.char == "c":
-            plotcountermark = plotcountermark + 1
-            if plotcountermark == 3:
-                plotcountermark = 0
-        elif key.char == "o":
-            countsamplingfile += 1
-            timestamp = datetime.now().strftime("%m%d_%H%M%S")
-            dataname = f"{timestamp}"
-            os.makedirs("saved_data", exist_ok=True)
-            f1 = open("saved_data/" + dataname + "1.txt", "w")
-            f2 = open("saved_data/" + dataname + "2.txt", "w")
-            print("The start of sampling")
-            ifsamplingflag = True
-        elif key.char == "p":
-            print("The end of sampling")
-            f1.close()
-            f2.close()
-            ifsamplingflag = False
-        elif key.char == "t":
-            windowWidth += 100
-            if windowWidth > 5000:
-                windowWidth = 100
-            tmp = Xm[-1]
-            tmp2 = Xm2[-1]
-            Xm = linspace(tmp, tmp, windowWidth)
-            Xm2 = linspace(tmp2, tmp2, windowWidth)
-            ptr = -windowWidth
-            print("windowWidth=", windowWidth)
-        elif key.char == "g":
-            sigma += 1
-            if sigma > 756:
-                sigma = 1
-            print("sigma=", sigma)
-        elif key.char == "f":
-            num_filter += 1
-            if num_filter > 10:
-                num_filter = 1
-            print("num_filter=", num_filter)
-        elif key.char == "h":
-            th += 1
-            if th > 10:
-                th = 1
-            print("threshold=", th)
-    except AttributeError:
-        # 特殊キー（例：Shift、Ctrlなど）の場合は無視
-        pass
+    # try:
+    #     if key.char == "o":
+    #         countsamplingfile += 1
+    #         timestamp = datetime.now().strftime("%m%d_%H%M%S")
+    #         dataname = f"{timestamp}"
+    #         os.makedirs("saved_data", exist_ok=True)
+    #         f1 = open("saved_data/" + dataname + "1.txt", "w")
+    #         f2 = open("saved_data/" + dataname + "2.txt", "w")
+    #         print("The start of sampling")
+    #         ifsamplingflag = True
+    #     elif key.char == "p":
+    #         print("The end of sampling")
+    #         f1.close()
+    #         f2.close()
+    #         ifsamplingflag = False
+    # except AttributeError:
+    #     # 特殊キー（例：Shift、Ctrlなど）の場合は無視
+    #     pass
 
 
 def start_key_listener():
@@ -513,15 +432,9 @@ if __name__ == "__main__":
     t1.daemon = True
     t1.start()
 
-    app = QApplication([])
-
-    timer = pg.QtCore.QTimer()
-    timer.timeout.connect(threading_of_plot)
-    timer.start(100)
-
     async def run_app():
         while True:
             await asyncio.sleep(0.1)
-            app.processEvents()
+            threading_of_plot()
 
     loop.run_until_complete(run_app())
