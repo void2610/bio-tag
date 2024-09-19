@@ -2061,6 +2061,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
+  moveSpeed: 9
   index: -1
 --- !u!1 &7776785986142313572
 GameObject:

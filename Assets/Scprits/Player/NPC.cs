@@ -9,10 +9,11 @@ public class NPC : MonoBehaviour
 {
     [SerializeField]
     private GameObject playerNameUIPrefab;
+    [SerializeField]
+    private float moveSpeed = 8f;
     public int index = -1;
 
     private Transform target;
-    private float moveSpeed = 8f;
     private bool isJumping = false;
     private List<Transform> fleeAnchors = new List<Transform>();
     private Animator animator => GetComponent<Animator>();

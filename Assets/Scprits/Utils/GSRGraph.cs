@@ -143,11 +143,11 @@ public class GSRGraph : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Y))
         {
-            threshold--;
+            threshold -= 0.1f;
         }
         else if (Input.GetKeyDown(KeyCode.U))
         {
-            threshold++;
+            threshold += 0.1f;
         }
     }
 }

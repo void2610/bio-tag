@@ -21,6 +21,7 @@ public class GameManagerBase : MonoBehaviourPunCallbacks
     }
 
     public int? gameState { get; protected set; } = 0;
+    [SerializeField]
     protected float gameLength = 60.0f;
     public int itIndex;
     public float lastTagTime;
