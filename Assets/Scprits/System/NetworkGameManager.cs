@@ -24,6 +24,9 @@ public class NetworkGameManager : GameManagerBase
         PhotonNetwork.CurrentRoom.StartGame(PhotonNetwork.ServerTimestamp);
 
         InvokeRepeating("SendScore", 0, 0.1f);
+
+        // TODO: PUN2でもプレイヤーのGameObjectを保持しておいた方がいい
+        itMarker.SetTarget(players[itIndex].transform);
     }
 
     protected override bool IsAllPlayerReady()
@@ -65,7 +68,6 @@ public class NetworkGameManager : GameManagerBase
             {
                 if (IsAllPlayerReady())
                 {
-
                     StartGame();
                 }
             }

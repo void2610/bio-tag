@@ -11,8 +11,6 @@ public class NPCGameManager : GameManagerBase
     [SerializeField]
     private GameMessageUI messageUI;
     [SerializeField]
-    private ItMarker itMarker;
-    [SerializeField]
     private int npcCount = 1;
 
     private List<GameObject> players = new List<GameObject>();

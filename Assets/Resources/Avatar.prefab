@@ -2005,6 +2005,7 @@ MonoBehaviour:
   jumpPower: 6
   walkSpeed: 6
   velocity: {x: 0, y: 0, z: 0}
+  index: -1
 --- !u!114 &6368321461493701097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2794,7 +2795,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2592574321971453481, guid: 21ee40ac3ea8a48ab97a3cb1bc9989cb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2592574321971453481, guid: 21ee40ac3ea8a48ab97a3cb1bc9989cb, type: 3}
       propertyPath: m_LocalPosition.z

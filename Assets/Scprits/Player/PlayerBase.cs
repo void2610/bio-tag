@@ -29,7 +29,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
 
     protected VisualEffect itEffect;
 
-    public int index { public get; private set; } = -1;
+    public int index = -1;
 
     protected virtual void Awake() { }
 

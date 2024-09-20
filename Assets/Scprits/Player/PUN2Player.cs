@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.VFX;
 using System.Collections;
 using Photon.Pun;
 
@@ -7,6 +8,13 @@ public class PUN2Player : PlayerBase, IPunObservable
     protected override void Start()
     {
         base.Start();
+
+        if (!photonView.IsMine)
+        {
+            // VFXをセンサーマネージャーに登録
+            var vfx = transform.Find("PlayerTrail").GetComponent<VisualEffect>();
+            SensorManager.instance.AddVFX(vfx);
+        }
     }
 
     private void Update()
