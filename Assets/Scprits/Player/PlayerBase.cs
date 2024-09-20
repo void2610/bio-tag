@@ -27,6 +27,10 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     protected float onLandTime = 0f;
     protected bool isMovable = true;
 
+    protected VisualEffect itEffect;
+
+    public int index { public get; private set; } = -1;
+
     protected virtual void Awake() { }
 
     protected virtual void Start()
@@ -34,6 +38,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         var canvas = GameObject.Find("WorldSpaceCanvas");
         var ui = Instantiate(playerNameUIPrefab, canvas.transform);
         ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, PlayerPrefs.GetString("PlayerName", "No Name"));
+        itEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
     }
 
     protected virtual void Update()
@@ -93,6 +98,15 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         if (new Vector3(playerDirection.x, 0, playerDirection.z).magnitude > 0.1f)
         {
             this.transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.LookRotation(new Vector3(playerDirection.x, 0, playerDirection.z)), Time.deltaTime * 10);
+        }
+
+        if (this.index == GameManagerBase.instance.itIndex && GameManagerBase.instance.gameState == 1)
+        {
+            itEffect.SetInt("Rate", 20);
+        }
+        else
+        {
+            itEffect.SetInt("Rate", 0);
         }
     }
 

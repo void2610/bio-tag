@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Title.unity
     guid: 6a2e3d20333a64717bc90dde10b6e056
   - enabled: 1
-    path: Assets/Scenes/PUN2Test.unity
+    path: Assets/Scenes/PUN2.unity
     guid: bd5107a020d444c1b9dc19aec5dad5da
   - enabled: 1
     path: Assets/Scenes/NPC.unity
