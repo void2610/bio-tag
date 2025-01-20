@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using Photon.Pun;
 
-public partial class TimerUI : MonoBehaviour
+public class TimerUI : MonoBehaviour
 {
     private TMP_Text _timerText;
 

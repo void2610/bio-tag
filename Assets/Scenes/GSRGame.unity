@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 71829175}
   - component: {fileID: 71829174}
   - component: {fileID: 71829173}
-  - component: {fileID: 71829172}
+  - component: {fileID: 71829176}
   m_Layer: 5
   m_Name: Timer
   m_TagString: Untagged
@@ -158,18 +158,6 @@ RectTransform:
   m_AnchoredPosition: {x: -770, y: 470}
   m_SizeDelta: {x: 300, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &71829172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71829170}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11542e2e6a28a423b8fa4ab9a1f92143, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &71829173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,6 +269,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71829170}
   m_CullTransparentMesh: 1
+--- !u!114 &71829176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71829170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13a8c4bd7eb447478f29729f1c4fac2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &129432738
 GameObject:
   m_ObjectHideFlags: 0
@@ -517,7 +517,7 @@ GameObject:
   - component: {fileID: 302484807}
   - component: {fileID: 302484806}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: GSRGraph
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -646,8 +646,8 @@ MonoBehaviour:
   threshold: 2
   threshold2: 1
   checkLength: 0.2
-  panelStartPos: {x: -10, y: -5}
-  panelEndPos: {x: 10, y: 5}
+  panelStartPos: {x: -10, y: -4}
+  panelEndPos: {x: 10, y: 4}
   lineMaterial: {fileID: 2100000, guid: 889fd4f4e6399463dba266c78d0bbfb5, type: 2}
   data: []
 --- !u!4 &302484808
