@@ -56,7 +56,7 @@ public class NetworkGameManager : GameManagerBase
         }
     }
 
-    private void Update()
+    protected override void Update()
     {
         if (!PhotonNetwork.InRoom) { return; }
         GameState = (int?)PhotonNetwork.CurrentRoom.CustomProperties[GameRoomProperty.KEY_GAME_STATE] ?? 0;

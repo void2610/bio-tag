@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.VFX;
 using UnityEngine.Rendering;
@@ -64,6 +65,7 @@ public class SensorManager : MonoBehaviour
         _tweenList.Add(tw);
     }
 
+    [Obsolete("Obsolete")]
     private void Start()
     {
         _volume = FindObjectOfType<Volume>();

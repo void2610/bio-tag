@@ -15,7 +15,6 @@ public class Npc : MonoBehaviour
     private Animator Animator => GetComponent<Animator>();
     private CharacterController CCon => GetComponent<CharacterController>();
     private NavMeshAgent Agent => this.GetComponent<NavMeshAgent>();
-    private int _jumpAreaType = 3;
     private bool _isMovable = true;
     private VisualEffect _itEffect;
     private Transform _target;

@@ -17,7 +17,7 @@ public class PUN2Player : PlayerBase, IPunObservable
         }
     }
 
-    private void Update()
+    protected override void Update()
     {
         if (photonView.IsMine)
         {

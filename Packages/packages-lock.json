@@ -1,11 +1,13 @@
 {
   "dependencies": {
-    "com.cysharp.unitask": {
-      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.singularitygroup.hotreload": {
+      "version": "file:com.singularitygroup.hotreload",
       "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "9057452c86079e4265228480b1439442894d5078"
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      }
     },
     "com.unity.ai.navigation": {
       "version": "2.0.4",
