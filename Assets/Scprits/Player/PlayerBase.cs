@@ -7,12 +7,12 @@ public class PlayerBase : MonoBehaviourPunCallbacks
 {
     [SerializeField] protected GameObject playerCameraPrefab;
     [SerializeField] protected GameObject playerNameUIPrefab;
-    [FormerlySerializedAs("FootstepAudioClips")] [SerializeField] protected AudioClip[] footstepAudioClips;
-    [FormerlySerializedAs("LandingAudioClip")] [SerializeField] protected AudioClip landingAudioClip;
+    [SerializeField] protected AudioClip[] footstepAudioClips;
+    [SerializeField] protected AudioClip landingAudioClip;
     [SerializeField] protected float jumpPower = 6f;
     [SerializeField] protected float walkSpeed = 6f;
-    [FormerlySerializedAs("FootstepAudioVolume")] [SerializeField] [Range(0, 1)] protected float footstepAudioVolume = 0.5f;
     public Vector3 velocity = Vector3.zero;
+    
     protected Animator Animator => GetComponent<Animator>();
     protected CharacterController CCon => GetComponent<CharacterController>();
     protected GameObject PlayerCamera = null;
@@ -21,6 +21,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     protected float OnLandTime = 0f;
     protected bool isMovable = true;
     protected VisualEffect ItEffect;
+    private const float FOOTSTEP_AUDIO_VOLUME = 0.5f;
 
     public int index = -1;
 
@@ -109,7 +110,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
             var i = Random.Range(0, footstepAudioClips.Length);
-            AudioSource.PlayClipAtPoint(footstepAudioClips[i], transform.TransformPoint(CCon.center), footstepAudioVolume);
+            AudioSource.PlayClipAtPoint(footstepAudioClips[i], transform.TransformPoint(CCon.center), FOOTSTEP_AUDIO_VOLUME);
         }
     }
 
@@ -118,7 +119,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
         if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - OnLandTime > 0.1f)
         {
             OnLandTime = Time.time;
-            AudioSource.PlayClipAtPoint(landingAudioClip, transform.TransformPoint(CCon.center), footstepAudioVolume);
+            AudioSource.PlayClipAtPoint(landingAudioClip, transform.TransformPoint(CCon.center), FOOTSTEP_AUDIO_VOLUME);
         }
     }
 }
