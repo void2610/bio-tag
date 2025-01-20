@@ -75,7 +75,7 @@ public class UDP : MonoBehaviour
     {
         if (count > 0)
         {
-            GSRGraph.instance.AddData(value);
+            GsrGraph.Instance.AddData(value);
             count--;
         }
 
