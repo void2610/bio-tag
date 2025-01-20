@@ -40,14 +40,14 @@ namespace Photon.Realtime.Demo
 
         public void Update()
         {
-            var client = this.lbc;
+            LoadBalancingClient client = this.lbc;
             if (client != null)
             {
                 client.Service();
 
 
-                var uiText = this.StateUiText;
-                var state = client.State.ToString();
+                Text uiText = this.StateUiText;
+                string state = client.State.ToString();
                 if (uiText != null && !uiText.text.Equals(state))
                 {
                     uiText.text = "State: " + state;
