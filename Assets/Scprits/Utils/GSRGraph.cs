@@ -29,7 +29,6 @@ public class GsrGraph : MonoBehaviour
     private float _min = -10;
 
     public void SetThreshold(float t) => threshold = t;
-
     public void AddData(float d)
     {
         for (var i = 0; i < dataLength - 1; i++)
