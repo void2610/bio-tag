@@ -7,15 +7,15 @@ public class TitleUI : MonoBehaviour
     [SerializeField]
     private TMP_InputField playerNameInputField;
 
-    void Start()
+    private void Start()
     {
-        string playerName = PlayerPrefs.GetString("PlayerName", "");
+        var playerName = PlayerPrefs.GetString("PlayerName", "");
         playerNameInputField.text = playerName;
     }
 
     public void OnPlayerButtonClicked()
     {
-        string playerName = playerNameInputField.text;
+        var playerName = playerNameInputField.text;
         PlayerPrefs.SetString("PlayerName", playerName);
         PlayerPrefs.Save();
         SceneManager.LoadScene("PUN2");
@@ -23,7 +23,7 @@ public class TitleUI : MonoBehaviour
 
     public void OnNpcButtonClicked()
     {
-        string playerName = playerNameInputField.text;
+        var playerName = playerNameInputField.text;
         PlayerPrefs.SetString("PlayerName", playerName);
         PlayerPrefs.Save();
         SceneManager.LoadScene("NPC");

@@ -15,7 +15,7 @@ public class NetworkGameManager : GameManagerBase
         if (!PhotonNetwork.IsMasterClient) { return; }
 
         playerScores.Clear();
-        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+        for (var i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             playerScores.Add(0);
         }
@@ -26,7 +26,7 @@ public class NetworkGameManager : GameManagerBase
         InvokeRepeating("SendScore", 0, 0.1f);
 
         // TODO: PUN2でもプレイヤーのGameObjectを保持しておいた方がいい
-        itMarker.SetTarget(players[itIndex].transform);
+        // itMarker.SetTarget(players[itIndex].transform);
     }
 
     protected override bool IsAllPlayerReady()
@@ -59,23 +59,23 @@ public class NetworkGameManager : GameManagerBase
     private void Update()
     {
         if (!PhotonNetwork.InRoom) { return; }
-        gameState = (int?)PhotonNetwork.CurrentRoom.CustomProperties[GameRoomProperty.KeyGameState] ?? 0;
+        GameState = (int?)PhotonNetwork.CurrentRoom.CustomProperties[GameRoomProperty.KEY_GAME_STATE] ?? 0;
 
         // マスタークライアントのみで実行
         if (PhotonNetwork.IsMasterClient)
         {
-            if (gameState == 0)
+            if (GameState == 0)
             {
                 if (IsAllPlayerReady())
                 {
                     StartGame();
                 }
             }
-            else if (gameState == 1)
+            else if (GameState == 1)
             {
                 playerScores[itIndex - 1] += Time.deltaTime;
-                PhotonNetwork.CurrentRoom.TryGetStartTime(out int timestamp);
-                float elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
+                PhotonNetwork.CurrentRoom.TryGetStartTime(out var timestamp);
+                var elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
                 if (elapsedTime >= gameLength)
                 {
                     CancelInvoke("SendScore");
@@ -85,7 +85,7 @@ public class NetworkGameManager : GameManagerBase
         }
 
         // 全てのクライアントで実行
-        if (gameState == 0)
+        if (GameState == 0)
         {
             if (Input.GetKeyDown(KeyCode.F))
             {
@@ -101,13 +101,13 @@ public class NetworkGameManager : GameManagerBase
 
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
-        if (propertiesThatChanged.ContainsKey(GameRoomProperty.KeyItIndex))
+        if (propertiesThatChanged.ContainsKey(GameRoomProperty.KEY_IT_INDEX))
         {
             PhotonNetwork.CurrentRoom.TryGetItIndex(out itIndex);
         }
-        if (propertiesThatChanged.ContainsKey(GameRoomProperty.KeyGameState))
+        if (propertiesThatChanged.ContainsKey(GameRoomProperty.KEY_GAME_STATE))
         {
-            PhotonNetwork.CurrentRoom.TryGetGameState(out int gameState);
+            PhotonNetwork.CurrentRoom.TryGetGameState(out var gameState);
             if (gameState == 2)
             {
                 messageUI.SetMessage("Game Over");

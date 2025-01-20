@@ -47,8 +47,8 @@ public class UDP : MonoBehaviour
     // 追加: 数値を送信するメソッド
     public void SendData(float value)
     {
-        string message = value.ToString();
-        byte[] data = Encoding.UTF8.GetBytes(message);
+        var message = value.ToString();
+        var data = Encoding.UTF8.GetBytes(message);
         udp.Send(data, data.Length, REMOTE_IP, REMOTE_PORT);
     }
 
@@ -57,8 +57,8 @@ public class UDP : MonoBehaviour
     {
         try
         {
-            byte[] data = udp.EndReceive(ar, ref remoteEP);
-            string text = Encoding.UTF8.GetString(data);
+            var data = udp.EndReceive(ar, ref remoteEP);
+            var text = Encoding.UTF8.GetString(data);
             value = float.Parse(text);
             count++;
 

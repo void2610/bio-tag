@@ -7,20 +7,20 @@ using UnityEngine;
 
 public class ScoreBoard : MonoBehaviour
 {
-    private TextMeshProUGUI label => this.GetComponent<TextMeshProUGUI>();
+    private TextMeshProUGUI Label => this.GetComponent<TextMeshProUGUI>();
 
-    private StringBuilder builder;
-    private float elapsedTime;
-    private bool isNetworked = false;
+    private StringBuilder _builder;
+    private float _elapsedTime;
+    private bool _isNetworked = false;
 
     private void Start()
     {
-        builder = new StringBuilder();
-        elapsedTime = 0f;
+        _builder = new StringBuilder();
+        _elapsedTime = 0f;
 
-        if (GameManagerBase.instance.GetType() == typeof(NetworkGameManager))
+        if (GameManagerBase.Instance.GetType() == typeof(NetworkGameManager))
         {
-            isNetworked = true;
+            _isNetworked = true;
         }
     }
 
@@ -30,13 +30,13 @@ public class ScoreBoard : MonoBehaviour
 
 
         // 0.1秒毎にテキストを更新する
-        elapsedTime += Time.deltaTime;
-        if (isNetworked)
+        _elapsedTime += Time.deltaTime;
+        if (_isNetworked)
         {
-            if (elapsedTime > 0.1f)
+            if (_elapsedTime > 0.1f)
             {
                 if (!PhotonNetwork.InRoom) { return; }
-                elapsedTime = 0f;
+                _elapsedTime = 0f;
                 UpdateLabelNetwork();
             }
         }
@@ -54,7 +54,7 @@ public class ScoreBoard : MonoBehaviour
             (p1, p2) =>
             {
                 // スコアが少ない順にソートする
-                int diff = p1.GetScore() - p2.GetScore();
+                var diff = p1.GetScore() - p2.GetScore();
                 if (diff != 0)
                 {
                     return diff;
@@ -63,24 +63,24 @@ public class ScoreBoard : MonoBehaviour
             }
         );
 
-        builder.Clear();
+        _builder.Clear();
         foreach (var player in players)
         {
-            builder.AppendLine($"{player.NickName} : {player.GetScore()}");
+            _builder.AppendLine($"{player.NickName} : {player.GetScore()}");
         }
-        label.text = builder.ToString();
+        Label.text = _builder.ToString();
     }
 
     private void UpdateLabel()
     {
-        List<float> s = GameManagerBase.instance.playerScores;
-        List<string> n = GameManagerBase.instance.playerNames;
+        var s = GameManagerBase.Instance.playerScores;
+        var n = GameManagerBase.Instance.playerNames;
 
         // StringBuilderを使用してスコアを表示
-        builder.Clear();
+        _builder.Clear();
         var playerData = new List<(string name, float score)>();
 
-        for (int i = 0; i < s.Count; i++)
+        for (var i = 0; i < s.Count; i++)
         {
             playerData.Add((n[i], s[i]));
         }
@@ -90,9 +90,9 @@ public class ScoreBoard : MonoBehaviour
 
         foreach (var player in playerData)
         {
-            int score = (int)player.score;
-            builder.AppendLine($"{player.name} : {score}");
+            var score = (int)player.score;
+            _builder.AppendLine($"{player.name} : {score}");
         }
-        label.text = builder.ToString();
+        Label.text = _builder.ToString();
     }
 }

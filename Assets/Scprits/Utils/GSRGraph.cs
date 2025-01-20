@@ -49,7 +49,7 @@ public class GSRGraph : MonoBehaviour
 
     public void AddData(float d)
     {
-        for (int i = 0; i < dataLength - 1; i++)
+        for (var i = 0; i < dataLength - 1; i++)
         {
             data[i] = data[i + 1];
         }
@@ -64,7 +64,7 @@ public class GSRGraph : MonoBehaviour
         max = Mathf.Max(max, threshold * 1.5f);
         min = Mathf.Min(min, -threshold * 1.5f);
 
-        float range = max - min;
+        var range = max - min;
         if (Mathf.Approximately(range, 0f))
         {
             range = 1f;
@@ -72,9 +72,9 @@ public class GSRGraph : MonoBehaviour
 
         var d = data.Select((v, i) =>
         {
-            float normalizedY = (v.y - min) / range;
-            float xPos = panelStartPos.x + i * (panelEndPos.x - panelStartPos.x) / (dataLength - 1);
-            float yPos = normalizedY * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
+            var normalizedY = (v.y - min) / range;
+            var xPos = panelStartPos.x + i * (panelEndPos.x - panelStartPos.x) / (dataLength - 1);
+            var yPos = normalizedY * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
             return new Vector3(xPos, yPos, ZPos);
         }).ToArray();
 
@@ -91,8 +91,8 @@ public class GSRGraph : MonoBehaviour
         }
 
         // 過去の値をチェック（閾値の1.5倍を大きく超えると定義）
-        float significantThreshold = threshold * threshold2;
-        for (int i = d.Count - 1; i >= 0 && d.Count - 1 - i < checkLength * dataLength; i--)
+        var significantThreshold = threshold * threshold2;
+        for (var i = d.Count - 1; i >= 0 && d.Count - 1 - i < checkLength * dataLength; i--)
         {
             if (Mathf.Abs(d[i]) > significantThreshold)
             {
@@ -113,12 +113,12 @@ public class GSRGraph : MonoBehaviour
         thresholdLine2.positionCount = 2;
 
         data = new List<Vector3>(dataLength);
-        for (int i = data.Count; i < dataLength; i++)
+        for (var i = data.Count; i < dataLength; i++)
         {
             data.Add(Vector3.zero);
         }
 
-        for (int i = 0; i < dataLength; i++)
+        for (var i = 0; i < dataLength; i++)
         {
             AddData(0);
         }
@@ -126,13 +126,13 @@ public class GSRGraph : MonoBehaviour
 
     private void Update()
     {
-        float range = max - min;
+        var range = max - min;
         if (Mathf.Approximately(range, 0f))
         {
             range = 1f;
         }
-        float t1 = (threshold - min) / range;
-        float t2 = (-threshold - min) / range;
+        var t1 = (threshold - min) / range;
+        var t2 = (-threshold - min) / range;
         t1 = t1 * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
         t2 = t2 * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
 

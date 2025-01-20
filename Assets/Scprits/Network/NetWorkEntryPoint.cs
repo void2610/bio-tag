@@ -7,7 +7,7 @@ public class NetWorkEntryPoint : MonoBehaviourPunCallbacks
 {
     private void Start()
     {
-        string playerName = PlayerPrefs.GetString("PlayerName", "No Name");
+        var playerName = PlayerPrefs.GetString("PlayerName", "No Name");
         PhotonNetwork.NickName = playerName;
 
         // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する

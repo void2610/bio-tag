@@ -13,7 +13,7 @@ public class PUN2Player : PlayerBase, IPunObservable
         {
             // VFXをセンサーマネージャーに登録
             var vfx = transform.Find("PlayerTrail").GetComponent<VisualEffect>();
-            SensorManager.instance.AddVFX(vfx);
+            SensorManager.Instance.AddVFX(vfx);
         }
     }
 
@@ -21,11 +21,11 @@ public class PUN2Player : PlayerBase, IPunObservable
     {
         if (photonView.IsMine)
         {
-            if (playerCamera == null)
+            if (PlayerCamera == null)
             {
-                playerCamera = Instantiate(playerCameraPrefab);
-                playerCamera.name = "PlayerCamera";
-                playerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
+                PlayerCamera = Instantiate(playerCameraPrefab);
+                PlayerCamera.name = "PlayerCamera";
+                PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
             }
             LocalMoving();
         }
@@ -48,9 +48,9 @@ public class PUN2Player : PlayerBase, IPunObservable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (photonView.IsMine && other.CompareTag("Player") && PhotonNetwork.CurrentRoom.TryGetLastTagTime(out double lastTagTime))
+        if (photonView.IsMine && other.CompareTag("Player") && PhotonNetwork.CurrentRoom.TryGetLastTagTime(out var lastTagTime))
         {
-            if (PhotonNetwork.ServerTimestamp - lastTagTime < 1000 || !PhotonNetwork.CurrentRoom.TryGetItIndex(out int itIndex))
+            if (PhotonNetwork.ServerTimestamp - lastTagTime < 1000 || !PhotonNetwork.CurrentRoom.TryGetItIndex(out var itIndex))
             {
                 return;
             }

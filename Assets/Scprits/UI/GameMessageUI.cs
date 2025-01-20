@@ -4,13 +4,13 @@ using TMPro;
 
 public class GameMessageUI : MonoBehaviour
 {
-    private TMP_Text messageText;
+    private TMP_Text _messageText;
     public void SetMessage(string message)
     {
-        messageText.text = message;
+        _messageText.text = message;
     }
-    void Start()
+    private void Start()
     {
-        messageText = this.GetComponent<TMP_Text>();
+        _messageText = this.GetComponent<TMP_Text>();
     }
 }

@@ -7,12 +7,12 @@ using Photon.Realtime;
 
 public class GameManagerBase : MonoBehaviourPunCallbacks
 {
-    public static GameManagerBase instance;
+    public static GameManagerBase Instance;
     protected virtual void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
         }
         else
         {
@@ -20,11 +20,9 @@ public class GameManagerBase : MonoBehaviourPunCallbacks
         }
     }
 
-    public int? gameState { get; protected set; } = 0;
-    [SerializeField]
-    protected ItMarker itMarker;
-    [SerializeField]
-    protected float gameLength = 60.0f;
+    [SerializeField] protected ItMarker itMarker;
+    [SerializeField] protected float gameLength = 60.0f;
+    public int? GameState { get; protected set; } = 0;
     public int itIndex;
     public float lastTagTime;
     public List<float> playerScores = new List<float>();

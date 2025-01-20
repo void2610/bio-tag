@@ -7,12 +7,12 @@ using DG.Tweening;
 
 public class SensorManager : MonoBehaviour
 {
-    public static SensorManager instance;
+    public static SensorManager Instance;
     private void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
         }
         else
         {
@@ -20,64 +20,64 @@ public class SensorManager : MonoBehaviour
         }
     }
 
-    private bool sensorValue = false;
-    private List<VisualEffect> vfxs = new List<VisualEffect>();
-    private List<Tween> tweens = new List<Tween>();
-    private Volume volume;
+    private bool _sensorValue = false;
+    private readonly List<VisualEffect> _vfxList = new ();
+    private readonly List<Tween> _tweenList = new ();
+    private Volume _volume;
 
     public void AddVFX(VisualEffect vfx)
     {
-        vfxs.Add(vfx);
+        _vfxList.Add(vfx);
     }
 
     private void SetAlpha(float a, float d)
     {
-        foreach (var vfx in vfxs)
+        foreach (var vfx in _vfxList)
         {
             var t = DOTween.To(() => vfx.GetFloat("alpha"), x => vfx.SetFloat("alpha", x), a, d);
-            tweens.Add(t);
+            _tweenList.Add(t);
         }
     }
 
     private void ChangeToExcited()
     {
-        foreach (var t in tweens)
+        foreach (var t in _tweenList)
         {
             t.Kill();
         }
-        tweens.Clear();
+        _tweenList.Clear();
         SetAlpha(0.0f, 1f);
-        volume.profile.TryGet(out Vignette vignette);
+        _volume.profile.TryGet(out Vignette vignette);
         var tw = DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 0.5f, 1f);
-        tweens.Add(tw);
+        _tweenList.Add(tw);
     }
     private void ChangeToCalm()
     {
-        foreach (var t in tweens)
+        foreach (var t in _tweenList)
         {
             t.Kill();
         }
-        tweens.Clear();
+        _tweenList.Clear();
         SetAlpha(1.0f, 3f);
-        volume.profile.TryGet(out Vignette vignette);
+        _volume.profile.TryGet(out Vignette vignette);
         var tw = DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 0f, 1f);
-        tweens.Add(tw);
+        _tweenList.Add(tw);
     }
 
     private void Start()
     {
-        volume = FindObjectOfType<Volume>();
+        _volume = FindObjectOfType<Volume>();
     }
 
     private void Update()
     {
-        sensorValue = GSRGraph.instance.isExcited;
+        _sensorValue = GSRGraph.instance.isExcited;
 
-        if (Input.GetKeyDown(KeyCode.J) || sensorValue)
+        if (Input.GetKeyDown(KeyCode.J) || _sensorValue)
         {
             ChangeToExcited();
         }
-        else if (Input.GetKeyDown(KeyCode.H) || !sensorValue)
+        else if (Input.GetKeyDown(KeyCode.H) || !_sensorValue)
         {
             ChangeToCalm();
         }

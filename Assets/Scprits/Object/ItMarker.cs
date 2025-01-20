@@ -3,14 +3,14 @@ using DG.Tweening;
 
 public class ItMarker : MonoBehaviour
 {
-    private Transform target;
-    private Vector3 offset = new Vector3(0, 2f, 0);
-    private float floatDistance = 0.1f;
-    private float floatOffsetY = 0f;
+    private Transform _target;
+    private readonly Vector3 _offset = new Vector3(0, 2f, 0);
+    private readonly float _floatDistance = 0.1f;
+    private float _floatOffsetY = 0f;
 
     public void SetTarget(Transform target)
     {
-        this.target = target;
+        this._target = target;
     }
 
     private void Start()
@@ -19,22 +19,22 @@ public class ItMarker : MonoBehaviour
 
         // floatOffsetYをアニメーションさせる
         DOTween.Sequence()
-            .Append(DOTween.To(() => floatOffsetY, x => floatOffsetY = x, floatDistance, 1f).SetEase(Ease.InOutSine))
-            .Append(DOTween.To(() => floatOffsetY, x => floatOffsetY = x, -floatDistance / 2, 1f).SetEase(Ease.InOutSine))
+            .Append(DOTween.To(() => _floatOffsetY, x => _floatOffsetY = x, _floatDistance, 1f).SetEase(Ease.InOutSine))
+            .Append(DOTween.To(() => _floatOffsetY, x => _floatOffsetY = x, -_floatDistance / 2, 1f).SetEase(Ease.InOutSine))
             .SetLoops(-1, LoopType.Yoyo)
             .Play();
     }
 
     private void Update()
     {
-        if (target == null)
+        if (!_target)
         {
             transform.position = new Vector3(0, -100, 0);
         }
         else
         {
             // ターゲットの位置＋オフセット＋浮動分を設定
-            transform.position = target.position + offset + new Vector3(0, floatOffsetY, 0);
+            transform.position = _target.position + _offset + new Vector3(0, _floatOffsetY, 0);
         }
     }
 }

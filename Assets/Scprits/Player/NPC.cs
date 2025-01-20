@@ -5,120 +5,111 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 
-public class NPC : MonoBehaviour
+public class Npc : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject playerNameUIPrefab;
-    [SerializeField]
-    private float moveSpeed = 8f;
+    [SerializeField] private GameObject playerNameUIPrefab;
+    [SerializeField] private float moveSpeed = 8f;
     public int index = -1;
+    
+    private readonly List<Transform> _fleeAnchors = new List<Transform>();
+    private Animator Animator => GetComponent<Animator>();
+    private CharacterController CCon => GetComponent<CharacterController>();
+    private NavMeshAgent Agent => this.GetComponent<NavMeshAgent>();
+    private int _jumpAreaType = 3;
+    private bool _isMovable = true;
+    private VisualEffect _itEffect;
+    private Transform _target;
+    private bool _isJumping = false;
 
-    private Transform target;
-    private bool isJumping = false;
-    private List<Transform> fleeAnchors = new List<Transform>();
-    private Animator animator => GetComponent<Animator>();
-    private CharacterController cCon => GetComponent<CharacterController>();
-    private NavMeshAgent agent => this.GetComponent<NavMeshAgent>();
-    private int jumpAreaType = 3;
-    private bool isMovable = true;
-    private VisualEffect itEffect;
-
-    public void Wait(float time)
+    private void Wait(float time)
     {
         StartCoroutine(WaitCoroutine(time));
     }
 
     public void SetTarget(Transform target)
     {
-        this.target = target;
+        this._target = target;
     }
 
-    void Awake()
+    private void Awake()
     {
         var anchors = GameObject.Find("NPCFleeAnchors");
-        for (int i = 0; i < anchors.transform.childCount; i++)
+        for (var i = 0; i < anchors.transform.childCount; i++)
         {
-            fleeAnchors.Add(anchors.transform.GetChild(i));
+            _fleeAnchors.Add(anchors.transform.GetChild(i));
         }
     }
 
-    void Start()
+    private void Start()
     {
         var canvas = GameObject.Find("WorldSpaceCanvas");
         var ui = Instantiate(playerNameUIPrefab, canvas.transform);
         ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, "NPC" + index);
 
-        agent.speed = moveSpeed;
+        Agent.speed = moveSpeed;
 
         // VFXをセンサーマネージャーに登録
         var vfx = transform.Find("PlayerTrail").GetComponent<VisualEffect>();
-        SensorManager.instance.AddVFX(vfx);
-        itEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
+        SensorManager.Instance.AddVFX(vfx);
+        _itEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
     }
 
-    void Update()
+    private void Update()
     {
-        agent.isStopped = !isMovable;
-        if (target != null && GameManagerBase.instance.gameState == 1 && isMovable)
+        Agent.isStopped = !_isMovable;
+        if (_target && GameManagerBase.Instance.GameState == 1 && _isMovable)
         {
-            if (index != GameManagerBase.instance.itIndex)
+            if (index != GameManagerBase.Instance.itIndex)
             {
                 Flee();
             }
             else
             {
-                agent.SetDestination(target.position);
+                Agent.SetDestination(_target.position);
             }
-            animator.SetFloat("Speed", agent.velocity.magnitude);
-            animator.SetFloat("MotionSpeed", 1);
+            Animator.SetFloat("Speed", Agent.velocity.magnitude);
+            Animator.SetFloat("MotionSpeed", 1);
         }
         else
         {
-            animator.SetFloat("Speed", 0);
-            animator.SetFloat("MotionSpeed", 0);
+            Animator.SetFloat("Speed", 0);
+            Animator.SetFloat("MotionSpeed", 0);
         }
 
-        if (agent.isOnOffMeshLink && !isJumping)
+        if (Agent.isOnOffMeshLink && !_isJumping)
         {
             StartCoroutine(ChangeSpeedOnLink());
         }
 
-        if (index == GameManagerBase.instance.itIndex)
-        {
-            itEffect.SetInt("Rate", 30);
-        }
-        else
-        {
-            itEffect.SetInt("Rate", 0);
-        }
+        _itEffect.SetInt("Rate", index == GameManagerBase.Instance.itIndex ? 30 : 0);
     }
 
     private IEnumerator WaitCoroutine(float time)
     {
-        isMovable = false;
+        _isMovable = false;
         yield return new WaitForSeconds(time);
-        isMovable = true;
+        _isMovable = true;
     }
 
     private IEnumerator ChangeSpeedOnLink()
     {
-        isJumping = true;
-        animator.SetBool("Jump", true);
-        animator.SetBool("Grounded", false);
+        _isJumping = true;
+        Animator.SetBool("Jump", true);
+        Animator.SetBool("Grounded", false);
 
-        agent.updatePosition = false;
+        Agent.updatePosition = false;
         // プレイヤーの方向を向く
-        transform.LookAt(target);
-        agent.speed = 0;
+        transform.LookAt(_target);
+        Agent.speed = 0;
 
-        Vector3 startPos = agent.transform.position;
-        Vector3 endPos = agent.currentOffMeshLinkData.endPos + Vector3.up * agent.baseOffset;
+        var startPos = Agent.transform.position;
+        var endPos = Agent.currentOffMeshLinkData.endPos + Vector3.up * Agent.baseOffset;
 
-        float duration = Vector3.Distance(agent.transform.position, endPos) / (moveSpeed * 0.8f);
+        var duration = Vector3.Distance(Agent.transform.position, endPos) / (moveSpeed * 0.8f);
 
         float time = 0;
 
-        Vector3 middle = new Vector3((startPos.x + endPos.x) / 2, Mathf.Max(startPos.y, endPos.y) + 0.5f, (startPos.z + endPos.z) / 2);
+        var middle = new Vector3((startPos.x + endPos.x) / 2, Mathf.Max(startPos.y, endPos.y) + 0.5f, (startPos.z + endPos.z) / 2);
         this.transform.DOPath(new Vector3[] { startPos, middle, endPos }, duration).SetEase(Ease.Linear);
 
         while (time < duration)
@@ -126,33 +117,33 @@ public class NPC : MonoBehaviour
             time += Time.deltaTime;
             yield return null;
         }
-        agent.CompleteOffMeshLink();
+        Agent.CompleteOffMeshLink();
 
-        agent.Warp(endPos);
-        animator.SetBool("Jump", false);
-        animator.SetBool("Grounded", true);
+        Agent.Warp(endPos);
+        Animator.SetBool("Jump", false);
+        Animator.SetBool("Grounded", true);
 
         yield return new WaitForSeconds(0.3f);
 
-        agent.speed = moveSpeed;
-        agent.updatePosition = true;
-        isJumping = false;
+        Agent.speed = moveSpeed;
+        Agent.updatePosition = true;
+        _isJumping = false;
     }
 
     private void Flee()
     {
         // アンカーポイントの中から、最もプレイヤーから遠いものを選択
         Transform farthestAnchor = null;
-        float maxDistance = float.MinValue;
+        var maxDistance = float.MinValue;
 
-        foreach (var anchor in fleeAnchors)
+        foreach (var anchor in _fleeAnchors)
         {
-            float distanceToTarget = Vector3.Distance(anchor.position, target.position);
+            var distanceToTarget = Vector3.Distance(anchor.position, _target.position);
             if (distanceToTarget > maxDistance)
             {
                 // NavMesh上で有効な経路かどうかを確認
-                NavMeshPath path = new NavMeshPath();
-                agent.CalculatePath(anchor.position, path);
+                var path = new NavMeshPath();
+                Agent.CalculatePath(anchor.position, path);
 
                 if (path.status == NavMeshPathStatus.PathComplete)
                 {
@@ -162,19 +153,19 @@ public class NPC : MonoBehaviour
             }
         }
 
-        if (farthestAnchor != null)
+        if (farthestAnchor)
         {
             // 計算されたアンカーポイントに向けてエージェントを移動させる
-            NavMeshPath path = new NavMeshPath();
-            agent.CalculatePath(farthestAnchor.position, path);
+            var path = new NavMeshPath();
+            Agent.CalculatePath(farthestAnchor.position, path);
 
             if (path.status == NavMeshPathStatus.PathComplete)
             {
-                agent.SetDestination(farthestAnchor.position);
+                Agent.SetDestination(farthestAnchor.position);
             }
 
             // オフメッシュリンクに到達したらリンクを使う処理
-            if (agent.isOnOffMeshLink && !isJumping)
+            if (Agent.isOnOffMeshLink && !_isJumping)
             {
                 StartCoroutine(ChangeSpeedOnLink());
             }
@@ -183,11 +174,10 @@ public class NPC : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && index != GameManagerBase.instance.itIndex)
-        {
-            NPCGameManager.instance.ChangeIt(index);
-            this.Wait(1f);
-        }
+        if (!other.CompareTag("Player") || index == GameManagerBase.Instance.itIndex) return;
+        
+        GameManagerBase.Instance.ChangeIt(index);
+        this.Wait(1f);
     }
 
     private void OnFootstep()

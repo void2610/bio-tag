@@ -3,30 +3,30 @@ using Photon.Realtime;
 
 public static class PlayerProperty
 {
-    private const string KeyIsReady = "r";
-    private const string KeyScore = "s";
+    private const string KEY_IS_READY = "r";
+    private const string KEY_SCORE = "s";
 
-    private static readonly Hashtable propsToSet = new Hashtable();
+    private static readonly Hashtable _propsToSet = new Hashtable();
 
     public static bool IsReady(this Player player)
     {
-        return player.CustomProperties[KeyIsReady] is bool value && value;
+        return player.CustomProperties[KEY_IS_READY] is bool value && value;
     }
 
     public static int GetScore(this Player player)
     {
-        return player.CustomProperties[KeyScore] is int value ? value : 0;
+        return player.CustomProperties[KEY_SCORE] is int value ? value : 0;
     }
 
     public static void SetReady(this Player player, bool value)
     {
-        propsToSet[KeyIsReady] = value;
-        player.SetCustomProperties(propsToSet);
+        _propsToSet[KEY_IS_READY] = value;
+        player.SetCustomProperties(_propsToSet);
     }
 
     public static void SetScore(this Player player, int value)
     {
-        propsToSet[KeyScore] = value;
-        player.SetCustomProperties(propsToSet);
+        _propsToSet[KEY_SCORE] = value;
+        player.SetCustomProperties(_propsToSet);
     }
 }

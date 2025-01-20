@@ -16,22 +16,22 @@ public class SinglePlayer : PlayerBase
     protected override void Update()
     {
         base.Update();
-        if (playerCamera == null)
+        if (!PlayerCamera)
         {
-            playerCamera = Instantiate(playerCameraPrefab);
-            playerCamera.name = "PlayerCamera";
-            playerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
+            PlayerCamera = Instantiate(playerCameraPrefab);
+            PlayerCamera.name = "PlayerCamera";
+            PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
         }
         LocalMoving();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (GameManagerBase.instance.gameState != 1)
+        if (GameManagerBase.Instance.GameState != 1)
         {
             return;
         }
 
-        NPCGameManager.instance.ChangeIt(index);
+        GameManagerBase.Instance.ChangeIt(index);
     }
 }

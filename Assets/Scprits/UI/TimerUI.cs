@@ -4,31 +4,31 @@ using Photon.Pun;
 
 public class TimerUI : MonoBehaviour
 {
-    private TMP_Text timerText;
-    void Start()
+    private TMP_Text _timerText;
+
+    private void Start()
     {
-        timerText = this.GetComponent<TMP_Text>();
-        timerText.text = "";
+        _timerText = this.GetComponent<TMP_Text>();
+        _timerText.text = "";
     }
 
     private void Update()
     {
-        if (GameManagerBase.instance.GetType() == typeof(NetworkGameManager))
+        if (GameManagerBase.Instance.GetType() == typeof(NetworkGameManager))
         {
             if (!PhotonNetwork.InRoom) { return; }
-            if (GameManagerBase.instance.gameState != 1) { return; }
-            if (!PhotonNetwork.CurrentRoom.TryGetStartTime(out int timestamp)) { return; }
+            if (GameManagerBase.Instance.GameState != 1) { return; }
+            if (!PhotonNetwork.CurrentRoom.TryGetStartTime(out var timestamp)) { return; }
 
-            float elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
-            timerText.text = elapsedTime.ToString("f2");
+            var elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
+            _timerText.text = elapsedTime.ToString("f2");
         }
-        else if (GameManagerBase.instance.GetType() == typeof(NPCGameManager))
+        else if (GameManagerBase.Instance.GetType() == typeof(NpcGameManager))
         {
-            NPCGameManager i = (NPCGameManager)GameManagerBase.instance;
-            if (i.gameState != 1) return;
-            float elapsedTime = i.getElapsedTime();
-            timerText.text = elapsedTime.ToString("f2");
+            var i = (NpcGameManager)GameManagerBase.Instance;
+            if (i.GameState != 1) return;
+            var elapsedTime = i.getElapsedTime();
+            _timerText.text = elapsedTime.ToString("f2");
         }
-
     }
 }

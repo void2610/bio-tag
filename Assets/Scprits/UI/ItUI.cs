@@ -4,18 +4,18 @@ using TMPro;
 
 public class ItUI : MonoBehaviour
 {
-    private TMP_Text itText;
-    void Start()
+    private TMP_Text _itText;
+    private void Start()
     {
-        itText = this.GetComponent<TMP_Text>();
-        itText.text = "";
+        _itText = this.GetComponent<TMP_Text>();
+        _itText.text = "";
     }
 
-    void Update()
+    private void Update()
     {
         if (!PhotonNetwork.InRoom) { return; }
-        if (!PhotonNetwork.CurrentRoom.TryGetItIndex(out int itIndex)) { return; }
+        if (!PhotonNetwork.CurrentRoom.TryGetItIndex(out var itIndex)) { return; }
 
-        itText.text = $"It: {PhotonNetwork.PlayerList[itIndex - 1].NickName}";
+        _itText.text = $"It: {PhotonNetwork.PlayerList[itIndex - 1].NickName}";
     }
 }
