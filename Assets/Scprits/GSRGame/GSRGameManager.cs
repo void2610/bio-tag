@@ -12,18 +12,20 @@ namespace GSRGame
     public class GsrGameManager : MonoBehaviour
     {
         public static GsrGameManager Instance;
-        public readonly ReactiveProperty<GsrState> TargetState = new(GsrState.Calmed);
+        public readonly ReactiveProperty<GsrState> TargetState = new();
         public readonly ReactiveProperty<int> Score = new(0);
         public readonly ReactiveProperty<float> Time = new(0);
-        public const float TIME_LIMIT = 30.0f;
+        public const float TIME_LIMIT = 60.0f;
 
         private async UniTaskVoid UpdateTarget()
         {
             TargetState.Value = GsrState.Calmed;
-            await UniTask.Delay((int)(Random.Range(10.0f, 15.0f) * 1000));
+            await UniTask.Delay(15 * 1000);
             TargetState.Value = GsrState.Excited;
-            await UniTask.Delay((int)(Random.Range(10.0f, 15.0f) * 1000));
+            await UniTask.Delay(15 * 1000);
             TargetState.Value = GsrState.Calmed;
+            await UniTask.Delay(15 * 1000);
+            TargetState.Value = GsrState.Excited;
         }
     
         private void Awake()

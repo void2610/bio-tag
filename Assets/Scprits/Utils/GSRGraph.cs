@@ -5,11 +5,6 @@ using System.Linq;
 public class GsrGraph : MonoBehaviour
 {
     public static GsrGraph Instance;
-    private void Awake()
-    {
-        if (Instance == null) Instance = this;
-        else Destroy(this);
-    }
 
     [SerializeField] private int dataLength = 500;
     [SerializeField] private float threshold = 5f;
@@ -27,7 +22,7 @@ public class GsrGraph : MonoBehaviour
     private float _min = -10;
     private Vector3 _lastData = Vector3.zero;
 
-    public void SetThreshold(float t) => threshold = t;
+    public void SetLineColor(Color c) => _lr.material.color = c;
     public Vector3 GetLastData() => _lastData;
     public void AddData(float d)
     {
@@ -77,15 +72,21 @@ public class GsrGraph : MonoBehaviour
         return false;
     }
 
-    private void Start()
+    private void Awake()
     {
+        if (Instance == null) Instance = this;
+        else Destroy(this);
+        
         _lr = GetComponent<LineRenderer>();
         _lr.material = lineMaterial;
         _thresholdLine1 = this.transform.Find("th1").GetComponent<LineRenderer>();
         _thresholdLine2 = this.transform.Find("th2").GetComponent<LineRenderer>();
         _thresholdLine1.positionCount = 2;
         _thresholdLine2.positionCount = 2;
+    }
 
+    private void Start()
+    {
         data = new List<Vector3>(dataLength);
         for (var i = data.Count; i < dataLength; i++)
             data.Add(Vector3.zero);
@@ -109,7 +110,7 @@ public class GsrGraph : MonoBehaviour
         _thresholdLine2.SetPosition(1, new Vector3(panelEndPos.x, t2, 0) + this.transform.position);
 
         IsExcited = CheckExcited(data.Select(v => v.y).ToList());
-        _lr.material.color = IsExcited ? Color.red : Color.white;
+        // _lr.material.color = IsExcited ? Color.red : Color.white;
 
         if (Input.GetKeyDown(KeyCode.Y))
             threshold -= 0.1f;
