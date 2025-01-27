@@ -10,7 +10,7 @@ namespace GSRGame
         private void Start()
         {
             _text = this.GetComponent<TextMeshProUGUI>();
-            GsrGameManager.Instance.Time.Subscribe((t) =>
+            GsrGameManager.Instance.CurrentTime.Subscribe((t) =>
             {
                 _text.text = (GsrGameManager.TIME_LIMIT - t).ToString("F2");
             }).AddTo(this);

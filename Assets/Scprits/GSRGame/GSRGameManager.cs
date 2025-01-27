@@ -14,8 +14,10 @@ namespace GSRGame
         public static GsrGameManager Instance;
         public readonly ReactiveProperty<GsrState> TargetState = new();
         public readonly ReactiveProperty<int> Score = new(0);
-        public readonly ReactiveProperty<float> Time = new(0);
+        public readonly ReactiveProperty<float> CurrentTime = new(0);
         public const float TIME_LIMIT = 60.0f;
+        
+        private bool _isGameEnd = false;
 
         private async UniTaskVoid UpdateTarget()
         {
@@ -43,7 +45,13 @@ namespace GSRGame
                 Score.Value += 1;
             }
             
-            Time.Value += UnityEngine.Time.deltaTime;
+            CurrentTime.Value += UnityEngine.Time.deltaTime;
+            
+            if (CurrentTime.Value >= TIME_LIMIT && !_isGameEnd)
+            {
+                _isGameEnd = true;
+                Debug.Log($"Score: {Score.Value}");
+            }
         }
     }
 }
