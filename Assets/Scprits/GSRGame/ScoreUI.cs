@@ -6,7 +6,7 @@ namespace GSRGame
 {
     public class ScoreUI : MonoBehaviour
     {
-        private void Awake()
+        private void Start()
         {
             GsrGameManager.Instance.Score.Subscribe(s => 
             { 

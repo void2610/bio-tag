@@ -27,8 +27,10 @@ public class GsrGraph : MonoBehaviour
     private LineRenderer _thresholdLine2;
     private float _max = 10;
     private float _min = -10;
+    private Vector3 _lastData = Vector3.zero;
 
     public void SetThreshold(float t) => threshold = t;
+    public Vector3 GetLastData() => _lastData;
     public void AddData(float d)
     {
         for (var i = 0; i < dataLength - 1; i++)
@@ -55,6 +57,7 @@ public class GsrGraph : MonoBehaviour
             var yPos = normalizedY * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
             return this.transform.position + new Vector3(xPos, yPos, 0);
         }).ToArray();
+        _lastData = d[Random.Range(0, d.Length)];
 
         _lr.positionCount = dataLength;
         _lr.SetPositions(d);
