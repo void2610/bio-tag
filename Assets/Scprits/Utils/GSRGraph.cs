@@ -116,5 +116,10 @@ public class GsrGraph : MonoBehaviour
             threshold -= 0.1f;
         else if (Input.GetKeyDown(KeyCode.U))
             threshold += 0.1f;
+
+        if (TcpServer.Instance.IsConnected())
+        {
+            AddData(TcpServer.Instance.GetValue());
+        }
     }
 }

@@ -19,6 +19,7 @@ uint8_t TCP_Receive_Data[TCP_RECEIVE_PACKET_SIZE] = {0};
 TelitWiFi gs2200;
 TWIFI_Params gsparams;
 
+
 static void led_onoff(int num, bool stat) {
   switch (num) {
     case 0:
@@ -149,7 +150,7 @@ void loop() {
           timer = millis();
           led_effect();
         }
-        delay(10);
+        delay(100);
       }
     }
   }
