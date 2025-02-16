@@ -1985,18 +1985,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerCameraPrefab: {fileID: 5409894540958609353, guid: b4be50f88394247c3bd92fe52a339b1a, type: 3}
   playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
-  FootstepAudioClips:
+  footstepAudioClips:
   - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}
   - {fileID: 8300000, guid: 22537e39083884518b948b6542639237, type: 3}
   - {fileID: 8300000, guid: 43db7da7ab06f44108f08affa300c419, type: 3}
-  - {fileID: 8300000, guid: 73f07aa753dc1463ebf904d34973e49d, type: 3}
-  - {fileID: 8300000, guid: d3fd818a8ea5a49f8af96c6f37f066f7, type: 3}
-  - {fileID: 8300000, guid: 90d68c2128ad54149a1f1310c64bfa22, type: 3}
-  - {fileID: 8300000, guid: ff8ebcc7ee9e24189a958b6d55efe7f0, type: 3}
-  - {fileID: 8300000, guid: 58617bea5edbf4eaf887b9e5bc9b8069, type: 3}
-  - {fileID: 8300000, guid: 82ffb1d8dbecd446fb1eb573921ad7de, type: 3}
-  - {fileID: 8300000, guid: 5ee2b731a277645fe86f15e96042556b, type: 3}
-  LandingAudioClip: {fileID: 8300000, guid: 1e27bdb7813524c9791edadb30b134c1, type: 3}
+  landingAudioClip: {fileID: 8300000, guid: 1e27bdb7813524c9791edadb30b134c1, type: 3}
   jumpPower: 6
   walkSpeed: 6
   velocity: {x: 0, y: 0, z: 0}
