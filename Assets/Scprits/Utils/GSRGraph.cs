@@ -4,8 +4,6 @@ using System.Linq;
 
 public class GsrGraph : MonoBehaviour
 {
-    public static GsrGraph Instance;
-
     [SerializeField] private int dataLength = 500;
     [SerializeField] private float threshold = 5f;
     [SerializeField] private float threshold2 = 1.5f;
@@ -77,9 +75,6 @@ public class GsrGraph : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(this);
-        
         _lr = GetComponent<LineRenderer>();
         _lr.material = lineMaterial;
         _thresholdLine1 = this.transform.Find("th1").GetComponent<LineRenderer>();
@@ -120,9 +115,9 @@ public class GsrGraph : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.U))
             threshold += 0.1f;
 
-        if (TcpServer.Instance.IsConnected())
+        if (TcpServer.Instance.IsConnected.CurrentValue)
         {
-            AddData(TcpServer.Instance.GetValue());
+            AddData(TcpServer.Instance.LastValue.CurrentValue);
         }
     }
 }

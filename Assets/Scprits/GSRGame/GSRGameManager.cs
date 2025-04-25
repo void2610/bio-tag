@@ -12,6 +12,9 @@ namespace GSRGame
     public class GsrGameManager : MonoBehaviour
     {
         public static GsrGameManager Instance;
+        
+        [SerializeField] private GsrGraph gsrGraph;
+        
         public readonly ReactiveProperty<GsrState> TargetState = new();
         public readonly ReactiveProperty<int> Score = new(0);
         public readonly ReactiveProperty<float> CurrentTime = new(0);
@@ -40,12 +43,12 @@ namespace GSRGame
 
         private void Update()
         {
-            if (GsrGraph.Instance.IsExcited == (TargetState.Value == GsrState.Excited))
+            if (gsrGraph.IsExcited == (TargetState.Value == GsrState.Excited))
             {
                 Score.Value += 1;
             }
             
-            CurrentTime.Value += UnityEngine.Time.deltaTime;
+            CurrentTime.Value += Time.deltaTime;
             
             if (CurrentTime.Value >= TIME_LIMIT && !_isGameEnd)
             {

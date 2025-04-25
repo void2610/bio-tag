@@ -37,7 +37,8 @@ public class PlayerBase : MonoBehaviourPunCallbacks
 
     protected virtual void Update()
     {
-        walkSpeed = GsrGraph.Instance.IsExcited ? 4f : 6.5f;
+        // TODO: なんとかしてインジェクションする
+        // walkSpeed = GsrGraph.Instance.IsExcited ? 4f : 6.5f;
     }
 
     protected virtual void LocalMoving()

@@ -73,7 +73,8 @@ public class SensorManager : MonoBehaviour
 
     private void Update()
     {
-        _sensorValue = GsrGraph.Instance.IsExcited;
+        // TODO: yaru
+        // _sensorValue = GsrGraph.Instance.IsExcited;
 
         if (Input.GetKeyDown(KeyCode.J) || _sensorValue)
         {
