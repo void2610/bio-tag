@@ -26,6 +26,9 @@ public class GsrGraph : MonoBehaviour
     public Vector3 GetLastData() => _lastData;
     public void AddData(float d)
     {
+        d = Mathf.Clamp(d, 0f, 1024f);
+        Debug.Log(d);
+
         for (var i = 0; i < dataLength - 1; i++)
             data[i] = data[i + 1];
         data[dataLength - 1] = new Vector3(0, d, 0);
