@@ -9,6 +9,11 @@ public class PUN2Player : PlayerBase, IPunObservable
     {
         base.Start();
 
+        if (PhotonNetwork.IsMasterClient && photonView.IsMine)
+        {
+            // GameManagerにプレイヤーを登録
+            GameManagerBase.Instance.SetMainPlayer(this);
+        }
         if (!photonView.IsMine)
         {
             // VFXをセンサーマネージャーに登録
@@ -21,7 +26,7 @@ public class PUN2Player : PlayerBase, IPunObservable
     {
         if (photonView.IsMine)
         {
-            if (PlayerCamera == null)
+            if (!PlayerCamera)
             {
                 PlayerCamera = Instantiate(playerCameraPrefab);
                 PlayerCamera.name = "PlayerCamera";

@@ -24,6 +24,8 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     private const float FOOTSTEP_AUDIO_VOLUME = 0.5f;
 
     public int index = -1;
+    
+    public void SetWalkSpeed(float s) => walkSpeed = s;
 
     protected virtual void Awake() { }
 
@@ -37,8 +39,6 @@ public class PlayerBase : MonoBehaviourPunCallbacks
 
     protected virtual void Update()
     {
-        // TODO: なんとかしてインジェクションする
-        // walkSpeed = GsrGraph.Instance.IsExcited ? 4f : 6.5f;
     }
 
     protected virtual void LocalMoving()

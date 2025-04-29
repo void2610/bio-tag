@@ -23,7 +23,7 @@
 #define  AP_SSID        "TG93B2M9-2.4G"
 #define  PASSPHRASE     "66412211"
 
-#define  TCPSRVR_IP  "100.64.1.17"
+#define  TCPSRVR_IP  "100.64.1.19"
 #define  TCPSRVR_PORT   "10001"
 
 

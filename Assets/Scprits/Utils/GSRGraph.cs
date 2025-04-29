@@ -108,14 +108,14 @@ public class GsrGraph : MonoBehaviour
         _thresholdLine2.SetPosition(1, new Vector3(panelEndPos.x, t2, 0) + this.transform.position);
 
         IsExcited = CheckExcited(data.Select(v => v.y).ToList());
-        // _lr.material.color = IsExcited ? Color.red : Color.white;
+        _lr.material.color = IsExcited ? Color.red : Color.white;
 
         if (Input.GetKeyDown(KeyCode.Y))
             threshold -= 0.1f;
         else if (Input.GetKeyDown(KeyCode.U))
             threshold += 0.1f;
 
-        if (TcpServer.Instance.IsConnected.CurrentValue)
+        if (TcpServer.Instance && TcpServer.Instance.IsConnected.CurrentValue)
         {
             AddData(TcpServer.Instance.LastValue.CurrentValue);
         }

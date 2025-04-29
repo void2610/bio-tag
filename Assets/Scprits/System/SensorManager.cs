@@ -42,6 +42,7 @@ public class SensorManager : MonoBehaviour
 
     private void ChangeToExcited()
     {
+        Debug.Log("Excited");
         foreach (var t in _tweenList)
         {
             t.Kill();
@@ -51,9 +52,14 @@ public class SensorManager : MonoBehaviour
         _volume.profile.TryGet(out Vignette vignette);
         var tw = DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 0.5f, 1f);
         _tweenList.Add(tw);
+        
+        // プレイヤー速度の変更
+        GameManagerBase.Instance.GetMainPlayer().SetWalkSpeed(3f);
     }
+    
     private void ChangeToCalm()
     {
+        Debug.Log("Calm");
         foreach (var t in _tweenList)
         {
             t.Kill();
@@ -63,6 +69,9 @@ public class SensorManager : MonoBehaviour
         _volume.profile.TryGet(out Vignette vignette);
         var tw = DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 0f, 1f);
         _tweenList.Add(tw);
+        
+        // プレイヤー速度の変更
+        GameManagerBase.Instance.GetMainPlayer().SetWalkSpeed(6.5f);
     }
 
     [Obsolete("Obsolete")]
@@ -76,12 +85,14 @@ public class SensorManager : MonoBehaviour
         // TODO: yaru
         // _sensorValue = GsrGraph.Instance.IsExcited;
 
-        if (Input.GetKeyDown(KeyCode.J) || _sensorValue)
+        if (Input.GetKeyDown(KeyCode.J))
         {
+            _sensorValue = false;
             ChangeToExcited();
         }
-        else if (Input.GetKeyDown(KeyCode.H) || !_sensorValue)
+        else if (Input.GetKeyDown(KeyCode.H))
         {
+            _sensorValue = true;
             ChangeToCalm();
         }
     }

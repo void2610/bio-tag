@@ -5,7 +5,7 @@ using Photon.Pun;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
 
-public class GameManagerBase : MonoBehaviourPunCallbacks
+public abstract class GameManagerBase : MonoBehaviourPunCallbacks
 {
     public static GameManagerBase Instance;
     protected virtual void Awake()
@@ -27,10 +27,13 @@ public class GameManagerBase : MonoBehaviourPunCallbacks
     public float lastTagTime;
     public List<float> playerScores = new List<float>();
     public List<string> playerNames = new List<string>();
+    
+    protected PlayerBase MainPlayer;
 
-    public virtual void ChangeIt(int index)
-    {
-    }
+    public virtual void ChangeIt(int index) { }
+
+    public void SetMainPlayer(PlayerBase p) => MainPlayer = p;
+    public PlayerBase GetMainPlayer() => MainPlayer;
 
     public virtual void StartGame()
     {

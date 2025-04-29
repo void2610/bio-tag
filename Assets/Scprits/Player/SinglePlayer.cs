@@ -11,6 +11,7 @@ public class SinglePlayer : PlayerBase
     protected override void Start()
     {
         base.Start();
+        GameManagerBase.Instance.SetMainPlayer(this);
     }
 
     protected override void Update()

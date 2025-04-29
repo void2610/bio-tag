@@ -26,7 +26,7 @@ public class NpcGameManager : GameManagerBase
         _startTime = Time.time;
         itMarker.SetTarget(_players[itIndex].transform);
     }
-
+    
     public float getElapsedTime()
     {
         return Time.time - _startTime;
