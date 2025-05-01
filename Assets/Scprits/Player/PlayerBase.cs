@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.VFX;
 using Photon.Pun;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 public class PlayerBase : MonoBehaviourPunCallbacks
@@ -19,8 +20,10 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     protected float AnimationBlend = 0f;
     protected Vector3 LookDirection = Vector3.zero;
     protected float OnLandTime = 0f;
-    protected bool isMovable = true;
+    protected bool IsMovable = true;
     protected VisualEffect ItEffect;
+    protected Vector3 MovementInput;
+    protected bool JumpInput = false;
     private const float FOOTSTEP_AUDIO_VOLUME = 0.5f;
 
     public int index = -1;
@@ -41,16 +44,26 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     {
     }
 
-    protected virtual void LocalMoving()
+    public void OnMove(InputValue value)
     {
-        var movement = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
-        UpdateCharacterController(movement, PlayerCamera.transform.forward, Input.GetButtonDown("Jump"));
+        MovementInput = new Vector3(value.Get<Vector2>().x, 0, value.Get<Vector2>().y);
+    }
+    
+    public void OnJump(InputValue value)
+    {
+        JumpInput = value.isPressed;
+    }
+    
+    protected void LocalMoving()
+    {
+        UpdateCharacterController(MovementInput, PlayerCamera.transform.forward, JumpInput);
         LookDirection = PlayerCamera.transform.forward;
+        JumpInput = false;
     }
 
     protected virtual void UpdateCharacterController(Vector3 input, Vector3 playerDirection, bool isJump)
     {
-        if (!isMovable)
+        if (!IsMovable)
         {
             velocity.y += Physics.gravity.y * Time.deltaTime;
             CCon.Move(velocity * Time.deltaTime);

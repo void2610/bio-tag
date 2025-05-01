@@ -32,7 +32,6 @@ public class PUN2Player : PlayerBase, IPunObservable
                 PlayerCamera.name = "PlayerCamera";
                 PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
             }
-            LocalMoving();
         }
     }
 

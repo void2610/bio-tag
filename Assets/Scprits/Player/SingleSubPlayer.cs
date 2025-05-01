@@ -27,6 +27,7 @@ public class SingleSubPlayer : PlayerBase
         
         PlayerCamera = Instantiate(playerCameraPrefab);
         PlayerCamera.name = "PlayerCamera";
+        Destroy(PlayerCamera.GetComponent<AudioListener>());
         PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
         PlayerCamera.GetComponent<Camera>().targetDisplay = index;
     }
