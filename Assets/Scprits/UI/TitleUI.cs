@@ -18,7 +18,7 @@ public class TitleUI : MonoBehaviour
         var playerName = playerNameInputField.text;
         PlayerPrefs.SetString("PlayerName", playerName);
         PlayerPrefs.Save();
-        SceneManager.LoadScene("PUN2");
+        SceneManager.LoadScene("WithPlayer");
     }
 
     public void OnNpcButtonClicked()
@@ -26,6 +26,6 @@ public class TitleUI : MonoBehaviour
         var playerName = playerNameInputField.text;
         PlayerPrefs.SetString("PlayerName", playerName);
         PlayerPrefs.Save();
-        SceneManager.LoadScene("NPC");
+        SceneManager.LoadScene("WithNPC");
     }
 }

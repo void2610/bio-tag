@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-public class SinglePlayer : PlayerBase
+public class SingleSubPlayer : PlayerBase
 {
     protected override void Awake()
     {
@@ -17,13 +17,18 @@ public class SinglePlayer : PlayerBase
     protected override void Update()
     {
         base.Update();
-        if (!PlayerCamera)
-        {
-            PlayerCamera = Instantiate(playerCameraPrefab);
-            PlayerCamera.name = "PlayerCamera";
-            PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
-        }
+        if (!PlayerCamera) CreatePlayerCamera();
         LocalMoving();
+    }
+    
+    private void CreatePlayerCamera()
+    {
+        if (PlayerCamera) return;
+        
+        PlayerCamera = Instantiate(playerCameraPrefab);
+        PlayerCamera.name = "PlayerCamera";
+        PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
+        PlayerCamera.GetComponent<Camera>().targetDisplay = index;
     }
 
     private void OnTriggerEnter(Collider other)

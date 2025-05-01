@@ -27,7 +27,7 @@ public class TimerUI : MonoBehaviour
         {
             var i = (NpcGameManager)GameManagerBase.Instance;
             if (i.GameState != 1) return;
-            var elapsedTime = i.getElapsedTime();
+            var elapsedTime = i.GetElapsedTime();
             _timerText.text = elapsedTime.ToString("f2");
         }
     }

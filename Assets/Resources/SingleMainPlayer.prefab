@@ -1901,7 +1901,7 @@ GameObject:
   - component: {fileID: -1502476831106821833}
   - component: {fileID: -8425628456057148448}
   m_Layer: 6
-  m_Name: SinglePlayer
+  m_Name: SingleMainPlayer
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
-public class NpcGameManager : GameManagerBase
+public class OfflinePlayerGameManager : GameManagerBase
 {
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private GameObject npcPrefab;
+    [SerializeField] private GameObject mainPlayerPrefab;
+    [SerializeField] private GameObject subPlayerPrefab;
     [SerializeField] private GameMessageUI messageUI;
     [SerializeField] private int npcCount = 1;
 
@@ -55,17 +55,23 @@ public class NpcGameManager : GameManagerBase
     protected override void Awake()
     {
         base.Awake();
-        var p = Instantiate(playerPrefab, new Vector3(Random.Range(-3f, 3f), 1, Random.Range(-3f, 3f)), Quaternion.identity);
-        _players.Add(p);
-        p.GetComponent<PlayerBase>().index = 0;
+        var mainP = Instantiate(mainPlayerPrefab, new Vector3(Random.Range(-3f, 3f), 1, Random.Range(-3f, 3f)), Quaternion.identity);
+        _players.Add(mainP);
+        mainP.GetComponent<PlayerBase>().index = 0;
         playerNames.Add(PlayerPrefs.GetString("PlayerName", "No Name"));
         for (var i = 1; i < npcCount + 1; i++)
         {
-            var n = Instantiate(npcPrefab, new Vector3(Random.Range(-3f, 3f), 1, Random.Range(-3f, 3f)), Quaternion.identity);
-            _players.Add(n);
-            n.GetComponent<Npc>().index = i;
-            n.GetComponent<Npc>().SetTarget(p.transform);
-            playerNames.Add("NPC" + i);
+            var subP = Instantiate(subPlayerPrefab, new Vector3(Random.Range(-3f, 3f), 1, Random.Range(-3f, 3f)), Quaternion.identity);
+            _players.Add(subP);
+            subP.GetComponent<PlayerBase>().index = i;
+            playerNames.Add("Player" + i);
+        }
+        
+        Debug.Log ("displays connected: " + Display.displays.Length);
+        // Display.displays[0] は主要なデフォルトのディスプレイで、常にオンです。ですから、インデックス 1 から始まります。
+        for (var i = 1; i < Display.displays.Length; i++)
+        {
+            Display.displays[i].Activate();
         }
     }
 
