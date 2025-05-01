@@ -1,47 +1,59 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerCamera : MonoBehaviour
 {
-    public Transform target; // プレイヤーをターゲットとして設定
-    public float distance; // ターゲットからの距離
-    public float height; // カメラの高さ
-    public float rotationSpeed; // 回転速度
-    private float _currentDistance;
-    private float _currentX = 0.0f;
-    private float _currentY = 0.0f;
+    [Header("Target & Offset")]
+    public Transform target;
+    public float distance = 5f;
+    public float height   = 2f;
 
-    private void Start()
+    [Header("Speed & Clamp")]
+    public float rotationSpeed = 180f;
+    public float minY = -20f;
+    public float maxY =  80f;
+
+    [Header("Smooth")]
+    public float followSpeed   = 10f;
+    public float rotateSmooth  = 10f;
+
+    // ──────────────────────────────────────
+    private float _currentX;
+    private float _currentY;
+    private Vector2 _lookInput;   // ← 入力値を保持
+
+    // 入力イベント
+    public void OnLook(InputValue value)
     {
-        _currentDistance = distance;
+        _lookInput = value.Get<Vector2>(); // ここでは代入だけ
     }
 
     private void Update()
     {
-        if (!target)
-        {
-            return;
-        }
-
-        // マウス入力を取得
-        _currentX += Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
-        _currentY -= Input.GetAxis("Mouse Y") * rotationSpeed * Time.deltaTime;
-        _currentY = Mathf.Clamp(_currentY, -20f, 80f);
+        // 毎フレーム入力を反映
+        _currentX += _lookInput.x * rotationSpeed * Time.deltaTime;
+        _currentY -= _lookInput.y * rotationSpeed * Time.deltaTime;
+        _currentY = Mathf.Clamp(_currentY, minY, maxY);
     }
 
     private void LateUpdate()
     {
-        if (!target)
-        {
-            return;
-        }
+        if (!target) return;
 
-        // 回転行列を作成
-        var rotation = Quaternion.Euler(_currentY, _currentX, 0);
-        var direction = new Vector3(0, height, -_currentDistance);
-        var position = target.position + rotation * direction;
+        // 目標回転と位置
+        Quaternion rot = Quaternion.Euler(_currentY, _currentX, 0f);
+        Vector3    off = rot * new Vector3(0f, height, -distance);
+        Vector3    tgtPos = target.position + off;
 
-        // カメラを設定
-        transform.position = position;
-        transform.LookAt(target.position + Vector3.up * height);
+        // 位置を Lerp で追従
+        transform.position = Vector3.Lerp(
+            transform.position, tgtPos, followSpeed * Time.deltaTime);
+
+        // 向きを Slerp で追従
+        Vector3 lookAt = target.position + Vector3.up * height;
+        Quaternion tgtRot = Quaternion.LookRotation(lookAt - transform.position);
+
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation, tgtRot, rotateSmooth * Time.deltaTime);
     }
 }

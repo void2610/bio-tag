@@ -19,7 +19,7 @@ public class SingleMainPlayer : PlayerBase
         base.Update();
         if (!PlayerCamera)
         {
-            PlayerCamera = Instantiate(playerCameraPrefab);
+            PlayerCamera = Instantiate(playerCameraPrefab, this.transform);
             PlayerCamera.name = "PlayerCamera";
             PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
         }
