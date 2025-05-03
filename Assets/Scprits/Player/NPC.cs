@@ -43,7 +43,7 @@ public class Npc : MonoBehaviour
     {
         var canvas = GameObject.Find("WorldSpaceCanvas");
         var ui = Instantiate(playerNameUIPrefab, canvas.transform);
-        ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, "NPC" + index);
+        ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, index);
 
         Agent.speed = moveSpeed;
 

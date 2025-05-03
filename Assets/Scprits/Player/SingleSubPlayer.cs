@@ -17,19 +17,23 @@ public class SingleSubPlayer : PlayerBase
     protected override void Update()
     {
         base.Update();
-        if (!PlayerCamera) CreatePlayerCamera();
+        if (!MyPlayerCamera)
+        {
+            MyPlayerCamera = transform.GetComponentInChildren<PlayerCamera>().gameObject;
+            MyPlayerCamera.name = "PlayerCamera" + index;
+        }
         LocalMoving();
     }
     
     private void CreatePlayerCamera()
     {
-        if (PlayerCamera) return;
+        if (MyPlayerCamera) return;
         
-        PlayerCamera = Instantiate(playerCameraPrefab, this.transform);
-        PlayerCamera.name = "PlayerCamera";
-        Destroy(PlayerCamera.GetComponent<AudioListener>());
-        PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
-        PlayerCamera.GetComponent<Camera>().targetDisplay = index;
+        MyPlayerCamera = Instantiate(playerCameraPrefab, this.transform);
+        MyPlayerCamera.name = "PlayerCamera";
+        Destroy(MyPlayerCamera.GetComponent<AudioListener>());
+        MyPlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
+        MyPlayerCamera.GetComponent<Camera>().targetDisplay = index;
     }
 
     private void OnTriggerEnter(Collider other)

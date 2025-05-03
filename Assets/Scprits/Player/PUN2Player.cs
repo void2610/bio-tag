@@ -26,11 +26,11 @@ public class PUN2Player : PlayerBase, IPunObservable
     {
         if (photonView.IsMine)
         {
-            if (!PlayerCamera)
+            if (!MyPlayerCamera)
             {
-                PlayerCamera = Instantiate(playerCameraPrefab);
-                PlayerCamera.name = "PlayerCamera";
-                PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
+                MyPlayerCamera = Instantiate(playerCameraPrefab);
+                MyPlayerCamera.name = "PlayerCamera";
+                MyPlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
             }
         }
     }

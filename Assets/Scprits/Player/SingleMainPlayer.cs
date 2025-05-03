@@ -17,11 +17,10 @@ public class SingleMainPlayer : PlayerBase
     protected override void Update()
     {
         base.Update();
-        if (!PlayerCamera)
+        if (!MyPlayerCamera)
         {
-            PlayerCamera = Instantiate(playerCameraPrefab, this.transform);
-            PlayerCamera.name = "PlayerCamera";
-            PlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
+            MyPlayerCamera = transform.GetComponentInChildren<PlayerCamera>().gameObject;
+            MyPlayerCamera.name = "PlayerCamera" + index;
         }
         LocalMoving();
     }

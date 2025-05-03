@@ -6,13 +6,15 @@ public class PlayerNameUI : MonoBehaviour
     private TMP_Text _playerNameText;
     private GameObject _targetPlayer;
     private Transform _playerCamera;
+    public int index = -1;
 
-    public void SetTargetPlayer(GameObject player, string playerName)
+    public void SetTargetPlayer(GameObject player, int index)
     {
         _targetPlayer = player;
         _playerNameText = GetComponent<TMP_Text>();
-        _playerNameText.text = playerName;
-        _playerCamera = GameObject.Find("PlayerCamera")?.transform;
+        _playerNameText.text = "player" + index;
+        _playerCamera = GameObject.Find("PlayerCamera" + index)?.transform;
+        this.index = index;
     }
 
     private void Start()
@@ -26,7 +28,7 @@ public class PlayerNameUI : MonoBehaviour
         if (!_targetPlayer)
             return;
         if (!_playerCamera)
-            _playerCamera = GameObject.Find("PlayerCamera").transform;
+            _playerCamera = GameObject.Find("PlayerCamera" + index).transform;
         
         this.transform.position = _targetPlayer.transform.position + new Vector3(0, 2.5f, 0);
         // プレイヤーの名前UIをカメラの方向に向ける

@@ -16,7 +16,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     
     protected Animator Animator => GetComponent<Animator>();
     protected CharacterController CCon => GetComponent<CharacterController>();
-    protected GameObject PlayerCamera = null;
+    protected GameObject MyPlayerCamera = null;
     protected float AnimationBlend = 0f;
     protected Vector3 LookDirection = Vector3.zero;
     protected float OnLandTime = 0f;
@@ -36,7 +36,7 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     {
         var canvas = GameObject.Find("WorldSpaceCanvas");
         var ui = Instantiate(playerNameUIPrefab, canvas.transform);
-        ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, PlayerPrefs.GetString("PlayerName", "No Name"));
+        ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, index);
         ItEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
     }
 
@@ -56,8 +56,8 @@ public class PlayerBase : MonoBehaviourPunCallbacks
     
     protected void LocalMoving()
     {
-        UpdateCharacterController(MovementInput, PlayerCamera.transform.forward, JumpInput);
-        LookDirection = PlayerCamera.transform.forward;
+        UpdateCharacterController(MovementInput, MyPlayerCamera.transform.forward, JumpInput);
+        LookDirection = MyPlayerCamera.transform.forward;
         JumpInput = false;
     }
 

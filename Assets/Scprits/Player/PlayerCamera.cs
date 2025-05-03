@@ -41,17 +41,17 @@ public class PlayerCamera : MonoBehaviour
         if (!target) return;
 
         // 目標回転と位置
-        Quaternion rot = Quaternion.Euler(_currentY, _currentX, 0f);
-        Vector3    off = rot * new Vector3(0f, height, -distance);
-        Vector3    tgtPos = target.position + off;
+        var rot = Quaternion.Euler(_currentY, _currentX, 0f);
+        var    off = rot * new Vector3(0f, height, -distance);
+        var    tgtPos = target.position + off;
 
         // 位置を Lerp で追従
         transform.position = Vector3.Lerp(
             transform.position, tgtPos, followSpeed * Time.deltaTime);
 
         // 向きを Slerp で追従
-        Vector3 lookAt = target.position + Vector3.up * height;
-        Quaternion tgtRot = Quaternion.LookRotation(lookAt - transform.position);
+        var lookAt = target.position + Vector3.up * height;
+        var tgtRot = Quaternion.LookRotation(lookAt - transform.position);
 
         transform.rotation = Quaternion.Slerp(
             transform.rotation, tgtRot, rotateSmooth * Time.deltaTime);
