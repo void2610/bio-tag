@@ -8,6 +8,18 @@ public class UILineRenderer : MaskableGraphic
 
     public float thickness = 10f;
     public bool center = true;
+    
+    public void SetPosition(int idx, Vector2 point)
+    {
+        points[idx] = point;
+        SetVerticesDirty();
+    }
+    
+    public void SetPositions(Vector2[] newPoints)
+    {
+        points = newPoints;
+        SetVerticesDirty();
+    }
 
     protected override void OnPopulateMesh(VertexHelper vh)
     {

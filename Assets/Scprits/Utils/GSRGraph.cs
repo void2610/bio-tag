@@ -12,20 +12,21 @@ public class GsrGraph : MonoBehaviour
     [SerializeField] private Vector2 panelEndPos;
     [SerializeField] private Material lineMaterial;
     public bool IsExcited { get; private set; } = false;
-    public List<Vector3> data = new ();
-    private LineRenderer _lr;
-    private LineRenderer _thresholdLine1;
-    private LineRenderer _thresholdLine2;
+    public List<Vector2> data = new ();
+    private UILineRenderer _lr;
+    private UILineRenderer _thresholdLine1;
+    private UILineRenderer _thresholdLine2;
     private float _max = 10;
     private float _min = -10;
     private Vector3 _lastData = Vector3.zero;
+    private float _test = 0f;
 
     public void SetLineColor(Color c) => _lr.material.color = c;
     public Vector3 GetLastData() => _lastData;
     public void AddData(float d)
     {
         d = Mathf.Clamp(d, 0f, 1024f);
-        // Debug.Log(d);
+        Debug.Log(d);
 
         for (var i = 0; i < dataLength - 1; i++)
             data[i] = data[i + 1];
@@ -49,11 +50,10 @@ public class GsrGraph : MonoBehaviour
             var normalizedY = (v.y - _min) / range;
             var xPos = panelStartPos.x + i * (panelEndPos.x - panelStartPos.x) / (dataLength - 1);
             var yPos = normalizedY * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
-            return this.transform.position + new Vector3(xPos, yPos, 0);
+            return new Vector2(xPos, yPos);
         }).ToArray();
         _lastData = d[Random.Range(0, d.Length)];
 
-        _lr.positionCount = dataLength;
         _lr.SetPositions(d);
     }
 
@@ -75,19 +75,19 @@ public class GsrGraph : MonoBehaviour
 
     private void Awake()
     {
-        _lr = GetComponent<LineRenderer>();
+        _lr = this.GetComponent<UILineRenderer>();
         _lr.material = lineMaterial;
-        _thresholdLine1 = this.transform.Find("th1").GetComponent<LineRenderer>();
-        _thresholdLine2 = this.transform.Find("th2").GetComponent<LineRenderer>();
-        _thresholdLine1.positionCount = 2;
-        _thresholdLine2.positionCount = 2;
+        _thresholdLine1 = this.transform.Find("th1").GetComponent<UILineRenderer>();
+        _thresholdLine2 = this.transform.Find("th2").GetComponent<UILineRenderer>();
+        _thresholdLine1.points = new Vector2[2];
+        _thresholdLine2.points = new Vector2[2];
     }
 
     private void Start()
     {
-        data = new List<Vector3>(dataLength);
+        data = new List<Vector2>(dataLength);
         for (var i = data.Count; i < dataLength; i++)
-            data.Add(Vector3.zero);
+            data.Add(Vector2.zero);
 
         for (var i = 0; i < dataLength; i++)
             AddData(0);
@@ -115,9 +115,13 @@ public class GsrGraph : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.U))
             threshold += 0.1f;
 
-        if (TcpServer.Instance && TcpServer.Instance.IsConnected.CurrentValue)
-        {
-            AddData(TcpServer.Instance.LastValue.CurrentValue);
-        }
+        // if (TcpServer.Instance && TcpServer.Instance.IsConnected.CurrentValue)
+        // {
+        //     AddData(TcpServer.Instance.LastValue.CurrentValue);
+        // }
+        
+        // test
+        _test += 1 * Random.Range(0f, 1f) > 0.5f ? 1f : -1f;
+        AddData(_test);
     }
 }
