@@ -1,15 +1,16 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Serialization;
 
 public class GsrGraph : MonoBehaviour
 {
     [SerializeField] private int dataLength = 500;
     [SerializeField] private float threshold = 5f;
-    [SerializeField] private float threshold2 = 1.5f;
+    [SerializeField] private float thresholdMagni = 1.5f;
     [SerializeField] private float checkLength = 0.1f;
-    [SerializeField] private Vector2 panelStartPos;
-    [SerializeField] private Vector2 panelEndPos;
+    [SerializeField] private float v1 = 580f;
+    [SerializeField] private float v2 = 200f;
     [SerializeField] private Material lineMaterial;
     public bool IsExcited { get; private set; } = false;
     public List<Vector2> data = new ();
@@ -26,7 +27,7 @@ public class GsrGraph : MonoBehaviour
     public void AddData(float d)
     {
         d = Mathf.Clamp(d, 0f, 1024f);
-        Debug.Log(d);
+        // Debug.Log(d);
 
         for (var i = 0; i < dataLength - 1; i++)
             data[i] = data[i + 1];
@@ -48,8 +49,8 @@ public class GsrGraph : MonoBehaviour
         var d = data.Select((v, i) =>
         {
             var normalizedY = (v.y - _min) / range;
-            var xPos = panelStartPos.x + i * (panelEndPos.x - panelStartPos.x) / (dataLength - 1);
-            var yPos = normalizedY * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
+            var xPos = i * v1 / (dataLength - 1);
+            var yPos = normalizedY * v2;
             return new Vector2(xPos, yPos);
         }).ToArray();
         _lastData = d[Random.Range(0, d.Length)];
@@ -64,7 +65,7 @@ public class GsrGraph : MonoBehaviour
             return true;
 
         // 過去の値をチェック（閾値の1.5倍を大きく超えると定義）
-        var significantThreshold = threshold * threshold2;
+        var significantThreshold = threshold * thresholdMagni;
         for (var i = d.Count - 1; i >= 0 && d.Count - 1 - i < checkLength * dataLength; i--)
         {
             if (Mathf.Abs(d[i]) > significantThreshold) return true;
@@ -99,21 +100,21 @@ public class GsrGraph : MonoBehaviour
         if (Mathf.Approximately(range, 0f)) range = 1f;
         var t1 = (threshold - _min) / range;
         var t2 = (-threshold - _min) / range;
-        t1 = t1 * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
-        t2 = t2 * (panelEndPos.y - panelStartPos.y) + panelStartPos.y;
+        t1 *= v2;
+        t2 *= v2;
 
-        _thresholdLine1.SetPosition(0, new Vector3(panelStartPos.x, t1, 0) + this.transform.position);
-        _thresholdLine1.SetPosition(1, new Vector3(panelEndPos.x, t1, 0) + this.transform.position);
-        _thresholdLine2.SetPosition(0, new Vector3(panelStartPos.x, t2, 0) + this.transform.position);
-        _thresholdLine2.SetPosition(1, new Vector3(panelEndPos.x, t2, 0) + this.transform.position);
+        _thresholdLine1.SetPosition(0, new Vector3(0, t1, 0));
+        _thresholdLine1.SetPosition(1, new Vector3(v1, t1, 0));
+        _thresholdLine2.SetPosition(0, new Vector3(0, t2, 0));
+        _thresholdLine2.SetPosition(1, new Vector3(v1, t2, 0));
 
         IsExcited = CheckExcited(data.Select(v => v.y).ToList());
         _lr.material.color = IsExcited ? Color.red : Color.white;
 
         if (Input.GetKeyDown(KeyCode.Y))
-            threshold -= 0.1f;
+            threshold -= 1f;
         else if (Input.GetKeyDown(KeyCode.U))
-            threshold += 0.1f;
+            threshold += 1f;
 
         // if (TcpServer.Instance && TcpServer.Instance.IsConnected.CurrentValue)
         // {
