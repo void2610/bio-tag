@@ -153,9 +153,9 @@ MonoBehaviour:
   target: {fileID: 0}
   distance: 4
   height: 0.6
-  mouseSensitivity: 0.15
-  gamepadSensitivity: 100
-  minY: -20
-  maxY: 80
+  isInverted: 1
+  rotationSpeed: 180
+  minY: -45
+  maxY: 45
   followSpeed: 20
   rotateSmooth: 20

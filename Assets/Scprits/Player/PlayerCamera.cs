@@ -9,6 +9,7 @@ public class PlayerCamera : MonoBehaviour
     public float height   = 2f;
 
     [Header("Speed & Clamp")]
+    public bool isInverted = false;
     public float rotationSpeed = 180f;
     public float minY = -20f;
     public float maxY =  80f;
@@ -42,6 +43,8 @@ public class PlayerCamera : MonoBehaviour
 
         // 目標回転と位置
         var rot = Quaternion.Euler(_currentY, _currentX, 0f);
+        if (isInverted)
+            rot = Quaternion.Euler(-_currentY, -_currentX, 0f);
         var    off = rot * new Vector3(0f, height, -distance);
         var    tgtPos = target.position + off;
 
