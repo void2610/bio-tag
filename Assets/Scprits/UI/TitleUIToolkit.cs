@@ -4,9 +4,9 @@ using UnityEngine.SceneManagement;
 
 public class TitleUIToolkit : MonoBehaviour
 {
-    private TextField playerNameInput;
-    private Button playerButton;
-    private Button npcButton;
+    private TextField _playerNameInput;
+    private Button _playerButton;
+    private Button _npcButton;
     
     private void OnEnable()
     {
@@ -15,24 +15,24 @@ public class TitleUIToolkit : MonoBehaviour
         var root = uiDocument.rootVisualElement;
         
         // Query UI elements
-        playerNameInput = root.Q<TextField>("player-name-input");
-        playerButton = root.Q<Button>("player-button");
-        npcButton = root.Q<Button>("npc-button");
+        _playerNameInput = root.Q<TextField>("player-name-input");
+        _playerButton = root.Q<Button>("player-button");
+        _npcButton = root.Q<Button>("npc-button");
         
         // Load saved player name
         string savedName = PlayerPrefs.GetString("PlayerName", "Player");
-        playerNameInput.value = savedName;
+        _playerNameInput.value = savedName;
         
         // Register button callbacks
-        playerButton.clicked += OnPlayerButtonClicked;
-        npcButton.clicked += OnNpcButtonClicked;
+        _playerButton.clicked += OnPlayerButtonClicked;
+        _npcButton.clicked += OnNpcButtonClicked;
     }
     
     private void OnDisable()
     {
         // Unregister callbacks to prevent memory leaks
-        playerButton.clicked -= OnPlayerButtonClicked;
-        npcButton.clicked -= OnNpcButtonClicked;
+        _playerButton.clicked -= OnPlayerButtonClicked;
+        _npcButton.clicked -= OnNpcButtonClicked;
     }
     
     private void OnPlayerButtonClicked()
@@ -49,10 +49,10 @@ public class TitleUIToolkit : MonoBehaviour
     
     private void SavePlayerName()
     {
-        string playerName = playerNameInput.value;
+        var playerName = _playerNameInput.value;
         if (string.IsNullOrWhiteSpace(playerName))
         {
-            playerName = "Player";
+            playerName = "NoName";
         }
         PlayerPrefs.SetString("PlayerName", playerName);
         PlayerPrefs.Save();
