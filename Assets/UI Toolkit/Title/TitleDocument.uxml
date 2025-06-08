@@ -3,9 +3,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:engine="UnityEngine.UIElements"
     xmlns:editor="UnityEditor.UIElements"
-    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+    xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
-    <Style src="project://database/Assets/UI%20Toolkit/MyStyleSheet.uss?fileID=7433441132597879392&amp;guid=83b49e3b38dc94d479f11c2eeb0ad15e&amp;type=3#MyStyleSheet" />
+    <Style src="project://database/Assets/UI%20Toolkit/TitleStyleSheet.uss?fileID=7433441132597879392&amp;guid=83b49e3b38dc94d479f11c2eeb0ad15e&amp;type=3#TitleStyleSheet" />
     
     <engine:VisualElement name="title-screen-container" class="title-screen-container">
         <engine:VisualElement name="title-content" class="title-content">

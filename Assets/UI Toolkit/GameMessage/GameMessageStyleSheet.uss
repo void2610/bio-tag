@@ -1,0 +1,47 @@
+/* Game Message Container */
+.game-message-container {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    translate: -50% 0;
+    width: auto;
+    max-width: 80%;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Game Message Label */
+.game-message-label {
+    font-size: 32px;
+    color: #ffffff;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px 25px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: #e94560;
+    white-space: nowrap;
+}
+
+/* Variations for different message types */
+.game-message-label.info {
+    border-color: #533483;
+    color: #f1f1f1;
+}
+
+.game-message-label.warning {
+    border-color: #ffb347;
+    color: #ffb347;
+}
+
+.game-message-label.success {
+    border-color: #4ade80;
+    color: #4ade80;
+}
+
+.game-message-label.error {
+    border-color: #ef4444;
+    color: #ef4444;
+}
