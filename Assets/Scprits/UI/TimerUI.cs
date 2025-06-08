@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro;
-using Photon.Pun;
 
 public class TimerUI : MonoBehaviour
 {
@@ -14,16 +13,7 @@ public class TimerUI : MonoBehaviour
 
     private void Update()
     {
-        if (GameManagerBase.Instance.GetType() == typeof(NetworkGameManager))
-        {
-            if (!PhotonNetwork.InRoom) { return; }
-            if (GameManagerBase.Instance.GameState != 1) { return; }
-            if (!PhotonNetwork.CurrentRoom.TryGetStartTime(out var timestamp)) { return; }
-
-            var elapsedTime = Mathf.Max(0f, unchecked(PhotonNetwork.ServerTimestamp - timestamp) / 1000f);
-            _timerText.text = elapsedTime.ToString("f2");
-        }
-        else if (GameManagerBase.Instance.GetType() == typeof(NpcGameManager))
+        if (GameManagerBase.Instance.GetType() == typeof(NpcGameManager))
         {
             var i = (NpcGameManager)GameManagerBase.Instance;
             if (i.GameState != 1) return;
