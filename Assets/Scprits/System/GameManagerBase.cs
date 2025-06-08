@@ -1,11 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using Photon.Pun;
-using ExitGames.Client.Photon;
-using Photon.Realtime;
 
-public abstract class GameManagerBase : MonoBehaviourPunCallbacks
+public abstract class GameManagerBase : MonoBehaviour
 {
     public static GameManagerBase Instance;
     protected virtual void Awake()

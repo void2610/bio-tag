@@ -1,5 +1,4 @@
 using UnityEngine;
-using Photon.Pun;
 using TMPro;
 
 public class ItUI : MonoBehaviour
@@ -13,9 +12,12 @@ public class ItUI : MonoBehaviour
 
     private void Update()
     {
-        if (!PhotonNetwork.InRoom) { return; }
-        if (!PhotonNetwork.CurrentRoom.TryGetItIndex(out var itIndex)) { return; }
-
-        _itText.text = $"It: {PhotonNetwork.PlayerList[itIndex - 1].NickName}";
+        if (GameManagerBase.Instance == null) return;
+        
+        var itIndex = GameManagerBase.Instance.itIndex;
+        if (itIndex >= 0 && itIndex < GameManagerBase.Instance.playerNames.Count)
+        {
+            _itText.text = $"It: {GameManagerBase.Instance.playerNames[itIndex]}";
+        }
     }
 }

@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEngine.VFX;
-using Photon.Pun;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
-public class PlayerBase : MonoBehaviourPunCallbacks
+public class PlayerBase : MonoBehaviour
 {
     [SerializeField] protected GameObject playerCameraPrefab;
     [SerializeField] protected GameObject playerNameUIPrefab;
