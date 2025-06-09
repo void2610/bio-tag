@@ -35,13 +35,13 @@ public class TitleUIToolkit : MonoBehaviour
         _npcButton.clicked -= OnNpcButtonClicked;
     }
     
-    private void OnPlayerButtonClicked()
+    public void OnPlayerButtonClicked()
     {
         SavePlayerName();
         SceneManager.LoadScene("WithPlayer");
     }
     
-    private void OnNpcButtonClicked()
+    public void OnNpcButtonClicked()
     {
         SavePlayerName();
         SceneManager.LoadScene("WithNPC");
