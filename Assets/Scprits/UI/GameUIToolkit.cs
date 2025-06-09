@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.Text;
 using System.Linq;
 
 /// <summary>
@@ -15,10 +14,6 @@ public class GameUIToolkit : MonoBehaviour
     private Label _itValue;
     private Label _scoreBoardContent;
     private VisualElement _scoreBoardContainer;
-    
-    // State
-    private bool _isScoreBoardEnabled = false;
-    private StringBuilder _scoreStringBuilder = new StringBuilder();
     
     public enum MessageType
     {
@@ -46,6 +41,12 @@ public class GameUIToolkit : MonoBehaviour
         {
             _gameMessageLabel.text = "";
         }
+        
+        // Always show score board
+        if (_scoreBoardContainer != null)
+        {
+            _scoreBoardContainer.style.display = DisplayStyle.Flex;
+        }
     }
     
     private void Update()
@@ -54,11 +55,7 @@ public class GameUIToolkit : MonoBehaviour
         
         UpdateTimer();
         UpdateItPlayer();
-        
-        if (_isScoreBoardEnabled)
-        {
-            UpdateScoreBoard();
-        }
+        UpdateScoreBoard();
     }
     
     // Game Message Methods
@@ -188,40 +185,30 @@ public class GameUIToolkit : MonoBehaviour
     
     // Score Board Methods
     
-    public void EnableScoreBoard(bool enable)
-    {
-        _isScoreBoardEnabled = enable;
-        if (_scoreBoardContainer != null)
-        {
-            _scoreBoardContainer.style.display = enable ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-    }
-    
     private void UpdateScoreBoard()
     {
         if (_scoreBoardContent == null) return;
         
         var gameManager = GameManagerBase.Instance;
         
-        _scoreStringBuilder.Clear();
-        
         // Create sorted score list
         var scoreEntries = gameManager.playerNames
-            .Select((name, index) => new { 
-                Name = name, 
+            .Select((playerName, index) => new { 
+                Name = playerName, 
                 Score = index < gameManager.playerScores.Count ? gameManager.playerScores[index] : 0f 
             })
-            .OrderByDescending(entry => entry.Score)
+            .OrderBy(entry => entry.Score)
             .ToList();
         
-        // Build score text
+        // Build score text with simple string concatenation
+        string scoreText = "";
         for (int i = 0; i < scoreEntries.Count; i++)
         {
-            if (i > 0) _scoreStringBuilder.AppendLine();
-            _scoreStringBuilder.Append($"{i + 1}. {scoreEntries[i].Name}: {scoreEntries[i].Score:F2}");
+            if (i > 0) scoreText += "\n";
+            scoreText += $"{i + 1}. {scoreEntries[i].Name}: {scoreEntries[i].Score:F1}";
         }
         
-        _scoreBoardContent.text = _scoreStringBuilder.ToString();
+        _scoreBoardContent.text = scoreText;
     }
     
 }
