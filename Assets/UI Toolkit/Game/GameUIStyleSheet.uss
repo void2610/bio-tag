@@ -1,0 +1,135 @@
+/* Game UI Container - Full screen overlay */
+.game-ui-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* Top HUD Section - Message Area */
+.top-hud {
+    position: absolute;
+    top: 150px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Game Message Styles */
+.game-message-container {
+    position: relative;
+    width: 100%;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+.game-message-label {
+    font-size: 24px;
+    color: #ffffff;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 15px 25px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: #e94560;
+    white-space: nowrap;
+    margin-left: auto;
+    margin-right: auto;
+    align-self: center;
+}
+
+/* Message Type Variations */
+.game-message-label.info {
+    border-color: #533483;
+    color: #f1f1f1;
+}
+
+.game-message-label.warning {
+    border-color: #ffb347;
+    color: #ffb347;
+}
+
+.game-message-label.success {
+    border-color: #4ade80;
+    color: #4ade80;
+}
+
+.game-message-label.error {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+/* Game Info Panel - Top Left */
+.game-info-panel {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    background-color: rgba(22, 33, 62, 0.9);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: #533483;
+    padding: 4px 8px;
+    min-width: 100px;
+}
+
+.info-item {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+/* Last item has no margin */
+.info-item-last {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-size: 14px;
+    color: #888888;
+    -unity-font-style: normal;
+}
+
+.info-value {
+    font-size: 16px;
+    color: #ffffff;
+    -unity-font-style: bold;
+    -unity-text-align: middle-right;
+}
+
+.it-name {
+    color: #e94560;
+}
+
+/* Score Board - Top Right (for GSR Game) */
+.score-board-container {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background-color: rgba(22, 33, 62, 0.9);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: #533483;
+    padding: 6px 8px;
+    min-width: 150px;
+    max-width: 180px;
+}
+
+.score-board-title {
+    font-size: 18px;
+    color: #e94560;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.score-board-content {
+    font-size: 14px;
+    color: #ffffff;
+    -unity-font-style: normal;
+    white-space: nowrap;
+}
