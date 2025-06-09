@@ -6,7 +6,7 @@ public class OfflinePlayerGameManager : GameManagerBase
 {
     [SerializeField] private GameObject mainPlayerPrefab;
     [SerializeField] private GameObject subPlayerPrefab;
-    [SerializeField] private GameMessageUIToolkit messageUI;
+    [SerializeField] private GameUIToolkit gameUI;
     [SerializeField] private int npcCount = 1;
 
     private readonly List<GameObject> _players = new ();
@@ -16,7 +16,7 @@ public class OfflinePlayerGameManager : GameManagerBase
     public override void StartGame()
     {
         GameState = 1;
-        messageUI.ClearMessage();
+        gameUI.ClearMessage();
         playerScores.Clear();
         for (var i = 0; i < npcCount + 1; i++)
         {
@@ -79,7 +79,7 @@ public class OfflinePlayerGameManager : GameManagerBase
     {
         Cursor.lockState = CursorLockMode.Locked;
         GameState = 0;
-        messageUI.SetMessage("Press F to Start Game", GameMessageUIToolkit.MessageType.Info);
+        gameUI.SetMessage("Press F to Start Game", GameUIToolkit.MessageType.Info);
     }
 
     protected override void Update()
@@ -112,7 +112,7 @@ public class OfflinePlayerGameManager : GameManagerBase
         }
         else if (GameState == 2)
         {
-            messageUI.SetMessage("Game Over", GameMessageUIToolkit.MessageType.Info);
+            gameUI.SetMessage("Game Over", GameUIToolkit.MessageType.Info);
         }
     }
 }
