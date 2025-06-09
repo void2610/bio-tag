@@ -9,19 +9,22 @@
 .top-hud {
     position: absolute;
     top: 150px;
-    left: 50%;
-    translate: -50% 0;
-    width: auto;
+    left: 0;
+    right: 0;
+    width: 100%;
     height: auto;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Game Message Styles */
 .game-message-container {
     position: relative;
-    width: auto;
+    width: 100%;
     padding: 0;
     justify-content: center;
     align-items: center;
+    flex-direction: row;
 }
 
 .game-message-label {
@@ -35,6 +38,9 @@
     border-width: 2px;
     border-color: #e94560;
     white-space: nowrap;
+    margin-left: auto;
+    margin-right: auto;
+    align-self: center;
 }
 
 /* Message Type Variations */
