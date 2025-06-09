@@ -6,7 +6,7 @@ public class OfflinePlayerGameManager : GameManagerBase
 {
     [SerializeField] private GameObject mainPlayerPrefab;
     [SerializeField] private GameObject subPlayerPrefab;
-    [SerializeField] private GameUIToolkit gameUI;
+    [SerializeField] private List<GameUIToolkit> gameUIs = new List<GameUIToolkit>();
     [SerializeField] private int npcCount = 1;
 
     private readonly List<GameObject> _players = new ();
@@ -16,7 +16,7 @@ public class OfflinePlayerGameManager : GameManagerBase
     public override void StartGame()
     {
         GameState = 1;
-        gameUI.ClearMessage();
+        SendMessageToAllUIs("", GameUIToolkit.MessageType.Default); // Clear messages
         playerScores.Clear();
         for (var i = 0; i < npcCount + 1; i++)
         {
@@ -25,6 +25,24 @@ public class OfflinePlayerGameManager : GameManagerBase
         itIndex = Random.Range(0, npcCount + 1);
         _startTime = Time.time;
         itMarker.SetTarget(_players[itIndex].transform);
+    }
+    
+    private void SendMessageToAllUIs(string message, GameUIToolkit.MessageType messageType)
+    {
+        foreach (var uiToolkit in gameUIs)
+        {
+            if (uiToolkit != null)
+            {
+                if (string.IsNullOrEmpty(message))
+                {
+                    uiToolkit.ClearMessage();
+                }
+                else
+                {
+                    uiToolkit.SetMessage(message, messageType);
+                }
+            }
+        }
     }
     
     public float GetElapsedTime()
@@ -55,6 +73,13 @@ public class OfflinePlayerGameManager : GameManagerBase
     protected override void Awake()
     {
         base.Awake();
+        
+        // If no GameUIToolkits are assigned in inspector, find all in the scene
+        if (gameUIs.Count == 0)
+        {
+            gameUIs.AddRange(FindObjectsByType<GameUIToolkit>(FindObjectsSortMode.None));
+        }
+        
         var mainP = Instantiate(mainPlayerPrefab, new Vector3(Random.Range(-3f, 3f), 1, Random.Range(-3f, 3f)), Quaternion.identity);
         _players.Add(mainP);
         mainP.GetComponent<PlayerBase>().index = 0;
@@ -79,7 +104,7 @@ public class OfflinePlayerGameManager : GameManagerBase
     {
         Cursor.lockState = CursorLockMode.Locked;
         GameState = 0;
-        gameUI.SetMessage("Press F to Start Game", GameUIToolkit.MessageType.Info);
+        SendMessageToAllUIs("Press F to Start Game", GameUIToolkit.MessageType.Info);
     }
 
     protected override void Update()
@@ -112,7 +137,7 @@ public class OfflinePlayerGameManager : GameManagerBase
         }
         else if (GameState == 2)
         {
-            gameUI.SetMessage("Game Over", GameUIToolkit.MessageType.Info);
+            SendMessageToAllUIs("Game Over", GameUIToolkit.MessageType.Info);
         }
     }
 }
