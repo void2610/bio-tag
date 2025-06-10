@@ -9,21 +9,20 @@ Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors 
 ## Core Architecture
 
 ### Game Management System
-- **GameManagerBase**: Abstract base class for all game modes at `Assets/Scprits/System/GameManagerBase.cs:8`
-- **NetworkGameManager**: Handles PUN2 multiplayer gameplay at `Assets/Scprits/System/NetworkGameManager.cs:8`
+- **GameManagerBase**: Abstract base class for all game modes at `Assets/Scprits/System/GameManagerBase.cs:5`
+- **GSRGameManager**: Core tag game logic at `Assets/Scprits/GSRGame/GSRGameManager.cs`
 - **NPCGameManager**: Manages AI-controlled games at `Assets/Scprits/System/NPCGameManager.cs`
 - **OfflinePlayerGameManager**: Single-player offline mode at `Assets/Scprits/System/OfflinePlayerGameManager.cs`
 
 ### Networking Architecture
-- **Photon PUN2**: Primary networking solution using App ID `ad94877c-57e5-4867-b36b-03c2443c6cc5` (Japan region)
-- **NetWorkEntryPoint**: Main networking entry point at `Assets/Scprits/Network/NetWorkEntryPoint.cs:6`
-- **Room Properties**: Custom room state management via `GameRoomProperty` and `PlayerProperty` classes
 - **TCP Server**: Local sensor data communication via `TcpServer` singleton at `Assets/Scprits/Utils/TCPServer.cs:10`
+- **Node.js Servers**: External sensor data handling via `spresense_sketch/tcp_server.js` (port 10001)
+- **Game State Management**: Centralized via GameManagerBase with states 0=Waiting, 1=Playing, 2=GameOver
 
 ### Player System
 - **PlayerBase**: Abstract player controller at `Assets/Scprits/Player/PlayerBase.cs`
-- **PUN2Player**: Networked player implementation using Photon
 - **SingleMainPlayer/SingleSubPlayer**: Offline player variants for single-player mode
+- **NPC**: AI-controlled player using Unity NavMesh at `Assets/Scprits/Player/NPC.cs`
 
 ### Sensor Integration
 - **SensorManager**: Core biometric sensor management at `Assets/Scprits/System/SensorManager.cs:9`
@@ -39,16 +38,11 @@ Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors 
 - **TCP Bridge**: Spresense device bridges sensor data to Unity via TCP port 10001
 
 ### Python Sensor Processing
-- **Poetry Project**: Located in `Arduino/python/` with dependencies for PyQt5, numpy, scipy
+- **Poetry Project**: Located in `Arduino/python/` with Python 3.11-3.12 constraint
+- **Dependencies**: PyQt5, numpy, scipy, bleak (BLE), keyboard/pynput (input handling)
 - **Real-time Processing**: Handles sensor calibration and data filtering
 
 ## Key Game Modes
-
-### Multiplayer (PUN2)
-- Scene: `PUN2.unity`
-- Minimum 2 players required
-- Real-time biometric influence on gameplay
-- Master client handles game state and scoring
 
 ### Single Player
 - Scene: `WithPlayer.unity` 
@@ -60,7 +54,24 @@ Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors 
 - AI-controlled opponents using Unity NavMesh
 - Good for testing without multiple human players
 
+## Development Environment
+- **Unity Version**: 6000.0.42f1 (Unity 6)
+- **Python Version**: 3.11-3.12
+- **Node.js**: Required for TCP/HTTP sensor servers
+- **Platform**: macOS (AppleScript dependencies in build tools)
+
 ## Development Commands
+
+### Unity Development Tools
+```bash
+# Check current compilation errors
+./unity-tools/unity-compile.sh check .
+
+# Trigger Unity compilation
+./unity-tools/unity-compile.sh trigger .
+
+# Hot Reload is integrated - code changes apply automatically during development
+```
 
 ### Unity Build & Run
 ```bash
@@ -68,6 +79,16 @@ Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors 
 # File -> Build Settings -> Build and Run
 # Or use Unity command line: 
 # /Applications/Unity/Hub/Editor/[VERSION]/Unity.app/Contents/MacOS/Unity -batchmode -projectPath . -buildTarget [Target] -quit
+```
+
+### Node.js Sensor Servers
+```bash
+# Start TCP server for sensor data (port 10001)
+cd spresense_sketch
+node tcp_server.js [log_file_name]
+
+# Start HTTP server for REST API (port 10080)  
+node HTTP_Server.js
 ```
 
 ### Arduino Development
@@ -103,10 +124,10 @@ poetry run python determine_values.py  # Calibration tool
 - **Calm State**: Below threshold → Player speed = 6.5f, white VFX, clear vision
 - **Real-time Updates**: 100ms intervals with R3 reactive properties
 
-### Networking Synchronization
+### Game Synchronization
 - **Game States**: 0=Waiting, 1=Playing, 2=GameOver
-- **"It" Player**: Tracked via `itIndex` in room properties
-- **Score Sync**: Master client broadcasts scores every 0.1 seconds
+- **"It" Player**: Tracked via `itIndex` in GameManagerBase
+- **Score Tracking**: Player scores and names managed via List<float> and List<string>
 - **Ready System**: Players press 'F' to ready up before game start
 
 ## Scene Structure
@@ -119,14 +140,21 @@ poetry run python determine_values.py  # Calibration tool
 ## Package Dependencies
 
 ### Key Unity Packages
-- **Photon PUN2**: Multiplayer networking
-- **DOTween**: Animation and tweening system
-- **UniTask**: Async/await operations (`com.cysharp.unitask`)
-- **R3**: Reactive extensions (`com.cysharp.r3`)
-- **Universal Render Pipeline**: Graphics rendering
-- **Visual Effect Graph**: Particle effects for biometric feedback
+- **R3**: Reactive extensions v1.2.9 (`com.cysharp.r3` and `org.nuget.r3`)
+- **UniTask**: Async/await operations v2.5.10 (`com.cysharp.unitask`)
+- **DOTween**: Animation and tweening system (via SingularityGroup Hot Reload)
+- **Universal Render Pipeline**: Graphics rendering v17.0.4
+- **Visual Effect Graph**: Particle effects for biometric feedback v17.0.4
+- **Unity Multiplayer Tools**: v2.2.1 for networking debugging
+- **AI Navigation**: v2.0.6 for NPC pathfinding
 
 ### Development Tools
-- **Hot Reload**: Live code updates during development
-- **Input System**: Modern Unity input handling
-- **Cinemachine**: Camera control systems
+- **Hot Reload**: SingularityGroup v1.13.7 for live code updates
+- **Input System**: Modern Unity input handling v1.13.1
+- **Cinemachine**: Camera control systems v2.10.3
+- **Unity Test Framework**: v1.4.6 (integrated but no custom tests)
+
+## Current Architecture Migration
+- **UI System**: Active migration from legacy Unity UI to UI Toolkit
+- **Title Scene**: Now uses `TitleUIToolkit.cs` with UI Toolkit Document
+- **Testing**: Unity Test Framework integrated but no custom test files present
