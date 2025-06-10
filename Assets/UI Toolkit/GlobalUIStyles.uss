@@ -1,30 +1,72 @@
 /* ============================================
    Bio-Tag Global UI Styles
-   統合されたUIスタイルシート
+   統合されたUIスタイルシート - CSS変数版
    ============================================ */
 
 /* ====================
-   Color Palette (カラーパレット)
-   
-   Primary Colors:
-   - primary-bg: #1a1a2e (メインの背景色)
-   - secondary-bg: #16213e (セカンダリ背景色) 
-   - tertiary-bg: #0f3460 (入力フィールド背景色)
-   - accent-color: #e94560 (アクセントカラー 赤)
-   - accent-hover: #c13651 (アクセントカラー ホバー)
-   - purple-accent: #533483 (紫のアクセント)
-   
-   Text Colors:
-   - text-primary: #ffffff (メインテキスト)
-   - text-secondary: #f1f1f1 (セカンダリテキスト)
-   - text-muted: #888888 (薄いテキスト)
-   
-   State Colors:
-   - success-color: #4ade80 (成功状態)
-   - warning-color: #ffb347 (警告状態)
-   - error-color: #ef4444 (エラー状態)
-   - info-color: #533483 (情報状態)
+   CSS Custom Properties (CSS変数)
+   Unity 6 でサポートされた変数システム
    ==================== */
+:root {
+    /* Primary Colors */
+    --primary-bg: #1a1a2e;           /* メインの背景色 */
+    --secondary-bg: #16213e;         /* セカンダリ背景色 */
+    --tertiary-bg: #0f3460;          /* 入力フィールド背景色 */
+    --accent-color: #e94560;         /* アクセントカラー */
+    --accent-hover: #c13651;         /* アクセントホバー */
+    --secondary-accent: #533483;     /* セカンダリアクセント */
+    
+    /* Text Colors */
+    --text-primary: #ffffff;         /* メインテキスト */
+    --text-secondary: #f1f1f1;       /* セカンダリテキスト */
+    --text-muted: #888888;           /* 薄いテキスト */
+    
+    /* State Colors */
+    --success-color: #4ade80;        /* 成功状態 */
+    --warning-color: #ffb347;        /* 警告状態 */
+    --error-color: #ef4444;          /* エラー状態 */
+    --info-color: #533483;           /* 情報状態 */
+    
+    /* Computed Colors */
+    --panel-bg: rgba(22, 33, 62, 0.9);    /* パネル背景 */
+    --overlay-bg: rgba(0, 0, 0, 0.85);    /* オーバーレイ背景 */
+}
+
+/* ====================
+   テーマ切り替え用クラス
+   ==================== */
+
+/* Forest Gold テーマ */
+.theme-forest-gold {
+    --primary-bg: #1a2e1a;
+    --secondary-bg: #213e21;
+    --tertiary-bg: #2d4a2d;
+    --accent-color: #ffd700;
+    --accent-hover: #ffb347;
+    --secondary-accent: #8fbc8f;
+    --text-secondary: #f0f8f0;
+    --success-color: #90ee90;
+    --error-color: #ff6b6b;
+    --info-color: #8fbc8f;
+    --panel-bg: rgba(33, 62, 33, 0.9);
+}
+
+/* Ocean Blue テーマ */
+.theme-ocean-blue {
+    --primary-bg: #0f1419;
+    --secondary-bg: #1e3a5f;
+    --tertiary-bg: #2a4a6b;
+    --accent-color: #00d4ff;
+    --accent-hover: #0099cc;
+    --secondary-accent: #4a90a4;
+    --text-secondary: #e6f3ff;
+    --text-muted: #8eb8d6;
+    --success-color: #00ff88;
+    --warning-color: #ffaa00;
+    --error-color: #ff4466;
+    --info-color: #4a90a4;
+    --panel-bg: rgba(30, 58, 95, 0.9);
+}
 
 /* ====================
    Base Container Styles
@@ -51,95 +93,95 @@
    Panel & Card Styles
    ==================== */
 .panel-primary {
-    background-color: #16213e; /* secondary-bg */
-    border-radius: 15px; /* border-radius-xl */
+    background-color: var(--secondary-bg);
+    border-radius: 15px;
     border-width: 3px;
-    border-color: #533483; /* purple-accent */
-    padding: 30px 25px; /* spacing-xxl spacing-xl */
+    border-color: var(--secondary-accent);
+    padding: 30px 25px;
 }
 
 .panel-secondary {
-    background-color: rgba(22, 33, 62, 0.9); /* panel-bg */
-    border-radius: 3px; /* border-radius-small */
+    background-color: var(--panel-bg);
+    border-radius: 3px;
     border-width: 1px;
-    border-color: #533483; /* purple-accent */
-    padding: 4px 8px; /* spacing-xs spacing-sm */
+    border-color: var(--secondary-accent);
+    padding: 4px 8px;
 }
 
 .panel-overlay {
-    background-color: rgba(0, 0, 0, 0.85); /* overlay-bg */
-    border-radius: 8px; /* border-radius-large */
+    background-color: var(--overlay-bg);
+    border-radius: 8px;
     border-width: 2px;
-    border-color: #e94560; /* accent-color */
-    padding: 15px 25px; /* spacing-md spacing-xl */
+    border-color: var(--accent-color);
+    padding: 15px 25px;
 }
 
 /* ====================
    Typography Styles
    ==================== */
 .text-title {
-    font-size: 42px; /* font-size-title */
-    color: #e94560; /* accent-color */
+    font-size: 42px;
+    color: var(--accent-color);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
 
 .text-heading {
-    font-size: 24px; /* font-size-xxl */
-    color: #ffffff; /* text-primary */
+    font-size: 24px;
+    color: var(--text-primary);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
 
 .text-subheading {
-    font-size: 18px; /* font-size-large */
-    color: #e94560; /* accent-color */
+    font-size: 18px;
+    color: var(--accent-color);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
 
 .text-body {
-    font-size: 16px; /* font-size-medium */
-    color: #ffffff; /* text-primary */
+    font-size: 16px;
+    color: var(--text-primary);
     -unity-font-style: normal;
 }
 
 .text-body-secondary {
-    font-size: 16px; /* font-size-medium */
-    color: #f1f1f1; /* text-secondary */
+    font-size: 16px;
+    color: var(--text-secondary);
     -unity-font-style: normal;
 }
 
 .text-caption {
-    font-size: 14px; /* font-size-small */
-    color: #888888; /* text-muted */
+    font-size: 14px;
+    color: var(--text-muted);
     -unity-font-style: normal;
 }
 
 .text-label {
-    font-size: 18px; /* font-size-large */
-    color: #f1f1f1; /* text-secondary */
+    font-size: 18px;
+    color: var(--text-secondary);
     -unity-text-align: middle-center;
 }
 
 .text-accent {
-    color: #e94560; /* accent-color */
+    color: var(--accent-color);
 }
 
 .text-success {
-    color: #4ade80; /* success-color */
+    color: var(--success-color);
 }
 
 .text-warning {
-    color: #ffb347; /* warning-color */
+    color: var(--warning-color);
 }
 
 .text-error {
-    color: #ef4444; /* error-color */
+    color: var(--error-color);
 }
 
 .text-info {
-    color: #533483; /* info-color */
+    color: var(--info-color);
 }
 
 /* ====================
@@ -148,34 +190,34 @@
 .btn-primary {
     width: 180px;
     height: 50px;
-    font-size: 18px; /* font-size-large */
-    background-color: #533483; /* purple-accent */
-    border-radius: 5px; /* border-radius-medium */
+    font-size: 18px;
+    background-color: var(--secondary-accent);
+    border-radius: 5px;
     border-width: 0;
-    color: #ffffff; /* text-primary */
-    transition-duration: 0.3s; /* transition-duration */
+    color: var(--text-primary);
+    transition-duration: 0.3s;
 }
 
 .btn-primary:hover {
-    background-color: #e94560; /* accent-color */
+    background-color: var(--accent-color);
     scale: 1.05;
 }
 
 .btn-primary:active {
-    background-color: #c13651; /* accent-hover */
+    background-color: var(--accent-hover);
     scale: 0.95;
 }
 
 .btn-secondary {
-    background-color: #16213e; /* secondary-bg */
+    background-color: var(--secondary-bg);
     border-width: 2px;
-    border-color: #533483; /* purple-accent */
-    color: #f1f1f1; /* text-secondary */
+    border-color: var(--secondary-accent);
+    color: var(--text-secondary);
 }
 
 .btn-secondary:hover {
-    background-color: #533483; /* purple-accent */
-    color: #ffffff; /* text-primary */
+    background-color: var(--secondary-accent);
+    color: var(--text-primary);
 }
 
 /* ====================
@@ -183,26 +225,26 @@
    ==================== */
 .input-field {
     height: 50px;
-    font-size: 20px; /* font-size-xl */
-    padding: 4px; /* spacing-xs */
-    background-color: #0f3460; /* tertiary-bg */
-    border-radius: 5px; /* border-radius-medium */
+    font-size: 20px;
+    padding: 4px;
+    background-color: var(--tertiary-bg);
+    border-radius: 5px;
     border-width: 2px;
-    border-color: #533483; /* purple-accent */
-    color: #ffffff; /* text-primary */
+    border-color: var(--secondary-accent);
+    color: var(--text-primary);
     min-height: 50px;
 }
 
 .input-field:focus {
-    border-color: #e94560; /* accent-color */
+    border-color: var(--accent-color);
 }
 
 .input-field > .unity-text-field__input {
-    background-color: #1a1a2e; /* primary-bg */
-    color: #ffffff; /* text-primary */
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
     border-width: 0;
-    padding: 10px 8px; /* spacing-sm */
-    border-radius: 3px; /* border-radius-small */
+    padding: 10px 8px;
+    border-radius: 3px;
     -unity-text-align: middle-left;
     height: 100%;
     min-height: 28px;
@@ -210,8 +252,8 @@
 }
 
 .input-field > .unity-text-field__input:focus {
-    background-color: #16213e; /* secondary-bg */
-    color: #ffffff; /* text-primary */
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
 }
 
 /* ====================
@@ -250,32 +292,32 @@
 }
 
 /* Margin Utilities */
-.m-xs { margin: 4px; } /* spacing-xs */
-.m-sm { margin: 8px; } /* spacing-sm */
-.m-md { margin: 15px; } /* spacing-md */
-.m-lg { margin: 20px; } /* spacing-lg */
-.m-xl { margin: 25px; } /* spacing-xl */
+.m-xs { margin: 4px; }
+.m-sm { margin: 8px; }
+.m-md { margin: 15px; }
+.m-lg { margin: 20px; }
+.m-xl { margin: 25px; }
 
-.mt-xs { margin-top: 4px; } /* spacing-xs */
-.mt-sm { margin-top: 8px; } /* spacing-sm */
-.mt-md { margin-top: 15px; } /* spacing-md */
-.mt-lg { margin-top: 20px; } /* spacing-lg */
-.mt-xl { margin-top: 25px; } /* spacing-xl */
+.mt-xs { margin-top: 4px; }
+.mt-sm { margin-top: 8px; }
+.mt-md { margin-top: 15px; }
+.mt-lg { margin-top: 20px; }
+.mt-xl { margin-top: 25px; }
 
-.mb-xs { margin-bottom: 4px; } /* spacing-xs */
-.mb-sm { margin-bottom: 8px; } /* spacing-sm */
-.mb-md { margin-bottom: 15px; } /* spacing-md */
-.mb-lg { margin-bottom: 20px; } /* spacing-lg */
-.mb-xl { margin-bottom: 25px; } /* spacing-xl */
+.mb-xs { margin-bottom: 4px; }
+.mb-sm { margin-bottom: 8px; }
+.mb-md { margin-bottom: 15px; }
+.mb-lg { margin-bottom: 20px; }
+.mb-xl { margin-bottom: 25px; }
 
-.ml-sm { margin-left: 8px; } /* spacing-sm */
-.mr-sm { margin-right: 8px; } /* spacing-sm */
+.ml-sm { margin-left: 8px; }
+.mr-sm { margin-right: 8px; }
 
 /* Padding Utilities */
-.p-xs { padding: 4px; } /* spacing-xs */
-.p-sm { padding: 8px; } /* spacing-sm */
-.p-md { padding: 15px; } /* spacing-md */
-.p-lg { padding: 20px; } /* spacing-lg */
+.p-xs { padding: 4px; }
+.p-sm { padding: 8px; }
+.p-md { padding: 15px; }
+.p-lg { padding: 20px; }
 
 /* Width Utilities */
 .w-full { width: 100%; }
@@ -286,7 +328,7 @@
    ==================== */
 .fade-in {
     transition-property: opacity;
-    transition-duration: 0.3s; /* transition-duration */
+    transition-duration: 0.3s;
     opacity: 1;
 }
 
@@ -296,7 +338,7 @@
 
 .scale-hover:hover {
     scale: 1.05;
-    transition-duration: 0.3s; /* transition-duration */
+    transition-duration: 0.3s;
 }
 
 .scale-active:active {
@@ -331,13 +373,13 @@
 }
 
 .top-left {
-    top: 4px; /* spacing-xs */
-    left: 4px; /* spacing-xs */
+    top: 4px;
+    left: 4px;
 }
 
 .top-right {
-    top: 4px; /* spacing-xs */
-    right: 4px; /* spacing-xs */
+    top: 4px;
+    right: 4px;
 }
 
 .top-center {
@@ -365,7 +407,7 @@
 
 /* Game Message Label - フォントサイズをカスタマイズ */
 .game-message-label {
-    font-size: 24px; /* デフォルトのheadingより小さく */
+    font-size: 24px;
     white-space: nowrap;
     margin-left: auto;
     margin-right: auto;
@@ -381,23 +423,23 @@
 }
 
 .game-message.info {
-    border-color: #533483; /* info-color */
-    color: #f1f1f1; /* text-secondary */
+    border-color: var(--info-color);
+    color: var(--text-secondary);
 }
 
 .game-message.warning {
-    border-color: #ffb347; /* warning-color */
-    color: #ffb347; /* warning-color */
+    border-color: var(--warning-color);
+    color: var(--warning-color);
 }
 
 .game-message.success {
-    border-color: #4ade80; /* success-color */
-    color: #4ade80; /* success-color */
+    border-color: var(--success-color);
+    color: var(--success-color);
 }
 
 .game-message.error {
-    border-color: #ef4444; /* error-color */
-    color: #ef4444; /* error-color */
+    border-color: var(--error-color);
+    color: var(--error-color);
 }
 
 /* Game Info Panel - 最小幅の設定 */
@@ -420,7 +462,7 @@
 
 /* It Name - アクセントカラー */
 .it-name {
-    color: #e94560;
+    color: var(--accent-color);
 }
 
 /* Score Board - サイズ制限とパディング調整 */
@@ -462,11 +504,11 @@
 
 /* Dark theme (default) */
 .theme-dark {
-    background-color: #1a1a2e; /* primary-bg */
+    background-color: var(--primary-bg);
 }
 
 /* High contrast theme */
 .theme-high-contrast {
     background-color: #000000;
-    color: #ffffff;
+    color: var(--text-primary);
 }
