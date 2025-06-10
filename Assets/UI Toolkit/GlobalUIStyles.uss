@@ -1,0 +1,472 @@
+/* ============================================
+   Bio-Tag Global UI Styles
+   統合されたUIスタイルシート
+   ============================================ */
+
+/* ====================
+   Color Palette (カラーパレット)
+   
+   Primary Colors:
+   - primary-bg: #1a1a2e (メインの背景色)
+   - secondary-bg: #16213e (セカンダリ背景色) 
+   - tertiary-bg: #0f3460 (入力フィールド背景色)
+   - accent-color: #e94560 (アクセントカラー 赤)
+   - accent-hover: #c13651 (アクセントカラー ホバー)
+   - purple-accent: #533483 (紫のアクセント)
+   
+   Text Colors:
+   - text-primary: #ffffff (メインテキスト)
+   - text-secondary: #f1f1f1 (セカンダリテキスト)
+   - text-muted: #888888 (薄いテキスト)
+   
+   State Colors:
+   - success-color: #4ade80 (成功状態)
+   - warning-color: #ffb347 (警告状態)
+   - error-color: #ef4444 (エラー状態)
+   - info-color: #533483 (情報状態)
+   ==================== */
+
+/* ====================
+   Base Container Styles
+   ==================== */
+.full-screen-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    flex-grow: 1;
+}
+
+.centered-container {
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* ====================
+   Panel & Card Styles
+   ==================== */
+.panel-primary {
+    background-color: #16213e; /* secondary-bg */
+    border-radius: 15px; /* border-radius-xl */
+    border-width: 3px;
+    border-color: #533483; /* purple-accent */
+    padding: 30px 25px; /* spacing-xxl spacing-xl */
+}
+
+.panel-secondary {
+    background-color: rgba(22, 33, 62, 0.9); /* panel-bg */
+    border-radius: 3px; /* border-radius-small */
+    border-width: 1px;
+    border-color: #533483; /* purple-accent */
+    padding: 4px 8px; /* spacing-xs spacing-sm */
+}
+
+.panel-overlay {
+    background-color: rgba(0, 0, 0, 0.85); /* overlay-bg */
+    border-radius: 8px; /* border-radius-large */
+    border-width: 2px;
+    border-color: #e94560; /* accent-color */
+    padding: 15px 25px; /* spacing-md spacing-xl */
+}
+
+/* ====================
+   Typography Styles
+   ==================== */
+.text-title {
+    font-size: 42px; /* font-size-title */
+    color: #e94560; /* accent-color */
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.text-heading {
+    font-size: 24px; /* font-size-xxl */
+    color: #ffffff; /* text-primary */
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.text-subheading {
+    font-size: 18px; /* font-size-large */
+    color: #e94560; /* accent-color */
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.text-body {
+    font-size: 16px; /* font-size-medium */
+    color: #ffffff; /* text-primary */
+    -unity-font-style: normal;
+}
+
+.text-body-secondary {
+    font-size: 16px; /* font-size-medium */
+    color: #f1f1f1; /* text-secondary */
+    -unity-font-style: normal;
+}
+
+.text-caption {
+    font-size: 14px; /* font-size-small */
+    color: #888888; /* text-muted */
+    -unity-font-style: normal;
+}
+
+.text-label {
+    font-size: 18px; /* font-size-large */
+    color: #f1f1f1; /* text-secondary */
+    -unity-text-align: middle-center;
+}
+
+.text-accent {
+    color: #e94560; /* accent-color */
+}
+
+.text-success {
+    color: #4ade80; /* success-color */
+}
+
+.text-warning {
+    color: #ffb347; /* warning-color */
+}
+
+.text-error {
+    color: #ef4444; /* error-color */
+}
+
+.text-info {
+    color: #533483; /* info-color */
+}
+
+/* ====================
+   Button Styles
+   ==================== */
+.btn-primary {
+    width: 180px;
+    height: 50px;
+    font-size: 18px; /* font-size-large */
+    background-color: #533483; /* purple-accent */
+    border-radius: 5px; /* border-radius-medium */
+    border-width: 0;
+    color: #ffffff; /* text-primary */
+    transition-duration: 0.3s; /* transition-duration */
+}
+
+.btn-primary:hover {
+    background-color: #e94560; /* accent-color */
+    scale: 1.05;
+}
+
+.btn-primary:active {
+    background-color: #c13651; /* accent-hover */
+    scale: 0.95;
+}
+
+.btn-secondary {
+    background-color: #16213e; /* secondary-bg */
+    border-width: 2px;
+    border-color: #533483; /* purple-accent */
+    color: #f1f1f1; /* text-secondary */
+}
+
+.btn-secondary:hover {
+    background-color: #533483; /* purple-accent */
+    color: #ffffff; /* text-primary */
+}
+
+/* ====================
+   Input Field Styles
+   ==================== */
+.input-field {
+    height: 50px;
+    font-size: 20px; /* font-size-xl */
+    padding: 4px; /* spacing-xs */
+    background-color: #0f3460; /* tertiary-bg */
+    border-radius: 5px; /* border-radius-medium */
+    border-width: 2px;
+    border-color: #533483; /* purple-accent */
+    color: #ffffff; /* text-primary */
+    min-height: 50px;
+}
+
+.input-field:focus {
+    border-color: #e94560; /* accent-color */
+}
+
+.input-field > .unity-text-field__input {
+    background-color: #1a1a2e; /* primary-bg */
+    color: #ffffff; /* text-primary */
+    border-width: 0;
+    padding: 10px 8px; /* spacing-sm */
+    border-radius: 3px; /* border-radius-small */
+    -unity-text-align: middle-left;
+    height: 100%;
+    min-height: 28px;
+    -unity-font-style: normal;
+}
+
+.input-field > .unity-text-field__input:focus {
+    background-color: #16213e; /* secondary-bg */
+    color: #ffffff; /* text-primary */
+}
+
+/* ====================
+   Layout Utilities
+   ==================== */
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-around {
+    justify-content: space-around;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.align-start {
+    align-items: flex-start;
+}
+
+.align-end {
+    align-items: flex-end;
+}
+
+/* Margin Utilities */
+.m-xs { margin: 4px; } /* spacing-xs */
+.m-sm { margin: 8px; } /* spacing-sm */
+.m-md { margin: 15px; } /* spacing-md */
+.m-lg { margin: 20px; } /* spacing-lg */
+.m-xl { margin: 25px; } /* spacing-xl */
+
+.mt-xs { margin-top: 4px; } /* spacing-xs */
+.mt-sm { margin-top: 8px; } /* spacing-sm */
+.mt-md { margin-top: 15px; } /* spacing-md */
+.mt-lg { margin-top: 20px; } /* spacing-lg */
+.mt-xl { margin-top: 25px; } /* spacing-xl */
+
+.mb-xs { margin-bottom: 4px; } /* spacing-xs */
+.mb-sm { margin-bottom: 8px; } /* spacing-sm */
+.mb-md { margin-bottom: 15px; } /* spacing-md */
+.mb-lg { margin-bottom: 20px; } /* spacing-lg */
+.mb-xl { margin-bottom: 25px; } /* spacing-xl */
+
+.ml-sm { margin-left: 8px; } /* spacing-sm */
+.mr-sm { margin-right: 8px; } /* spacing-sm */
+
+/* Padding Utilities */
+.p-xs { padding: 4px; } /* spacing-xs */
+.p-sm { padding: 8px; } /* spacing-sm */
+.p-md { padding: 15px; } /* spacing-md */
+.p-lg { padding: 20px; } /* spacing-lg */
+
+/* Width Utilities */
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+
+/* ====================
+   Animation Utilities
+   ==================== */
+.fade-in {
+    transition-property: opacity;
+    transition-duration: 0.3s; /* transition-duration */
+    opacity: 1;
+}
+
+.fade-out {
+    opacity: 0;
+}
+
+.scale-hover:hover {
+    scale: 1.05;
+    transition-duration: 0.3s; /* transition-duration */
+}
+
+.scale-active:active {
+    scale: 0.95;
+    transition-duration: 0.1s;
+}
+
+/* ====================
+   State Classes
+   ==================== */
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: flex;
+}
+
+.disabled {
+    opacity: 0.5;
+}
+
+/* ====================
+   Position Utilities
+   ==================== */
+.pos-absolute {
+    position: absolute;
+}
+
+.pos-relative {
+    position: relative;
+}
+
+.top-left {
+    top: 4px; /* spacing-xs */
+    left: 4px; /* spacing-xs */
+}
+
+.top-right {
+    top: 4px; /* spacing-xs */
+    right: 4px; /* spacing-xs */
+}
+
+.top-center {
+    top: 150px;
+    left: 0;
+    right: 0;
+    width: 100%;
+}
+
+/* ====================
+   Game UI Specific Styles
+   ==================== */
+
+/* Top HUD Section - Message Area */
+.top-hud {
+    position: absolute;
+    top: 150px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Game Message Label - フォントサイズをカスタマイズ */
+.game-message-label {
+    font-size: 24px; /* デフォルトのheadingより小さく */
+    white-space: nowrap;
+    margin-left: auto;
+    margin-right: auto;
+    align-self: center;
+}
+
+/* Game Message Styles */
+.game-message {
+    white-space: nowrap;
+    margin-left: auto;
+    margin-right: auto;
+    align-self: center;
+}
+
+.game-message.info {
+    border-color: #533483; /* info-color */
+    color: #f1f1f1; /* text-secondary */
+}
+
+.game-message.warning {
+    border-color: #ffb347; /* warning-color */
+    color: #ffb347; /* warning-color */
+}
+
+.game-message.success {
+    border-color: #4ade80; /* success-color */
+    color: #4ade80; /* success-color */
+}
+
+.game-message.error {
+    border-color: #ef4444; /* error-color */
+    color: #ef4444; /* error-color */
+}
+
+/* Game Info Panel - 最小幅の設定 */
+.game-info-panel {
+    min-width: 100px;
+}
+
+/* Info Panel Styles */
+.info-item {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+/* Info Value - フォントを太字に */
+.info-value {
+    -unity-text-align: middle-right;
+    -unity-font-style: bold;
+}
+
+/* It Name - アクセントカラー */
+.it-name {
+    color: #e94560;
+}
+
+/* Score Board - サイズ制限とパディング調整 */
+.score-board-container {
+    min-width: 150px;
+    max-width: 180px;
+    padding: 6px 8px;
+}
+
+/* Score Board Title - マージン調整 */
+.score-board-title {
+    margin-bottom: 4px;
+}
+
+/* Score Board Content - 改行なし */
+.score-board-content {
+    white-space: nowrap;
+}
+
+/* ====================
+   Title UI Specific Styles
+   ==================== */
+
+/* タイトル画面のボタンを少し大きくする */
+.title-screen-container .menu-button {
+    width: 200px;
+    height: 55px;
+}
+
+/* タイトルコンテナの幅設定 */
+.title-content {
+    width: 500px;
+    max-width: 80%;
+}
+
+/* ====================
+   Theme Variations
+   ==================== */
+
+/* Dark theme (default) */
+.theme-dark {
+    background-color: #1a1a2e; /* primary-bg */
+}
+
+/* High contrast theme */
+.theme-high-contrast {
+    background-color: #000000;
+    color: #ffffff;
+}
