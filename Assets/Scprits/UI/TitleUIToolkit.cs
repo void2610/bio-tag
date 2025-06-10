@@ -20,7 +20,7 @@ public class TitleUIToolkit : MonoBehaviour
         _npcButton = root.Q<Button>("npc-button");
         
         // Load saved player name
-        string savedName = PlayerPrefs.GetString("PlayerName", "Player");
+        var savedName = PlayerPrefs.GetString("PlayerName", "Player");
         _playerNameInput.value = savedName;
         
         // Register button callbacks
