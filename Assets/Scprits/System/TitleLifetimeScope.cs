@@ -2,7 +2,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-public class TitleSceneManager : LifetimeScope
+public class TitleLifetimeScope : LifetimeScope
 {
     protected override void Configure(IContainerBuilder builder)
     {
