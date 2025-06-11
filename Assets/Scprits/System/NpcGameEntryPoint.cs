@@ -38,14 +38,14 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
     private void SetupLegacyCompatibility()
     {
         // GameManagerBase.Instanceとの互換性のためプロキシを作成
-        if (GameManagerBase.Instance == null)
+        if (!GameManagerBase.Instance)
         {
             var proxyGameObject = new GameObject("GameManagerProxy");
             var proxy = proxyGameObject.AddComponent<GameManagerProxy>();
             
             // DIコンテナから依存注入
             var container = VContainer.Unity.LifetimeScope.Find<NpcGameLifetimeScope>();
-            if (container != null)
+            if (container)
             {
                 container.Container.Inject(proxy);
             }
@@ -58,10 +58,10 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
         _gameManager.SetGameState(0);
         _gameUI.ShowStartGame();
         
-        SpawnPlayersAndNPCs();
+        SpawnPlayersAndNpc();
     }
     
-    private void SpawnPlayersAndNPCs()
+    private void SpawnPlayersAndNpc()
     {
         // プレーヤーを生成
         var playerPosition = _playerSpawn.GetRandomSpawnPosition();
@@ -72,7 +72,7 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
         for (int i = 1; i < _gameConfig.npcCount + 1; i++)
         {
             var npcPosition = _playerSpawn.GetRandomSpawnPosition();
-            var npc = _playerSpawn.SpawnNpc(_gameConfig.npcPrefab, npcPosition, i, player.transform);
+             _playerSpawn.SpawnNpc(_gameConfig.npcPrefab, npcPosition, i, player.transform);
             _gameManager.AddPlayerName($"NPC{i}");
         }
     }
@@ -86,7 +86,7 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
     private void OnItChanged(int newItIndex)
     {
         var targetPlayer = GetPlayerByIndex(newItIndex);
-        if (targetPlayer != null)
+        if (targetPlayer)
         {
             _itMarker.SetTarget(targetPlayer.transform);
         }
@@ -169,7 +169,7 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
         var players = _playerSpawn.SpawnedPlayers;
         if (players.Count >= 2)
         {
-            float distance = Vector3.Distance(
+            var distance = Vector3.Distance(
                 players[0].transform.position,
                 players[1].transform.position
             );

@@ -25,9 +25,14 @@ public class Npc : MonoBehaviour
     private IGameManagerService _gameManager;
     
     [Inject]
-    public void Construct(IGameManagerService gameManager)
+    public void Construct(IGameManagerService gameManager, Transform fleeParent)
     {
         _gameManager = gameManager;
+        
+        foreach (Transform f in fleeParent.GetComponentsInChildren<Transform>())
+        {
+            _fleeAnchors.Add(f);
+        }
     }
 
     private void Wait(float time)
@@ -40,16 +45,29 @@ public class Npc : MonoBehaviour
         this._target = target;
     }
 
-    private void Awake()
-    {
-        var anchors = GameObject.Find("NPCFleeAnchors");
-        for (var i = 0; i < anchors.transform.childCount; i++)
-        {
-            _fleeAnchors.Add(anchors.transform.GetChild(i));
-        }
-    }
-
     private void Start()
+    {
+        // indexが初期化されるまで待つ
+        if (index < 0)
+        {
+            Debug.LogWarning($"NPC Start() called but index not set yet. Waiting...");
+            StartCoroutine(WaitForIndexAndInitialize());
+            return;
+        }
+        
+        Initialize();
+    }
+    
+    private IEnumerator WaitForIndexAndInitialize()
+    {
+        while (index < 0)
+        {
+            yield return null;
+        }
+        Initialize();
+    }
+    
+    private void Initialize()
     {
         var canvas = GameObject.Find("WorldSpaceCanvas");
         var ui = Instantiate(playerNameUIPrefab, canvas.transform);
@@ -66,20 +84,17 @@ public class Npc : MonoBehaviour
     private void Update()
     {
         // VContainerからゲーム状態を取得
-        bool isGamePlaying = _gameManager?.GameState == 1;
-        int currentItIndex = _gameManager?.ItIndex ?? -1;
+        var isGamePlaying = _gameManager?.GameState == 1;
+        var currentItIndex = _gameManager?.ItIndex ?? -1;
         
         Agent.isStopped = !_isMovable;
         if (_target && isGamePlaying && _isMovable)
         {
             if (index != currentItIndex)
-            {
                 Flee();
-            }
             else
-            {
                 Agent.SetDestination(_target.position);
-            }
+            
             Animator.SetFloat("Speed", Agent.velocity.magnitude);
             Animator.SetFloat("MotionSpeed", 1);
         }
@@ -145,12 +160,21 @@ public class Npc : MonoBehaviour
 
     private void Flee()
     {
+        if (!_target) return;
+        if (_fleeAnchors.Count == 0)
+        {
+            Debug.LogWarning("No flee anchors available.");
+            return;
+        }
+        
         // アンカーポイントの中から、最もプレイヤーから遠いものを選択
         Transform farthestAnchor = null;
         var maxDistance = float.MinValue;
 
         foreach (var anchor in _fleeAnchors)
         {
+            if (!anchor) continue;
+            
             var distanceToTarget = Vector3.Distance(anchor.position, _target.position);
             if (distanceToTarget > maxDistance)
             {

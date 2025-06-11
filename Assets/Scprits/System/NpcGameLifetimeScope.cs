@@ -5,6 +5,7 @@ using VContainer.Unity;
 public class NpcGameLifetimeScope : LifetimeScope
 {
     [SerializeField] private GameConfig gameConfig;
+    [SerializeField] private Transform fleeParent;
     protected override void Configure(IContainerBuilder builder)
     {
         // 共通サービス
@@ -18,6 +19,7 @@ public class NpcGameLifetimeScope : LifetimeScope
         
         // 設定値をコンテナに登録
         builder.RegisterInstance(gameConfig);
+        builder.RegisterInstance(fleeParent).As<Transform>();
         
         // ゲーム関連コンポーネント
         builder.RegisterComponentInHierarchy<GameUIToolkit>();
