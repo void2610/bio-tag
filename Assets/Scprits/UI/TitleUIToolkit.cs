@@ -1,9 +1,12 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.SceneManagement;
+using VContainer;
 
 public class TitleUIToolkit : MonoBehaviour
 {
+    [Inject] private IPlayerDataService _playerDataService;
+    [Inject] private ISceneService _sceneService;
+    
     private TextField _playerNameInput;
     private Button _playerButton;
     private Button _npcButton;
@@ -20,8 +23,7 @@ public class TitleUIToolkit : MonoBehaviour
         _npcButton = root.Q<Button>("npc-button");
         
         // Load saved player name
-        var savedName = PlayerPrefs.GetString("PlayerName", "Player");
-        _playerNameInput.value = savedName;
+        _playerNameInput.value = _playerDataService.GetPlayerName();
         
         // Register button callbacks
         _playerButton.clicked += OnPlayerButtonClicked;
@@ -34,27 +36,22 @@ public class TitleUIToolkit : MonoBehaviour
         _playerButton.clicked -= OnPlayerButtonClicked;
         _npcButton.clicked -= OnNpcButtonClicked;
     }
-    
-    public void OnPlayerButtonClicked()
+
+    private void OnPlayerButtonClicked()
     {
         SavePlayerName();
-        SceneManager.LoadScene("WithPlayer");
+        _sceneService.LoadPlayerScene();
     }
-    
-    public void OnNpcButtonClicked()
+
+    private void OnNpcButtonClicked()
     {
         SavePlayerName();
-        SceneManager.LoadScene("WithNPC");
+        _sceneService.LoadNpcScene();
     }
     
     private void SavePlayerName()
     {
         var playerName = _playerNameInput.value;
-        if (string.IsNullOrWhiteSpace(playerName))
-        {
-            playerName = "NoName";
-        }
-        PlayerPrefs.SetString("PlayerName", playerName);
-        PlayerPrefs.Save();
+        _playerDataService.SetPlayerName(playerName);
     }
 }
