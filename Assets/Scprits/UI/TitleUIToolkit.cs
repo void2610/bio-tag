@@ -6,6 +6,7 @@ public class TitleUIToolkit : MonoBehaviour
 {
     [Inject] private IPlayerDataService _playerDataService;
     [Inject] private ISceneService _sceneService;
+    [Inject] private IThemeService _themeService;
     
     private TextField _playerNameInput;
     private Button _playerButton;
@@ -28,6 +29,13 @@ public class TitleUIToolkit : MonoBehaviour
         // Register button callbacks
         _playerButton.clicked += OnPlayerButtonClicked;
         _npcButton.clicked += OnNpcButtonClicked;
+        
+        // Subscribe to theme changes and apply current theme
+        if (_themeService != null)
+        {
+            _themeService.ThemeChanged += OnThemeChanged;
+            ApplyTheme(_themeService.CurrentTheme);
+        }
     }
     
     private void OnDisable()
@@ -35,6 +43,20 @@ public class TitleUIToolkit : MonoBehaviour
         // Unregister callbacks to prevent memory leaks
         _playerButton.clicked -= OnPlayerButtonClicked;
         _npcButton.clicked -= OnNpcButtonClicked;
+        
+        // Unsubscribe from theme changes
+        if (_themeService != null)
+        {
+            _themeService.ThemeChanged -= OnThemeChanged;
+        }
+    }
+    
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            _themeService?.CycleTheme();
+        }
     }
 
     private void OnPlayerButtonClicked()
@@ -53,5 +75,39 @@ public class TitleUIToolkit : MonoBehaviour
     {
         var playerName = _playerNameInput.value;
         _playerDataService.SetPlayerName(playerName);
+    }
+    
+    private void OnThemeChanged(string newTheme)
+    {
+        ApplyTheme(newTheme);
+    }
+    
+    private void ApplyTheme(string themeName)
+    {
+        var uiDocument = GetComponent<UIDocument>();
+        if (uiDocument == null) return;
+        
+        var root = uiDocument.rootVisualElement;
+        if (root == null) return;
+        
+        // Remove all theme classes
+        foreach (string theme in _themeService.AvailableThemes)
+        {
+            if (!string.IsNullOrEmpty(theme))
+            {
+                root.RemoveFromClassList(theme);
+            }
+        }
+        
+        // Apply new theme
+        if (!string.IsNullOrEmpty(themeName))
+        {
+            root.AddToClassList(themeName);
+            Debug.Log($"[TitleUIToolkit] Applied theme: {themeName}");
+        }
+        else
+        {
+            Debug.Log("[TitleUIToolkit] Applied default theme");
+        }
     }
 }
