@@ -69,7 +69,7 @@ public class TitleUIToolkit : MonoBehaviour
     private void ApplyTheme(string themeName)
     {
         var root = _uiDocument.rootVisualElement;
-        if (root == null || string.IsNullOrEmpty(themeName)) return;
+        if (root == null) return;
         
         // 既存のテーマクラスを削除
         foreach (var theme in _themeService.AvailableThemes)
@@ -80,6 +80,6 @@ public class TitleUIToolkit : MonoBehaviour
             }
         }
         
-        root.AddToClassList(themeName);
+        if (!string.IsNullOrEmpty(themeName)) root.AddToClassList(themeName);
     }
 }
