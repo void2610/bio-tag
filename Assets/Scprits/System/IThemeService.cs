@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 
 public interface IThemeService
 {
     string CurrentTheme { get; }
-    string[] AvailableThemes { get; }
+    List<string> AvailableThemes { get; }
     
     void SetTheme(string themeName);
     void CycleTheme();

@@ -1,21 +1,21 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ThemeService : IThemeService
 {
     private const string THEME_PREF_KEY = "BioTag_SelectedTheme";
-    
-    private readonly string[] _availableThemes;
+
     private int _currentThemeIndex;
     
-    public string CurrentTheme => _availableThemes[_currentThemeIndex];
-    public string[] AvailableThemes => _availableThemes;
-    
+    public string CurrentTheme => AvailableThemes[_currentThemeIndex];
+    public List<string> AvailableThemes { get; }
+
     public event Action<string> ThemeChanged;
     
     public ThemeService()
     {
-        _availableThemes = new[] {
+        AvailableThemes = new List<string> {
             "", // Default theme (no class)
             "theme-forest-gold",
             "theme-ocean-blue"
@@ -44,32 +44,19 @@ public class ThemeService : IThemeService
     
     public void CycleTheme()
     {
-        _currentThemeIndex = (_currentThemeIndex + 1) % _availableThemes.Length;
-        string newTheme = CurrentTheme;
+        _currentThemeIndex = (_currentThemeIndex + 1) % AvailableThemes.Count;
+        var newTheme = CurrentTheme;
         
         SaveTheme(newTheme);
         ThemeChanged?.Invoke(newTheme);
-        
-        if (string.IsNullOrEmpty(newTheme))
-        {
-            Debug.Log("[ThemeService] Cycled to default theme");
-        }
-        else
-        {
-            Debug.Log($"[ThemeService] Cycled to theme: {newTheme}");
-        }
     }
     
-    public string GetSavedTheme()
-    {
-        return PlayerPrefs.GetString(THEME_PREF_KEY, "");
-    }
+    public string GetSavedTheme() => PlayerPrefs.GetString(THEME_PREF_KEY, "");
     
     public void SaveTheme(string themeName)
     {
         PlayerPrefs.SetString(THEME_PREF_KEY, themeName);
         PlayerPrefs.Save();
-        Debug.Log($"[ThemeService] Saved theme preference: {themeName}");
     }
     
     public void ClearSavedTheme()
@@ -78,42 +65,31 @@ public class ThemeService : IThemeService
         PlayerPrefs.Save();
         _currentThemeIndex = 0;
         ThemeChanged?.Invoke(CurrentTheme);
-        Debug.Log("[ThemeService] Cleared saved theme preference");
     }
     
     private void LoadSavedTheme()
     {
-        string savedTheme = GetSavedTheme();
+        var savedTheme = GetSavedTheme();
         
         if (!string.IsNullOrEmpty(savedTheme))
         {
-            int themeIndex = FindThemeIndex(savedTheme);
+            var themeIndex = FindThemeIndex(savedTheme);
             if (themeIndex >= 0)
-            {
-                _currentThemeIndex = themeIndex;
                 Debug.Log($"[ThemeService] Loaded saved theme: {savedTheme}");
-            }
             else
-            {
-                Debug.LogWarning($"[ThemeService] Invalid saved theme '{savedTheme}', using default");
                 _currentThemeIndex = 0;
-            }
         }
         else
         {
-            Debug.Log("[ThemeService] No saved theme found, using default");
             _currentThemeIndex = 0;
         }
     }
     
     private int FindThemeIndex(string themeName)
     {
-        for (int i = 0; i < _availableThemes.Length; i++)
+        for (var i = 0; i < AvailableThemes.Count; i++)
         {
-            if (_availableThemes[i] == themeName)
-            {
-                return i;
-            }
+            if (AvailableThemes[i] == themeName) return i;
         }
         return -1;
     }

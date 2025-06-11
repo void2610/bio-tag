@@ -85,13 +85,13 @@ public class TitleUIToolkit : MonoBehaviour
     private void ApplyTheme(string themeName)
     {
         var uiDocument = GetComponent<UIDocument>();
-        if (uiDocument == null) return;
+        if (!uiDocument) return;
         
         var root = uiDocument.rootVisualElement;
         if (root == null) return;
         
         // Remove all theme classes
-        foreach (string theme in _themeService.AvailableThemes)
+        foreach (var theme in _themeService.AvailableThemes)
         {
             if (!string.IsNullOrEmpty(theme))
             {
@@ -101,13 +101,6 @@ public class TitleUIToolkit : MonoBehaviour
         
         // Apply new theme
         if (!string.IsNullOrEmpty(themeName))
-        {
             root.AddToClassList(themeName);
-            Debug.Log($"[TitleUIToolkit] Applied theme: {themeName}");
-        }
-        else
-        {
-            Debug.Log("[TitleUIToolkit] Applied default theme");
-        }
     }
 }
