@@ -20,7 +20,13 @@ public class PlayerSpawnService : IPlayerSpawnService
         
         var player = Object.Instantiate(playerPrefab, position, Quaternion.identity);
         var playerBase = player.GetComponent<PlayerBase>();
-        if (playerBase) playerBase.index = index;
+        if (playerBase)
+        {
+            // VContainerで依存注入を実行
+            _container.Inject(playerBase);
+            
+            playerBase.index = index;
+        }
         
         SpawnedPlayers.Add(player);
         return player;

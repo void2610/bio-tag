@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.VFX;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
+using VContainer;
 
 public class PlayerBase : MonoBehaviour
 {
@@ -27,9 +27,16 @@ public class PlayerBase : MonoBehaviour
 
     public int index = -1;
     
+    // VContainer依存注入
+    protected IGameManagerService Gm;
+    
+    [Inject]
+    public void Construct(IGameManagerService gameManager)
+    {
+        Gm = gameManager;
+    }
+    
     public void SetWalkSpeed(float s) => walkSpeed = s;
-
-    protected virtual void Awake() { }
 
     protected virtual void Start()
     {
@@ -107,18 +114,22 @@ public class PlayerBase : MonoBehaviour
             this.transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.LookRotation(new Vector3(playerDirection.x, 0, playerDirection.z)), Time.deltaTime * 10);
         }
 
-        if (this.index == GameManagerBase.Instance.itIndex && GameManagerBase.Instance.GameState == 1)
+        // VContainerからゲーム状態を取得してItエフェクトを制御
+        bool isGamePlaying = Gm?.GameState == 1;
+        bool isIt = this.index == Gm?.ItIndex;
+        
+        if (isIt && isGamePlaying)
         {
-            ItEffect.SetInt("Rate", 20);
+            ItEffect?.SetInt("Rate", 20);
         }
         else
         {
-            ItEffect.SetInt("Rate", 0);
+            ItEffect?.SetInt("Rate", 0);
         }
     }
 
 
-    protected virtual void OnFootstep(AnimationEvent animationEvent)
+    protected void OnFootstep(AnimationEvent animationEvent)
     {
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
@@ -127,7 +138,7 @@ public class PlayerBase : MonoBehaviour
         }
     }
 
-    protected virtual void OnLand(AnimationEvent animationEvent)
+    protected void OnLand(AnimationEvent animationEvent)
     {
         if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - OnLandTime > 0.1f)
         {

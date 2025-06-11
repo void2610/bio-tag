@@ -3099,7 +3099,7 @@ MonoBehaviour:
   gameConfig:
     playerPrefab: {fileID: 7493163483396742707, guid: 108ba9941725d4ff982b3035dcc58c79, type: 3}
     npcPrefab: {fileID: 7493163483396742707, guid: a1e8109496a4540b18110533135d37c6, type: 3}
-    gameLength: 15
+    gameLength: 60
     npcCount: 1
 --- !u!1 &1702553561
 GameObject:

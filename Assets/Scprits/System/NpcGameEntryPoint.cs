@@ -30,8 +30,26 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
     
     public void Start()
     {
+        SetupLegacyCompatibility();
         InitializeGame();
         SetupEventSubscriptions();
+    }
+    
+    private void SetupLegacyCompatibility()
+    {
+        // GameManagerBase.Instanceとの互換性のためプロキシを作成
+        if (GameManagerBase.Instance == null)
+        {
+            var proxyGameObject = new GameObject("GameManagerProxy");
+            var proxy = proxyGameObject.AddComponent<GameManagerProxy>();
+            
+            // DIコンテナから依存注入
+            var container = VContainer.Unity.LifetimeScope.Find<NpcGameLifetimeScope>();
+            if (container != null)
+            {
+                container.Container.Inject(proxy);
+            }
+        }
     }
     
     private void InitializeGame()
