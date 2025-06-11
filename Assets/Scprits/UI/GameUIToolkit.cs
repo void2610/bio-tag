@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Linq;
+using System.Collections.Generic;
+using VContainer;
 
 /// <summary>
 /// Unified Game UI controller for tag game using UI Toolkit
@@ -14,6 +16,15 @@ public class GameUIToolkit : MonoBehaviour
     private Label _itValue;
     private Label _scoreBoardContent;
     private VisualElement _scoreBoardContainer;
+    
+    // VContainer依存注入
+    private IGameManagerService _gameManagerService;
+    
+    [Inject]
+    public void Construct(IGameManagerService gameManagerService)
+    {
+        _gameManagerService = gameManagerService;
+    }
     
     public enum MessageType
     {
@@ -128,15 +139,12 @@ public class GameUIToolkit : MonoBehaviour
     {
         if (_timerValue == null) return;
         
-        var gameManager = GameManagerBase.Instance;
-        
-        // Check for NpcGameManager or OfflinePlayerGameManager
-        if (gameManager.GetType() == typeof(NpcGameManager))
+        // Use injected game manager service
+        if (_gameManagerService != null)
         {
-            var npcManager = (NpcGameManager)gameManager;
-            if (npcManager.GameState == 1)
+            if (_gameManagerService.GameState == 1)
             {
-                var elapsedTime = npcManager.GetElapsedTime();
+                var elapsedTime = _gameManagerService.GetElapsedTime();
                 _timerValue.text = elapsedTime.ToString("F2");
             }
             else
@@ -144,9 +152,9 @@ public class GameUIToolkit : MonoBehaviour
                 _timerValue.text = "0.00";
             }
         }
-        else if (gameManager.GetType() == typeof(OfflinePlayerGameManager))
+        else if (GameManagerBase.Instance && GameManagerBase.Instance.GetType() == typeof(OfflinePlayerGameManager))
         {
-            var offlineManager = (OfflinePlayerGameManager)gameManager;
+            var offlineManager = (OfflinePlayerGameManager)GameManagerBase.Instance;
             if (offlineManager.GameState == 1)
             {
                 var elapsedTime = offlineManager.GetElapsedTime();
@@ -159,8 +167,8 @@ public class GameUIToolkit : MonoBehaviour
         }
         else
         {
-            // For other game managers, just show game state
-            _timerValue.text = gameManager.GameState == 1 ? "Running" : "0.00";
+            // For other game managers, just show default
+            _timerValue.text = "0.00";
         }
     }
     
@@ -170,12 +178,32 @@ public class GameUIToolkit : MonoBehaviour
     {
         if (_itValue == null) return;
         
-        var gameManager = GameManagerBase.Instance;
-        var itIndex = gameManager.itIndex;
-        
-        if (itIndex >= 0 && itIndex < gameManager.playerNames.Count)
+        if (_gameManagerService != null)
         {
-            _itValue.text = gameManager.playerNames[itIndex];
+            var itIndex = _gameManagerService.ItIndex;
+            var playerNames = _gameManagerService.PlayerNames;
+            
+            if (itIndex >= 0 && itIndex < playerNames.Count)
+            {
+                _itValue.text = playerNames[itIndex];
+            }
+            else
+            {
+                _itValue.text = "---";
+            }
+        }
+        else if (GameManagerBase.Instance)
+        {
+            var itIndex = GameManagerBase.Instance.itIndex;
+            
+            if (itIndex >= 0 && itIndex < GameManagerBase.Instance.playerNames.Count)
+            {
+                _itValue.text = GameManagerBase.Instance.playerNames[itIndex];
+            }
+            else
+            {
+                _itValue.text = "---";
+            }
         }
         else
         {
@@ -189,13 +217,31 @@ public class GameUIToolkit : MonoBehaviour
     {
         if (_scoreBoardContent == null) return;
         
-        var gameManager = GameManagerBase.Instance;
+        List<string> playerNames = null;
+        List<float> playerScores = null;
+        
+        if (_gameManagerService != null)
+        {
+            playerNames = _gameManagerService.PlayerNames;
+            playerScores = _gameManagerService.PlayerScores;
+        }
+        else if (GameManagerBase.Instance)
+        {
+            playerNames = GameManagerBase.Instance.playerNames;
+            playerScores = GameManagerBase.Instance.playerScores;
+        }
+        
+        if (playerNames == null || playerScores == null)
+        {
+            _scoreBoardContent.text = "No scores available";
+            return;
+        }
         
         // Create sorted score list
-        var scoreEntries = gameManager.playerNames
+        var scoreEntries = playerNames
             .Select((playerName, index) => new { 
                 Name = playerName, 
-                Score = index < gameManager.playerScores.Count ? gameManager.playerScores[index] : 0f 
+                Score = index < playerScores.Count ? playerScores[index] : 0f 
             })
             .OrderBy(entry => entry.Score)
             .ToList();

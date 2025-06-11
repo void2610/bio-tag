@@ -10,29 +10,27 @@ public class Npc : MonoBehaviour
 {
     [SerializeField] private GameObject playerNameUIPrefab;
     [SerializeField] private float moveSpeed = 8f;
-    public int index = -1;
     
     private readonly List<Transform> _fleeAnchors = new List<Transform>();
     private Animator Animator => GetComponent<Animator>();
     private CharacterController CCon => GetComponent<CharacterController>();
     private NavMeshAgent Agent => this.GetComponent<NavMeshAgent>();
+    private int _index = -1;
     private bool _isMovable = true;
     private VisualEffect _itEffect;
     private Transform _target;
     private bool _isJumping = false;
     private Transform _currentFleeTarget = null;
     private float _lastFleeCalculationTime = 0f;
-    private const float FLEE_RECALCULATION_INTERVAL = 2f; // 2秒ごとに再計算
-    
-    // VContainer依存注入
     private IGameManagerService _gameManager;
+    
+    private const float FLEE_RECALCULATION_INTERVAL = 2f; // 2秒ごとに再計算
     
     [Inject]
     public void Construct(IGameManagerService gameManager, Transform fleeParent)
     {
         _gameManager = gameManager;
-        
-        foreach (Transform f in fleeParent.GetComponentsInChildren<Transform>())
+        foreach (var f in fleeParent.GetComponentsInChildren<Transform>())
         {
             _fleeAnchors.Add(f);
         }
@@ -43,39 +41,17 @@ public class Npc : MonoBehaviour
         StartCoroutine(WaitCoroutine(time));
     }
 
-    public void SetTarget(Transform target)
+    public void Initialize(int index, string playerName, Transform target)
     {
-        this._target = target;
-    }
-
-    private void Start()
-    {
-        // indexが初期化されるまで待つ
-        if (index < 0)
-        {
-            Debug.LogWarning($"NPC Start() called but index not set yet. Waiting...");
-            StartCoroutine(WaitForIndexAndInitialize());
-            return;
-        }
+        _index = index;
+        _target = target;
         
-        Initialize();
-    }
-    
-    private IEnumerator WaitForIndexAndInitialize()
-    {
-        while (index < 0)
-        {
-            yield return null;
-        }
-        Initialize();
-    }
-    
-    private void Initialize()
-    {
+        // UI設定
         var canvas = GameObject.Find("WorldSpaceCanvas");
         var ui = Instantiate(playerNameUIPrefab, canvas.transform);
-        ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, index);
+        ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, _index);
 
+        // NavMeshAgent設定
         Agent.speed = moveSpeed;
         Agent.autoTraverseOffMeshLink = false; // 手動でオフメッシュリンクを処理
 
@@ -83,6 +59,9 @@ public class Npc : MonoBehaviour
         var vfx = transform.Find("PlayerTrail").GetComponent<VisualEffect>();
         SensorManager.Instance.AddVFX(vfx);
         _itEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
+        
+        // プレイヤー名を登録
+        _gameManager?.AddPlayerName(playerName);
     }
 
     private void Update()
@@ -94,7 +73,7 @@ public class Npc : MonoBehaviour
         Agent.isStopped = !_isMovable;
         if (_target && isGamePlaying && _isMovable)
         {
-            if (index != currentItIndex)
+            if (_index != currentItIndex)
             {
                 Flee();
             }
@@ -119,7 +98,7 @@ public class Npc : MonoBehaviour
             StartCoroutine(ChangeSpeedOnLink());
         }
 
-        _itEffect?.SetInt("Rate", index == currentItIndex ? 30 : 0);
+        _itEffect?.SetInt("Rate", _index == currentItIndex ? 30 : 0);
     }
 
     private IEnumerator WaitCoroutine(float time)
@@ -218,16 +197,10 @@ public class Npc : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player") || index == _gameManager?.ItIndex) return;
+        if (!other.CompareTag("Player") || _index == _gameManager?.ItIndex) return;
         
-        _gameManager?.ChangeIt(index);
+        _gameManager?.ChangeIt(_index);
         this.Wait(1f);
     }
 
-    private void OnFootstep()
-    {
-    }
-    private void OnLand()
-    {
-    }
 }

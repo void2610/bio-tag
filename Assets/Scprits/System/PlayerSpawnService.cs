@@ -42,9 +42,7 @@ public class PlayerSpawnService : IPlayerSpawnService
         {
             // VContainerで依存注入を実行
             _container.Inject(npcComponent);
-            
-            npcComponent.index = index;
-            npcComponent.SetTarget(target);
+            npcComponent.Initialize(index, $"NPC{index + 1}", target);
         }
         
         SpawnedPlayers.Add(npc);
