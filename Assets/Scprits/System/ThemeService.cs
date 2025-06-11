@@ -74,15 +74,10 @@ public class ThemeService : IThemeService
         if (!string.IsNullOrEmpty(savedTheme))
         {
             var themeIndex = FindThemeIndex(savedTheme);
-            if (themeIndex >= 0)
-                Debug.Log($"[ThemeService] Loaded saved theme: {savedTheme}");
-            else
-                _currentThemeIndex = 0;
+            _currentThemeIndex = themeIndex >= 0 ? themeIndex : 0;
         }
         else
-        {
             _currentThemeIndex = 0;
-        }
     }
     
     private int FindThemeIndex(string themeName)
