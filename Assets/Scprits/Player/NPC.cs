@@ -20,6 +20,9 @@ public class Npc : MonoBehaviour
     private VisualEffect _itEffect;
     private Transform _target;
     private bool _isJumping = false;
+    private Transform _currentFleeTarget = null;
+    private float _lastFleeCalculationTime = 0f;
+    private const float FLEE_RECALCULATION_INTERVAL = 2f; // 2秒ごとに再計算
     
     // VContainer依存注入
     private IGameManagerService _gameManager;
@@ -74,6 +77,7 @@ public class Npc : MonoBehaviour
         ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, index);
 
         Agent.speed = moveSpeed;
+        Agent.autoTraverseOffMeshLink = false; // 手動でオフメッシュリンクを処理
 
         // VFXをセンサーマネージャーに登録
         var vfx = transform.Find("PlayerTrail").GetComponent<VisualEffect>();
@@ -91,9 +95,15 @@ public class Npc : MonoBehaviour
         if (_target && isGamePlaying && _isMovable)
         {
             if (index != currentItIndex)
+            {
                 Flee();
+            }
             else
+            {
+                // 鬼になったときは逃げ先をリセット
+                _currentFleeTarget = null;
                 Agent.SetDestination(_target.position);
+            }
             
             Animator.SetFloat("Speed", Agent.velocity.magnitude);
             Animator.SetFloat("MotionSpeed", 1);
@@ -167,44 +177,41 @@ public class Npc : MonoBehaviour
             return;
         }
         
-        // アンカーポイントの中から、最もプレイヤーから遠いものを選択
-        Transform farthestAnchor = null;
-        var maxDistance = float.MinValue;
-
-        foreach (var anchor in _fleeAnchors)
+        // 一定時間ごとに逃げる目標を再計算、またはまだ計算していない場合
+        bool shouldRecalculate = _currentFleeTarget == null || 
+                                (Time.time - _lastFleeCalculationTime > FLEE_RECALCULATION_INTERVAL) ||
+                                (Agent.hasPath && Agent.remainingDistance < 1f);
+        
+        if (shouldRecalculate)
         {
-            if (!anchor) continue;
-            
-            var distanceToTarget = Vector3.Distance(anchor.position, _target.position);
-            if (distanceToTarget > maxDistance)
-            {
-                // NavMesh上で有効な経路かどうかを確認
-                var path = new NavMeshPath();
-                Agent.CalculatePath(anchor.position, path);
+            // アンカーポイントの中から、最もプレイヤーから遠いものを選択
+            Transform farthestAnchor = null;
+            var maxDistance = float.MinValue;
 
-                if (path.status == NavMeshPathStatus.PathComplete)
+            foreach (var anchor in _fleeAnchors)
+            {
+                if (!anchor) continue;
+                
+                var distanceToTarget = Vector3.Distance(anchor.position, _target.position);
+                if (distanceToTarget > maxDistance)
                 {
-                    maxDistance = distanceToTarget;
-                    farthestAnchor = anchor;
+                    // NavMesh上で有効な経路かどうかを確認
+                    var path = new NavMeshPath();
+                    Agent.CalculatePath(anchor.position, path);
+
+                    if (path.status == NavMeshPathStatus.PathComplete)
+                    {
+                        maxDistance = distanceToTarget;
+                        farthestAnchor = anchor;
+                    }
                 }
             }
-        }
 
-        if (farthestAnchor)
-        {
-            // 計算されたアンカーポイントに向けてエージェントを移動させる
-            var path = new NavMeshPath();
-            Agent.CalculatePath(farthestAnchor.position, path);
-
-            if (path.status == NavMeshPathStatus.PathComplete)
+            if (farthestAnchor != null)
             {
+                _currentFleeTarget = farthestAnchor;
+                _lastFleeCalculationTime = Time.time;
                 Agent.SetDestination(farthestAnchor.position);
-            }
-
-            // オフメッシュリンクに到達したらリンクを使う処理
-            if (Agent.isOnOffMeshLink && !_isJumping)
-            {
-                StartCoroutine(ChangeSpeedOnLink());
             }
         }
     }
