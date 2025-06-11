@@ -6,6 +6,14 @@ public class PlayerSpawnService : IPlayerSpawnService
 {
     public List<GameObject> SpawnedPlayers { get; private set; } = new ();
     
+    private readonly IObjectResolver _container;
+    
+    [Inject]
+    public PlayerSpawnService(IObjectResolver container)
+    {
+        _container = container;
+    }
+    
     public GameObject SpawnPlayer(GameObject playerPrefab, Vector3 position, int index)
     {
         if (!playerPrefab) return null;
@@ -26,6 +34,9 @@ public class PlayerSpawnService : IPlayerSpawnService
         var npcComponent = npc.GetComponent<Npc>();
         if (npcComponent)
         {
+            // VContainerで依存注入を実行
+            _container.Inject(npcComponent);
+            
             npcComponent.index = index;
             npcComponent.SetTarget(target);
         }

@@ -3,11 +3,6 @@ using UnityEngine.VFX;
 
 public class SingleMainPlayer : PlayerBase
 {
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
     protected override void Start()
     {
         base.Start();

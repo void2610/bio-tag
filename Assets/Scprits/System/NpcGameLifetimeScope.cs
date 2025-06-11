@@ -4,11 +4,7 @@ using VContainer.Unity;
 
 public class NpcGameLifetimeScope : LifetimeScope
 {
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private GameObject npcPrefab;
-    [SerializeField] private float gameLength = 60f;
-    [SerializeField] private int npcCount = 1;
-    
+    [SerializeField] private GameConfig gameConfig;
     protected override void Configure(IContainerBuilder builder)
     {
         // 共通サービス
@@ -21,13 +17,6 @@ public class NpcGameLifetimeScope : LifetimeScope
         builder.Register<IGameUIService, GameUIService>(Lifetime.Singleton);
         
         // 設定値をコンテナに登録
-        var gameConfig = new GameConfig
-        {
-            playerPrefab = this.playerPrefab,
-            npcPrefab = this.npcPrefab,
-            gameLength = this.gameLength,
-            npcCount = this.npcCount
-        };
         builder.RegisterInstance(gameConfig);
         
         // ゲーム関連コンポーネント

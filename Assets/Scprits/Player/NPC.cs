@@ -4,6 +4,7 @@ using UnityEngine.VFX;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using VContainer;
 
 public class Npc : MonoBehaviour
 {
@@ -19,6 +20,15 @@ public class Npc : MonoBehaviour
     private VisualEffect _itEffect;
     private Transform _target;
     private bool _isJumping = false;
+    
+    // VContainer依存注入
+    private IGameManagerService _gameManager;
+    
+    [Inject]
+    public void Construct(IGameManagerService gameManager)
+    {
+        _gameManager = gameManager;
+    }
 
     private void Wait(float time)
     {
@@ -55,10 +65,14 @@ public class Npc : MonoBehaviour
 
     private void Update()
     {
+        // VContainerからゲーム状態を取得
+        bool isGamePlaying = _gameManager?.GameState == 1;
+        int currentItIndex = _gameManager?.ItIndex ?? -1;
+        
         Agent.isStopped = !_isMovable;
-        if (_target && GameManagerBase.Instance.GameState == 1 && _isMovable)
+        if (_target && isGamePlaying && _isMovable)
         {
-            if (index != GameManagerBase.Instance.itIndex)
+            if (index != currentItIndex)
             {
                 Flee();
             }
@@ -80,7 +94,7 @@ public class Npc : MonoBehaviour
             StartCoroutine(ChangeSpeedOnLink());
         }
 
-        _itEffect.SetInt("Rate", index == GameManagerBase.Instance.itIndex ? 30 : 0);
+        _itEffect?.SetInt("Rate", index == currentItIndex ? 30 : 0);
     }
 
     private IEnumerator WaitCoroutine(float time)
@@ -173,9 +187,9 @@ public class Npc : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player") || index == GameManagerBase.Instance.itIndex) return;
+        if (!other.CompareTag("Player") || index == _gameManager?.ItIndex) return;
         
-        GameManagerBase.Instance.ChangeIt(index);
+        _gameManager?.ChangeIt(index);
         this.Wait(1f);
     }
 

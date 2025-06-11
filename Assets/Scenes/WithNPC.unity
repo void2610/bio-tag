@@ -3096,12 +3096,11 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
-  playerPrefab: {fileID: 7493163483396742707, guid: 108ba9941725d4ff982b3035dcc58c79, type: 3}
-  npcPrefab: {fileID: 7493163483396742707, guid: a1e8109496a4540b18110533135d37c6, type: 3}
-  playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
-  fleeAnchorParent: {fileID: 1414768951}
-  gameLength: 60
-  npcCount: 1
+  gameConfig:
+    playerPrefab: {fileID: 7493163483396742707, guid: 108ba9941725d4ff982b3035dcc58c79, type: 3}
+    npcPrefab: {fileID: 7493163483396742707, guid: a1e8109496a4540b18110533135d37c6, type: 3}
+    gameLength: 15
+    npcCount: 1
 --- !u!1 &1702553561
 GameObject:
   m_ObjectHideFlags: 0
@@ -3941,7 +3940,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2554290826947676235, guid: 9722c7d726b46486e81849ce393624d6, type: 3}
     m_RemovedGameObjects:
     - {fileID: 7530954296294710765, guid: 9722c7d726b46486e81849ce393624d6, type: 3}
     m_AddedGameObjects: []
