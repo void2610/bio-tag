@@ -1,60 +1,85 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.SceneManagement;
+using VContainer;
 
+[RequireComponent(typeof(UIDocument))]
 public class TitleUIToolkit : MonoBehaviour
 {
+    [Inject] private IPlayerDataService _playerDataService;
+    [Inject] private ISceneService _sceneService;
+    [Inject] private IThemeService _themeService;
+    
     private TextField _playerNameInput;
     private Button _playerButton;
     private Button _npcButton;
+    private UIDocument _uiDocument;
     
     private void OnEnable()
     {
-        // Get the root visual element
-        var uiDocument = GetComponent<UIDocument>();
-        var root = uiDocument.rootVisualElement;
+        _uiDocument = this.GetComponent<UIDocument>();
+        var root = _uiDocument.rootVisualElement;
         
-        // Query UI elements
+        // UI要素を取得
         _playerNameInput = root.Q<TextField>("player-name-input");
         _playerButton = root.Q<Button>("player-button");
         _npcButton = root.Q<Button>("npc-button");
         
-        // Load saved player name
-        var savedName = PlayerPrefs.GetString("PlayerName", "Player");
-        _playerNameInput.value = savedName;
+        // プレイヤー名をロード
+        _playerNameInput.value = _playerDataService.GetPlayerName();
         
-        // Register button callbacks
+        // コールバックを登録
         _playerButton.clicked += OnPlayerButtonClicked;
         _npcButton.clicked += OnNpcButtonClicked;
+        
+        // テーマ変更のためのコールバックを登録
+        _themeService.ThemeChanged += ApplyTheme;
+        ApplyTheme(_themeService.CurrentTheme);
     }
     
     private void OnDisable()
     {
-        // Unregister callbacks to prevent memory leaks
+        // コールバックを解除
         _playerButton.clicked -= OnPlayerButtonClicked;
         _npcButton.clicked -= OnNpcButtonClicked;
+        _themeService.ThemeChanged -= ApplyTheme;
     }
     
-    public void OnPlayerButtonClicked()
+    private void Update()
     {
-        SavePlayerName();
-        SceneManager.LoadScene("WithPlayer");
-    }
-    
-    public void OnNpcButtonClicked()
-    {
-        SavePlayerName();
-        SceneManager.LoadScene("WithNPC");
-    }
-    
-    private void SavePlayerName()
-    {
-        var playerName = _playerNameInput.value;
-        if (string.IsNullOrWhiteSpace(playerName))
+        if (Input.GetKeyDown(KeyCode.T))
         {
-            playerName = "NoName";
+            _themeService?.CycleTheme();
         }
-        PlayerPrefs.SetString("PlayerName", playerName);
-        PlayerPrefs.Save();
+    }
+
+    private void OnPlayerButtonClicked()
+    {
+        SavePlayerName();
+        _sceneService.LoadPlayerScene();
+    }
+
+    private void OnNpcButtonClicked()
+    {
+        SavePlayerName();
+        _sceneService.LoadNpcScene();
+    }
+    
+    private void SavePlayerName() => _playerDataService.SetPlayerName(_playerNameInput.value);
+    
+    private void ApplyTheme(string themeName)
+    {
+        var root = _uiDocument.rootVisualElement;
+        if (root == null) return;
+        
+        // 既存のテーマクラスを削除
+        foreach (var theme in _themeService.AvailableThemes)
+        {
+            if (!string.IsNullOrEmpty(theme))
+            {
+                root.RemoveFromClassList(theme);
+            }
+        }
+        
+        if (!string.IsNullOrEmpty(themeName)) root.AddToClassList(themeName);
     }
 }
