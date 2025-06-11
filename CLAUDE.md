@@ -8,11 +8,23 @@ Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors 
 
 ## Core Architecture
 
+### Dependency Injection with VContainer
+- **VContainer**: Lightweight DI container for Unity (jp.hadashikick.vcontainer v4.x)
+- **LifetimeScope Pattern**: Each scene has its own LifetimeScope (e.g., `TitleLifetimeScope`)
+- **Service Registration**: Services registered as Singleton, components via `RegisterComponentInHierarchy<T>()`
+- **Injection**: Use `[Inject]` attribute for dependency injection in MonoBehaviours
+
 ### Game Management System
 - **GameManagerBase**: Abstract base class for all game modes at `Assets/Scprits/System/GameManagerBase.cs:5`
 - **GSRGameManager**: Core tag game logic at `Assets/Scprits/GSRGame/GSRGameManager.cs`
 - **NPCGameManager**: Manages AI-controlled games at `Assets/Scprits/System/NPCGameManager.cs`
 - **OfflinePlayerGameManager**: Single-player offline mode at `Assets/Scprits/System/OfflinePlayerGameManager.cs`
+
+### Service Architecture (VContainer)
+- **IPlayerDataService/PlayerDataService**: Player data management (name, preferences)
+- **ISceneService/SceneService**: Scene transition management
+- **IThemeService/ThemeService**: UI theme management with CSS Custom Properties
+- All services use interfaces for abstraction and are registered in scene-specific LifetimeScopes
 
 ### Networking Architecture
 - **TCP Server**: Local sensor data communication via `TcpServer` singleton at `Assets/Scprits/Utils/TCPServer.cs:10`
@@ -29,6 +41,13 @@ Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors 
 - **GSRGraph**: Real-time biometric data visualization at `Assets/Scprits/Utils/GSRGraph.cs:6`
 - **Hardware Integration**: Arduino-based MAX30009 sensor via BLE and TCP communication
 
+### UI System (UI Toolkit)
+- **Migration to UI Toolkit**: Using Unity 6's UI Toolkit instead of legacy uGUI
+- **UXML Documents**: UI layouts defined in .uxml files
+- **USS Styling**: CSS-like styling with Custom Properties for theming
+- **Theme System**: Dynamic theme switching via CSS classes (default, theme-forest-gold, theme-ocean-blue)
+- **No EventSystem Required**: UI Toolkit handles input independently
+
 ## Hardware Components
 
 ### Arduino MAX30009 Integration
@@ -41,18 +60,6 @@ Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors 
 - **Poetry Project**: Located in `Arduino/python/` with Python 3.11-3.12 constraint
 - **Dependencies**: PyQt5, numpy, scipy, bleak (BLE), keyboard/pynput (input handling)
 - **Real-time Processing**: Handles sensor calibration and data filtering
-
-## Key Game Modes
-
-### Single Player
-- Scene: `WithPlayer.unity` 
-- Local gameplay with mock sensor data
-- Testing environment for sensor integration
-
-### NPC Mode
-- Scene: `WithNPC.unity`
-- AI-controlled opponents using Unity NavMesh
-- Good for testing without multiple human players
 
 ## Development Environment
 - **Unity Version**: 6000.0.42f1 (Unity 6)
@@ -132,17 +139,19 @@ poetry run python determine_values.py  # Calibration tool
 
 ## Scene Structure
 
-- **Title.unity**: Main menu and networking setup
+- **Title.unity**: Main menu with VContainer setup (TitleLifetimeScope)
 - **GSRGame.unity**: Core biometric tag game
-- **VFXTest.unity**: Visual effects testing environment  
-- **UDPTest.unity**: Network communication testing
+- **WithPlayer.unity**: Single player mode with mock sensor data
+- **WithNPC.unity**: AI opponent mode
+- **Test/UIToolkitTitle.unity**: UI Toolkit test scene
 
 ## Package Dependencies
 
 ### Key Unity Packages
+- **VContainer**: v4.x for dependency injection (`jp.hadashikick.vcontainer`)
 - **R3**: Reactive extensions v1.2.9 (`com.cysharp.r3` and `org.nuget.r3`)
 - **UniTask**: Async/await operations v2.5.10 (`com.cysharp.unitask`)
-- **DOTween**: Animation and tweening system (via SingularityGroup Hot Reload)
+- **DOTween**: Animation and tweening system
 - **Universal Render Pipeline**: Graphics rendering v17.0.4
 - **Visual Effect Graph**: Particle effects for biometric feedback v17.0.4
 - **Unity Multiplayer Tools**: v2.2.1 for networking debugging
@@ -153,8 +162,3 @@ poetry run python determine_values.py  # Calibration tool
 - **Input System**: Modern Unity input handling v1.13.1
 - **Cinemachine**: Camera control systems v2.10.3
 - **Unity Test Framework**: v1.4.6 (integrated but no custom tests)
-
-## Current Architecture Migration
-- **UI System**: Active migration from legacy Unity UI to UI Toolkit
-- **Title Scene**: Now uses `TitleUIToolkit.cs` with UI Toolkit Document
-- **Testing**: Unity Test Framework integrated but no custom test files present
