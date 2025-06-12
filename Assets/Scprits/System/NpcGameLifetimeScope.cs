@@ -26,6 +26,7 @@ public class NpcGameLifetimeScope : LifetimeScope
         // ゲーム関連コンポーネント
         builder.RegisterComponentInHierarchy<GameUIToolkit>();
         builder.RegisterComponentInHierarchy<ItMarker>();
+        builder.RegisterComponentInHierarchy<SensorManager>();
         
         // NPCGameManagerをEntryPointとして登録
         builder.RegisterEntryPoint<NpcGameEntryPoint>();

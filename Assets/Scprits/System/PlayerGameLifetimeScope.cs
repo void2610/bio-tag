@@ -2,7 +2,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-public class WithPlayerLifetimeScope : LifetimeScope
+public class PlayerGameLifetimeScope : LifetimeScope
 {
     [SerializeField] private PlayerNameUI playerNameUIPrefab;
     [SerializeField] private GameConfig gameConfig;
@@ -26,6 +26,7 @@ public class WithPlayerLifetimeScope : LifetimeScope
         // ゲーム関連コンポーネント
         builder.RegisterComponentInHierarchy<GameUIToolkit>();
         builder.RegisterComponentInHierarchy<ItMarker>();
+        builder.RegisterComponentInHierarchy<SensorManager>();
         
         // WithPlayerEntryPointをEntryPointとして登録
         builder.RegisterEntryPoint<WithPlayerEntryPoint>();

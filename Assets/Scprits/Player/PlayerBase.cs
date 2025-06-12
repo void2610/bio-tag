@@ -22,12 +22,10 @@ public class PlayerBase : MonoBehaviour
     protected VisualEffect ItEffect;
     protected Vector3 MovementInput;
     protected bool JumpInput = false;
+    protected IGameManagerService Gm;
     private const float FOOTSTEP_AUDIO_VOLUME = 0.5f;
 
     public int index = -1;
-    
-    // VContainer依存注入
-    protected IGameManagerService Gm;
     
     [Inject]
     public void Construct(IGameManagerService gameManager)
@@ -40,10 +38,6 @@ public class PlayerBase : MonoBehaviour
     protected virtual void Start()
     {
         ItEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
-    }
-
-    protected virtual void Update()
-    {
     }
 
     public void OnMove(InputValue value)
@@ -63,7 +57,7 @@ public class PlayerBase : MonoBehaviour
         JumpInput = false;
     }
 
-    protected virtual void UpdateCharacterController(Vector3 input, Vector3 playerDirection, bool isJump)
+    protected void UpdateCharacterController(Vector3 input, Vector3 playerDirection, bool isJump)
     {
         if (!IsMovable)
         {
@@ -123,7 +117,6 @@ public class PlayerBase : MonoBehaviour
             ItEffect?.SetInt("Rate", 0);
         }
     }
-
 
     protected void OnFootstep(AnimationEvent animationEvent)
     {

@@ -5,10 +5,20 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
 using DG.Tweening;
+using VContainer;
 
 public class SensorManager : MonoBehaviour
 {
     public static SensorManager Instance;
+    
+    private IPlayerSpawnService _playerSpawn;
+    
+    [Inject]
+    public void Construct(IPlayerSpawnService playerSpawn)
+    {
+        _playerSpawn = playerSpawn;
+    }
+    
     private void Awake()
     {
         if (Instance == null)
@@ -29,6 +39,15 @@ public class SensorManager : MonoBehaviour
     public void AddVFX(VisualEffect vfx)
     {
         _vfxList.Add(vfx);
+    }
+    
+    private PlayerBase GetMainPlayer()
+    {
+        if (_playerSpawn?.SpawnedPlayers != null && _playerSpawn.SpawnedPlayers.Count > 0)
+        {
+            return _playerSpawn.SpawnedPlayers[0]?.GetComponent<PlayerBase>();
+        }
+        return null;
     }
 
     private void SetAlpha(float a, float d)
@@ -54,7 +73,8 @@ public class SensorManager : MonoBehaviour
         _tweenList.Add(tw);
         
         // プレイヤー速度の変更
-        GameManagerBase.Instance.GetMainPlayer().SetWalkSpeed(3f);
+        var mainPlayer = GetMainPlayer();
+        if (mainPlayer) mainPlayer.SetWalkSpeed(3f);
     }
     
     private void ChangeToCalm()
@@ -71,7 +91,8 @@ public class SensorManager : MonoBehaviour
         _tweenList.Add(tw);
         
         // プレイヤー速度の変更
-        GameManagerBase.Instance.GetMainPlayer().SetWalkSpeed(6.5f);
+        var mainPlayer = GetMainPlayer();
+        if (mainPlayer) mainPlayer.SetWalkSpeed(6.5f);
     }
 
     [Obsolete("Obsolete")]

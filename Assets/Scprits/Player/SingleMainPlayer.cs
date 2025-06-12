@@ -3,9 +3,8 @@ using UnityEngine.VFX;
 
 public class SingleMainPlayer : PlayerBase
 {
-    protected override void Update()
+    private void Update()
     {
-        base.Update();
         if (!MyPlayerCamera)
         {
             MyPlayerCamera = transform.GetComponentInChildren<PlayerCamera>().gameObject;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// DEPRECATED: This class has been replaced by the VContainer-based architecture.
-/// Use WithPlayerLifetimeScope, WithPlayerGameManagerService, and WithPlayerEntryPoint instead.
+/// Use PlayerGameLifetimeScope, WithPlayerGameManagerService, and WithPlayerEntryPoint instead.
 /// This file is kept for reference during migration.
 /// </summary>
 [System.Obsolete("This class is deprecated. Use VContainer-based WithPlayer* services instead.")]

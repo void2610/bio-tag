@@ -3,9 +3,8 @@ using UnityEngine.VFX;
 
 public class SingleSubPlayer : PlayerBase
 {
-    protected override void Update()
+    private void Update()
     {
-        base.Update();
         if (!MyPlayerCamera)
         {
             MyPlayerCamera = transform.GetComponentInChildren<PlayerCamera>().gameObject;
@@ -27,11 +26,11 @@ public class SingleSubPlayer : PlayerBase
 
     private void OnTriggerEnter(Collider other)
     {
-        if (GameManagerBase.Instance.GameState != 1)
+        if (Gm?.GameState != 1)
         {
             return;
         }
 
-        GameManagerBase.Instance.ChangeIt(index);
+        Gm?.ChangeIt(index);
     }
 }
