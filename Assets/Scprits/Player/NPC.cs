@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.VFX;
-using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using VContainer;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 
 public class Npc : MonoBehaviour
 {
@@ -36,9 +37,11 @@ public class Npc : MonoBehaviour
         }
     }
 
-    private void Wait(float time)
+    private async UniTaskVoid Wait(float time)
     {
-        StartCoroutine(WaitCoroutine(time));
+        _isMovable = false;
+        await UniTask.Delay((int)(time * 1000), cancellationToken: this.GetCancellationTokenOnDestroy());
+        _isMovable = true;
     }
 
     public void Initialize(int index, string playerName, Transform target)
@@ -95,20 +98,13 @@ public class Npc : MonoBehaviour
 
         if (Agent.isOnOffMeshLink && !_isJumping)
         {
-            StartCoroutine(ChangeSpeedOnLink());
+            ChangeSpeedOnLinkAsync().Forget();
         }
 
         _itEffect?.SetInt("Rate", _index == currentItIndex ? 30 : 0);
     }
 
-    private IEnumerator WaitCoroutine(float time)
-    {
-        _isMovable = false;
-        yield return new WaitForSeconds(time);
-        _isMovable = true;
-    }
-
-    private IEnumerator ChangeSpeedOnLink()
+    private async UniTaskVoid ChangeSpeedOnLinkAsync()
     {
         _isJumping = true;
         Animator.SetBool("Jump", true);
@@ -124,23 +120,18 @@ public class Npc : MonoBehaviour
 
         var duration = Vector3.Distance(Agent.transform.position, endPos) / (moveSpeed * 0.8f);
 
-        float time = 0;
-
         var middle = new Vector3((startPos.x + endPos.x) / 2, Mathf.Max(startPos.y, endPos.y) + 0.5f, (startPos.z + endPos.z) / 2);
         this.transform.DOPath(new Vector3[] { startPos, middle, endPos }, duration).SetEase(Ease.Linear);
 
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-            yield return null;
-        }
+        await UniTask.Delay((int)(duration * 1000), cancellationToken: this.GetCancellationTokenOnDestroy());
+        
         Agent.CompleteOffMeshLink();
 
         Agent.Warp(endPos);
         Animator.SetBool("Jump", false);
         Animator.SetBool("Grounded", true);
 
-        yield return new WaitForSeconds(0.3f);
+        await UniTask.Delay(300, cancellationToken: this.GetCancellationTokenOnDestroy());
 
         Agent.speed = moveSpeed;
         Agent.updatePosition = true;
@@ -200,7 +191,7 @@ public class Npc : MonoBehaviour
         if (!other.CompareTag("Player") || _index == _gameManager?.ItIndex) return;
         
         _gameManager?.ChangeIt(_index);
-        this.Wait(1f);
+        Wait(1f).Forget();
     }
 
 }
