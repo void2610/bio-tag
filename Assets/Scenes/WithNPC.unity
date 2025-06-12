@@ -3096,12 +3096,13 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
+  playerNameUIPrefab: {fileID: 3791076943737411426, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
+  fleeParent: {fileID: 1414768951}
   gameConfig:
     playerPrefab: {fileID: 7493163483396742707, guid: 108ba9941725d4ff982b3035dcc58c79, type: 3}
     npcPrefab: {fileID: 7493163483396742707, guid: a1e8109496a4540b18110533135d37c6, type: 3}
     gameLength: 60
     npcCount: 1
-  fleeParent: {fileID: 1414768951}
 --- !u!1 &1702553561
 GameObject:
   m_ObjectHideFlags: 0

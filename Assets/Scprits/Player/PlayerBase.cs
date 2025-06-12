@@ -6,7 +6,6 @@ using VContainer;
 public class PlayerBase : MonoBehaviour
 {
     [SerializeField] protected GameObject playerCameraPrefab;
-    [SerializeField] protected GameObject playerNameUIPrefab;
     [SerializeField] protected AudioClip[] footstepAudioClips;
     [SerializeField] protected AudioClip landingAudioClip;
     [SerializeField] protected float jumpPower = 6f;
@@ -40,9 +39,6 @@ public class PlayerBase : MonoBehaviour
 
     protected virtual void Start()
     {
-        var canvas = GameObject.Find("WorldSpaceCanvas");
-        var ui = Instantiate(playerNameUIPrefab, canvas.transform);
-        ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, index);
         ItEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
     }
 

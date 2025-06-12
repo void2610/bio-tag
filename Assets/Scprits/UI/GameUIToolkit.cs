@@ -17,7 +17,6 @@ public class GameUIToolkit : MonoBehaviour
     private Label _scoreBoardContent;
     private VisualElement _scoreBoardContainer;
     
-    // VContainer依存注入
     private IGameManagerService _gameManagerService;
     
     [Inject]
@@ -69,13 +68,6 @@ public class GameUIToolkit : MonoBehaviour
         UpdateScoreBoard();
     }
     
-    // Game Message Methods
-    
-    public void SetMessage(string message)
-    {
-        SetMessage(message, MessageType.Default);
-    }
-    
     public void SetMessage(string message, MessageType messageType = MessageType.Default)
     {
         if (_gameMessageLabel == null) return;
@@ -104,24 +96,6 @@ public class GameUIToolkit : MonoBehaviour
                 _gameMessageLabel.AddToClassList("error");
                 break;
         }
-        
-        ShowMessage();
-    }
-    
-    public void ShowMessage()
-    {
-        if (_gameMessageLabel != null && !string.IsNullOrEmpty(_gameMessageLabel.text))
-        {
-            _gameMessageLabel.style.display = DisplayStyle.Flex;
-        }
-    }
-    
-    public void HideMessage()
-    {
-        if (_gameMessageLabel != null)
-        {
-            _gameMessageLabel.style.display = DisplayStyle.None;
-        }
     }
     
     public void ClearMessage()
@@ -134,7 +108,6 @@ public class GameUIToolkit : MonoBehaviour
     }
     
     // Timer Methods
-    
     private void UpdateTimer()
     {
         if (_timerValue == null || _gameManagerService == null) return;
@@ -151,7 +124,6 @@ public class GameUIToolkit : MonoBehaviour
     }
     
     // It Player Methods
-    
     private void UpdateItPlayer()
     {
         if (_itValue == null || _gameManagerService == null) return;
@@ -170,7 +142,6 @@ public class GameUIToolkit : MonoBehaviour
     }
     
     // Score Board Methods
-    
     private void UpdateScoreBoard()
     {
         if (_scoreBoardContent == null || _gameManagerService == null) return;

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using VContainer;
 
 public class PlayerSpawnService : IPlayerSpawnService
@@ -7,11 +8,15 @@ public class PlayerSpawnService : IPlayerSpawnService
     public List<GameObject> SpawnedPlayers { get; private set; } = new ();
     
     private readonly IObjectResolver _container;
+    private IPlayerDataService _playerDataService;
+    private readonly PlayerNameUI _playerNameUIPrefab;
     
     [Inject]
-    public PlayerSpawnService(IObjectResolver container)
+    public PlayerSpawnService(IObjectResolver container, IPlayerDataService playerDataService, PlayerNameUI playerNameUIPrefab)
     {
         _container = container;
+        _playerDataService = playerDataService;
+        _playerNameUIPrefab = playerNameUIPrefab;
     }
     
     public GameObject SpawnPlayer(GameObject playerPrefab, Vector3 position, int index)
@@ -20,10 +25,16 @@ public class PlayerSpawnService : IPlayerSpawnService
         
         var player = Object.Instantiate(playerPrefab, position, Quaternion.identity);
         var playerBase = player.GetComponent<PlayerBase>();
+        var nameUI = Object.Instantiate(_playerNameUIPrefab, GameObject.Find("WorldSpaceCanvas").transform);
         if (playerBase)
         {
             // VContainerで依存注入を実行
             _container.Inject(playerBase);
+            
+            // PlayerNameUIをInitializeで初期化（VContainer依存注入は不要）
+            var playerNameUI = nameUI.GetComponent<PlayerNameUI>();
+            var name = _playerDataService.GetPlayerName();
+            playerNameUI.Initialize(player.transform, name);
             
             playerBase.index = index;
         }
@@ -38,11 +49,14 @@ public class PlayerSpawnService : IPlayerSpawnService
         
         var npc = Object.Instantiate(npcPrefab, position, Quaternion.identity);
         var npcComponent = npc.GetComponent<Npc>();
+        var nameUI = Object.Instantiate(_playerNameUIPrefab, GameObject.Find("WorldSpaceCanvas").transform);
         if (npcComponent)
         {
             // VContainerで依存注入を実行
             _container.Inject(npcComponent);
-            npcComponent.Initialize(index, $"NPC{index + 1}", target);
+            npcComponent.Initialize(index, $"NPC{index}", target);
+            var playerNameUI = nameUI.GetComponent<PlayerNameUI>();
+            playerNameUI.Initialize(npc.transform, $"NPC{index}");
         }
         
         SpawnedPlayers.Add(npc);

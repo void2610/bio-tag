@@ -7,6 +7,7 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
 {
     private readonly IGameManagerService _gameManager;
     private readonly IPlayerSpawnService _playerSpawn;
+    private readonly IPlayerDataService _playerDataService;
     private readonly IGameUIService _gameUI;
     private readonly GameConfig _gameConfig;
     private readonly ItMarker _itMarker;
@@ -17,12 +18,14 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
     public NpcGameEntryPoint(
         IGameManagerService gameManager,
         IPlayerSpawnService playerSpawn,
+        IPlayerDataService playerDataService,
         IGameUIService gameUI,
         GameConfig gameConfig,
         ItMarker itMarker)
     {
         _gameManager = gameManager;
         _playerSpawn = playerSpawn;
+        _playerDataService = playerDataService;
         _gameUI = gameUI;
         _gameConfig = gameConfig;
         _itMarker = itMarker;
@@ -66,7 +69,8 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
         // プレーヤーを生成
         var playerPosition = _playerSpawn.GetRandomSpawnPosition();
         var player = _playerSpawn.SpawnPlayer(_gameConfig.playerPrefab, playerPosition, 0);
-        _gameManager.AddPlayerName("Player");
+        var playerName = _playerDataService.GetPlayerName();
+        _gameManager.AddPlayerName(playerName);
         
         // NPCを生成
         for (int i = 1; i < _gameConfig.npcCount + 1; i++)

@@ -1,16 +1,19 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
 public class NpcGameLifetimeScope : LifetimeScope
 {
-    [SerializeField] private GameConfig gameConfig;
+    [SerializeField] private PlayerNameUI playerNameUIPrefab;
     [SerializeField] private Transform fleeParent;
+    [SerializeField] private GameConfig gameConfig;
     protected override void Configure(IContainerBuilder builder)
     {
         // 共通サービス
         builder.Register<ISceneService, SceneService>(Lifetime.Singleton);
         builder.Register<IThemeService, ThemeService>(Lifetime.Singleton);
+        builder.Register<IPlayerDataService, PlayerDataService>(Lifetime.Singleton);
         
         // NPCゲーム専用サービス
         builder.Register<IGameManagerService, NPCGameManagerService>(Lifetime.Singleton);
@@ -20,6 +23,7 @@ public class NpcGameLifetimeScope : LifetimeScope
         // 設定値をコンテナに登録
         builder.RegisterInstance(gameConfig);
         builder.RegisterInstance(fleeParent).As<Transform>();
+        builder.RegisterInstance(playerNameUIPrefab).As<PlayerNameUI>();
         
         // ゲーム関連コンポーネント
         builder.RegisterComponentInHierarchy<GameUIToolkit>();

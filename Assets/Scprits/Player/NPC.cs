@@ -9,12 +9,10 @@ using System.Threading;
 
 public class Npc : MonoBehaviour
 {
-    [SerializeField] private GameObject playerNameUIPrefab;
     [SerializeField] private float moveSpeed = 8f;
     
     private readonly List<Transform> _fleeAnchors = new List<Transform>();
     private Animator Animator => GetComponent<Animator>();
-    private CharacterController CCon => GetComponent<CharacterController>();
     private NavMeshAgent Agent => this.GetComponent<NavMeshAgent>();
     private int _index = -1;
     private bool _isMovable = true;
@@ -49,11 +47,6 @@ public class Npc : MonoBehaviour
         _index = index;
         _target = target;
         
-        // UI設定
-        var canvas = GameObject.Find("WorldSpaceCanvas");
-        var ui = Instantiate(playerNameUIPrefab, canvas.transform);
-        ui.GetComponent<PlayerNameUI>().SetTargetPlayer(this.gameObject, _index);
-
         // NavMeshAgent設定
         Agent.speed = moveSpeed;
         Agent.autoTraverseOffMeshLink = false; // 手動でオフメッシュリンクを処理
@@ -62,9 +55,6 @@ public class Npc : MonoBehaviour
         var vfx = transform.Find("PlayerTrail").GetComponent<VisualEffect>();
         SensorManager.Instance.AddVFX(vfx);
         _itEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
-        
-        // プレイヤー名を登録
-        _gameManager?.AddPlayerName(playerName);
     }
 
     private void Update()
