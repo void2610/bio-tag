@@ -130,8 +130,7 @@ public class PlayerGameEntryPoint : IStartable, ITickable, IDisposable
                 }
                 
                 // ゲーム終了判定
-                var gameManagerService = _gameManager as PlayerGameManagerService;
-                if (gameManagerService != null && _gameManager.GetElapsedTime() >= gameManagerService.GetGameLength())
+                if (_gameManager is PlayerGameManagerService gameManagerService && _gameManager.GetElapsedTime() >= gameManagerService.GetGameLength())
                 {
                     _gameManager.SetGameState(2);
                 }

@@ -7,8 +7,8 @@ public class PlayerGameManagerService : IGameManagerService
     public int? GameState { get; private set; } = 0;
     public int ItIndex { get; private set; }
     public float LastTagTime { get; private set; }
-    public List<float> PlayerScores { get; private set; } = new List<float>();
-    public List<string> PlayerNames { get; private set; } = new List<string>();
+    public List<float> PlayerScores { get; private set; } = new ();
+    public List<string> PlayerNames { get; private set; } = new ();
     
     public event System.Action<int> OnGameStateChanged;
     public event System.Action<int> OnItChanged;
@@ -25,13 +25,7 @@ public class PlayerGameManagerService : IGameManagerService
     public void StartGame()
     {
         SetGameState(1);
-        PlayerScores.Clear();
-        // 1 main player + N NPCs
-        for (var i = 0; i < _gameConfig.npcCount + 1; i++)
-        {
-            PlayerScores.Add(0);
-        }
-        ItIndex = Random.Range(0, _gameConfig.npcCount + 1);
+        ItIndex = Random.Range(0, 2);
         _startTime = Time.time;
         OnItChanged?.Invoke(ItIndex);
     }
@@ -55,19 +49,10 @@ public class PlayerGameManagerService : IGameManagerService
         }
     }
     
-    public void AddPlayerScore(float score)
-    {
-        PlayerScores.Add(score);
-    }
-    
     public void AddPlayerName(string name)
     {
         PlayerNames.Add(name);
-    }
-    
-    public void ClearScores()
-    {
-        PlayerScores.Clear();
+        PlayerScores.Add(0);
     }
     
     public float GetElapsedTime()
@@ -78,10 +63,5 @@ public class PlayerGameManagerService : IGameManagerService
     public float GetGameLength()
     {
         return _gameConfig.gameLength;
-    }
-    
-    public int GetNpcCount()
-    {
-        return _gameConfig.npcCount;
     }
 }

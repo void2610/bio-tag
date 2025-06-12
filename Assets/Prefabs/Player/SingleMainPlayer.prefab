@@ -1898,6 +1898,7 @@ GameObject:
   - component: {fileID: 3677766485405940899}
   - component: {fileID: 1046156731043585764}
   - component: {fileID: 3017559631962645264}
+  - component: {fileID: -1807133460783643629}
   - component: {fileID: -1502476831106821833}
   - component: {fileID: -8425628456057148448}
   - component: {fileID: 3561700276160663422}
@@ -1965,7 +1966,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -1973,6 +1974,33 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!54 &-1807133460783643629
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7493163483396742707}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!114 &-1502476831106821833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1986,7 +2014,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCameraPrefab: {fileID: 5409894540958609353, guid: b4be50f88394247c3bd92fe52a339b1a, type: 3}
-  playerNameUIPrefab: {fileID: 1163752231689873787, guid: a54dba814ff9646d68d75a90918199b4, type: 3}
   footstepAudioClips:
   - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}
   - {fileID: 8300000, guid: 22537e39083884518b948b6542639237, type: 3}
@@ -1995,7 +2022,6 @@ MonoBehaviour:
   jumpPower: 6
   walkSpeed: 6
   velocity: {x: 0, y: 0, z: 0}
-  index: -1
 --- !u!143 &-8425628456057148448
 CharacterController:
   m_ObjectHideFlags: 0
