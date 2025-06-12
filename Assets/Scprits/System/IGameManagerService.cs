@@ -12,9 +12,7 @@ public interface IGameManagerService
     void StartGame();
     void ChangeIt(int index);
     void SetGameState(int state);
-    void AddPlayerScore(float score);
     void AddPlayerName(string name);
-    void ClearScores();
     float GetElapsedTime();
     
     event System.Action<int> OnGameStateChanged;

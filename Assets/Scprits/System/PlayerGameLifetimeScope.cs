@@ -1,12 +1,12 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
-public class NpcGameLifetimeScope : LifetimeScope
+public class PlayerGameLifetimeScope : LifetimeScope
 {
     [SerializeField] private PlayerNameUI playerNameUIPrefab;
     [SerializeField] private GameConfig gameConfig;
+    
     protected override void Configure(IContainerBuilder builder)
     {
         // 共通サービス
@@ -14,13 +14,13 @@ public class NpcGameLifetimeScope : LifetimeScope
         builder.Register<IThemeService, ThemeService>(Lifetime.Singleton);
         builder.Register<IPlayerDataService, PlayerDataService>(Lifetime.Singleton);
         
-        // NPCゲーム専用サービス
-        builder.Register<IGameManagerService, NPCGameManagerService>(Lifetime.Singleton);
+        // WithPlayer専用サービス
+        builder.Register<IGameManagerService, PlayerGameManagerService>(Lifetime.Singleton);
         builder.Register<IPlayerSpawnService, PlayerSpawnService>(Lifetime.Singleton);
         builder.Register<IGameUIService, GameUIService>(Lifetime.Singleton);
         
         // 設定値をコンテナに登録
-        builder.RegisterInstance(gameConfig);
+        builder.RegisterInstance(gameConfig).As<GameConfig>();
         builder.RegisterInstance(playerNameUIPrefab).As<PlayerNameUI>();
         
         // ゲーム関連コンポーネント
@@ -28,7 +28,7 @@ public class NpcGameLifetimeScope : LifetimeScope
         builder.RegisterComponentInHierarchy<ItMarker>();
         builder.RegisterComponentInHierarchy<SensorManager>();
         
-        // NPCGameManagerをEntryPointとして登録
-        builder.RegisterEntryPoint<NpcGameEntryPoint>();
+        // WithPlayerEntryPointをEntryPointとして登録
+        builder.RegisterEntryPoint<PlayerGameEntryPoint>();
     }
 }

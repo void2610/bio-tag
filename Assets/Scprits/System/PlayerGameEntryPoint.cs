@@ -3,7 +3,7 @@ using VContainer;
 using VContainer.Unity;
 using System;
 
-public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
+public class PlayerGameEntryPoint : IStartable, ITickable, IDisposable
 {
     private readonly IGameManagerService _gameManager;
     private readonly IPlayerSpawnService _playerSpawn;
@@ -15,7 +15,7 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
     private bool _isPlayerReady = false;
     
     [Inject]
-    public NpcGameEntryPoint(
+    public PlayerGameEntryPoint(
         IGameManagerService gameManager,
         IPlayerSpawnService playerSpawn,
         IPlayerDataService playerDataService,
@@ -35,6 +35,8 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
     {
         InitializeGame();
         SetupEventSubscriptions();
+        
+        if (Display.displays.Length > 1) Display.displays[1].Activate();
     }
     
     private void InitializeGame()
@@ -43,24 +45,13 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
         _gameManager.SetGameState(0);
         _gameUI.ShowStartGame();
         
-        SpawnPlayersAndNpc();
+        SpawnPlayers();
     }
     
-    private void SpawnPlayersAndNpc()
+    private void SpawnPlayers()
     {
-        // プレーヤーを生成
-        var playerPosition = _playerSpawn.GetRandomSpawnPosition();
-        var player = _playerSpawn.SpawnPlayer(_gameConfig.playerPrefab, playerPosition, 0);
-        var playerName = _playerDataService.GetPlayerName();
-        _gameManager.AddPlayerName(playerName);
-        
-        // NPCを生成
-        for (int i = 1; i < _gameConfig.npcCount + 1; i++)
-        {
-            var npcPosition = _playerSpawn.GetRandomSpawnPosition();
-             _playerSpawn.SpawnNpc(_gameConfig.npcPrefab, npcPosition, i, player.transform);
-            _gameManager.AddPlayerName($"NPC{i}");
-        }
+        _playerSpawn.SpawnPlayer(_gameConfig.playerPrefab, _playerSpawn.GetRandomSpawnPosition(), 0);
+        _playerSpawn.SpawnPlayer(_gameConfig.subPlayerPrefab, _playerSpawn.GetRandomSpawnPosition(), 1);
     }
     
     private void SetupEventSubscriptions()
@@ -139,7 +130,7 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
                 }
                 
                 // ゲーム終了判定
-                if (_gameManager.GetElapsedTime() >= _gameConfig.gameLength)
+                if (_gameManager is PlayerGameManagerService gameManagerService && _gameManager.GetElapsedTime() >= gameManagerService.GetGameLength())
                 {
                     _gameManager.SetGameState(2);
                 }

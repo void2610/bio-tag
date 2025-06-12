@@ -11,7 +11,8 @@ public class PlayerBase : MonoBehaviour
     [SerializeField] protected float jumpPower = 6f;
     [SerializeField] protected float walkSpeed = 6f;
     public Vector3 velocity = Vector3.zero;
-    
+    public int Index { get; private set; } = -1;
+
     protected Animator Animator => GetComponent<Animator>();
     protected CharacterController CCon => GetComponent<CharacterController>();
     protected GameObject MyPlayerCamera = null;
@@ -22,28 +23,16 @@ public class PlayerBase : MonoBehaviour
     protected VisualEffect ItEffect;
     protected Vector3 MovementInput;
     protected bool JumpInput = false;
+    protected IGameManagerService Gm;
     private const float FOOTSTEP_AUDIO_VOLUME = 0.5f;
 
-    public int index = -1;
-    
-    // VContainer依存注入
-    protected IGameManagerService Gm;
-    
-    [Inject]
-    public void Construct(IGameManagerService gameManager)
-    {
-        Gm = gameManager;
-    }
-    
     public void SetWalkSpeed(float s) => walkSpeed = s;
 
-    protected virtual void Start()
+    public void Initialize(IGameManagerService gameManager, int index)
     {
+        Index = index;
+        Gm = gameManager;
         ItEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
-    }
-
-    protected virtual void Update()
-    {
     }
 
     public void OnMove(InputValue value)
@@ -63,7 +52,7 @@ public class PlayerBase : MonoBehaviour
         JumpInput = false;
     }
 
-    protected virtual void UpdateCharacterController(Vector3 input, Vector3 playerDirection, bool isJump)
+    protected void UpdateCharacterController(Vector3 input, Vector3 playerDirection, bool isJump)
     {
         if (!IsMovable)
         {
@@ -111,8 +100,8 @@ public class PlayerBase : MonoBehaviour
         }
 
         // VContainerからゲーム状態を取得してItエフェクトを制御
-        bool isGamePlaying = Gm?.GameState == 1;
-        bool isIt = this.index == Gm?.ItIndex;
+        var isGamePlaying = Gm?.GameState == 1;
+        var isIt = this.Index == Gm?.ItIndex;
         
         if (isIt && isGamePlaying)
         {
@@ -123,7 +112,16 @@ public class PlayerBase : MonoBehaviour
             ItEffect?.SetInt("Rate", 0);
         }
     }
-
+    
+    private void Update()
+    {
+        if (!MyPlayerCamera)
+        {
+            MyPlayerCamera = transform.GetComponentInChildren<PlayerCamera>().gameObject;
+            MyPlayerCamera.name = "PlayerCamera" + Index;
+        }
+        LocalMoving();
+    }
 
     protected void OnFootstep(AnimationEvent animationEvent)
     {
