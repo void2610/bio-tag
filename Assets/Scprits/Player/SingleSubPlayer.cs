@@ -3,16 +3,6 @@ using UnityEngine.VFX;
 
 public class SingleSubPlayer : PlayerBase
 {
-    private void Update()
-    {
-        if (!MyPlayerCamera)
-        {
-            MyPlayerCamera = transform.GetComponentInChildren<PlayerCamera>().gameObject;
-            MyPlayerCamera.name = "PlayerCamera" + Index;
-        }
-        LocalMoving();
-    }
-    
     private void CreatePlayerCamera()
     {
         if (MyPlayerCamera) return;
