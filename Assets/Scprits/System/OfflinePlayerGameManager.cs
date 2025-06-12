@@ -2,6 +2,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
+/// <summary>
+/// DEPRECATED: This class has been replaced by the VContainer-based architecture.
+/// Use WithPlayerLifetimeScope, WithPlayerGameManagerService, and WithPlayerEntryPoint instead.
+/// This file is kept for reference during migration.
+/// </summary>
+[System.Obsolete("This class is deprecated. Use VContainer-based WithPlayer* services instead.")]
 public class OfflinePlayerGameManager : GameManagerBase
 {
     [SerializeField] private GameObject mainPlayerPrefab;
@@ -31,7 +37,7 @@ public class OfflinePlayerGameManager : GameManagerBase
     {
         foreach (var uiToolkit in gameUIs)
         {
-            if (uiToolkit != null)
+            if (uiToolkit)
             {
                 if (string.IsNullOrEmpty(message))
                 {
