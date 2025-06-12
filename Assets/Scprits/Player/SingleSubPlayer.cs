@@ -3,17 +3,6 @@ using UnityEngine.VFX;
 
 public class SingleSubPlayer : PlayerBase
 {
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
-    protected override void Start()
-    {
-        base.Start();
-        GameManagerBase.Instance.SetMainPlayer(this);
-    }
-
     protected override void Update()
     {
         base.Update();

@@ -3,17 +3,6 @@ using UnityEngine.VFX;
 
 public class SingleMainPlayer : PlayerBase
 {
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
-    protected override void Start()
-    {
-        base.Start();
-        GameManagerBase.Instance.SetMainPlayer(this);
-    }
-
     protected override void Update()
     {
         base.Update();
@@ -27,11 +16,7 @@ public class SingleMainPlayer : PlayerBase
 
     private void OnTriggerEnter(Collider other)
     {
-        if (GameManagerBase.Instance.GameState != 1)
-        {
-            return;
-        }
-
-        GameManagerBase.Instance.ChangeIt(index);
+        if (Gm?.GameState != 1) return;
+        Gm?.ChangeIt(index);
     }
 }
