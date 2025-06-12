@@ -8,7 +8,7 @@ public class SingleSubPlayer : PlayerBase
         if (!MyPlayerCamera)
         {
             MyPlayerCamera = transform.GetComponentInChildren<PlayerCamera>().gameObject;
-            MyPlayerCamera.name = "PlayerCamera" + index;
+            MyPlayerCamera.name = "PlayerCamera" + Index;
         }
         LocalMoving();
     }
@@ -21,7 +21,7 @@ public class SingleSubPlayer : PlayerBase
         MyPlayerCamera.name = "PlayerCamera";
         Destroy(MyPlayerCamera.GetComponent<AudioListener>());
         MyPlayerCamera.GetComponent<PlayerCamera>().target = this.transform.Find("PlayerCameraRoot").gameObject.transform;
-        MyPlayerCamera.GetComponent<Camera>().targetDisplay = index;
+        MyPlayerCamera.GetComponent<Camera>().targetDisplay = Index;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -31,6 +31,6 @@ public class SingleSubPlayer : PlayerBase
             return;
         }
 
-        Gm?.ChangeIt(index);
+        Gm?.ChangeIt(Index);
     }
 }

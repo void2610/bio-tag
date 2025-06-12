@@ -30,20 +30,15 @@ public class PlayerSpawnService : IPlayerSpawnService
         var player = Object.Instantiate(playerPrefab, position, Quaternion.identity);
         var playerBase = player.GetComponent<PlayerBase>();
         var nameUI = Object.Instantiate(_playerNameUIPrefab, GameObject.Find("WorldSpaceCanvas").transform);
-        if (playerBase)
-        {
-            // VContainerで依存注入を実行
-            _container.Inject(playerBase);
-            
-            // PlayerNameUIをInitializeで初期化（VContainer依存注入は不要）
-            var playerNameUI = nameUI.GetComponent<PlayerNameUI>();
-            var name = _playerDataService.GetPlayerName();
-            playerNameUI.Initialize(player.transform, name);
-            
-            playerBase.index = index;
-        }
+        
+        var playerNameUI = nameUI.GetComponent<PlayerNameUI>();
+        var name = index == 0 ? _playerDataService.GetPlayerName() : $"Player {index}";
+        playerNameUI.Initialize(player.transform, name);
+        playerBase.Initialize(_gameManager, index);
         
         SpawnedPlayers.Add(player);
+        _gameManager.AddPlayerName(name);
+        
         return player;
     }
     

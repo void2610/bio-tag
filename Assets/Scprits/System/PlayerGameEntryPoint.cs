@@ -3,7 +3,7 @@ using VContainer;
 using VContainer.Unity;
 using System;
 
-public class WithPlayerEntryPoint : IStartable, ITickable, IDisposable
+public class PlayerGameEntryPoint : IStartable, ITickable, IDisposable
 {
     private readonly IGameManagerService _gameManager;
     private readonly IPlayerSpawnService _playerSpawn;
@@ -15,7 +15,7 @@ public class WithPlayerEntryPoint : IStartable, ITickable, IDisposable
     private bool _isPlayerReady = false;
     
     [Inject]
-    public WithPlayerEntryPoint(
+    public PlayerGameEntryPoint(
         IGameManagerService gameManager,
         IPlayerSpawnService playerSpawn,
         IPlayerDataService playerDataService,
@@ -35,7 +35,8 @@ public class WithPlayerEntryPoint : IStartable, ITickable, IDisposable
     {
         InitializeGame();
         SetupEventSubscriptions();
-        SetupDisplays();
+        
+        if (Display.displays.Length > 1) Display.displays[1].Activate();
     }
     
     private void InitializeGame()
@@ -44,34 +45,13 @@ public class WithPlayerEntryPoint : IStartable, ITickable, IDisposable
         _gameManager.SetGameState(0);
         _gameUI.ShowStartGame();
         
-        SpawnPlayersAndNpcs();
+        SpawnPlayers();
     }
     
-    private void SpawnPlayersAndNpcs()
+    private void SpawnPlayers()
     {
-        // MainPlayer (人間プレーヤー)を生成
-        var mainPlayerPosition = _playerSpawn.GetRandomSpawnPosition();
-        var mainPlayer = _playerSpawn.SpawnPlayer(_gameConfig.playerPrefab, mainPlayerPosition, 0);
-        var playerName = _playerDataService.GetPlayerName();
-        _gameManager.AddPlayerName(playerName);
-        
-        // SubPlayer NPCsを生成
-        for (int i = 1; i < _gameConfig.npcCount + 1; i++)
-        {
-            var npcPosition = _playerSpawn.GetRandomSpawnPosition();
-            _playerSpawn.SpawnPlayer(_gameConfig.subPlayerPrefab, npcPosition, i);
-            _gameManager.AddPlayerName($"Player{i}");
-        }
-    }
-    
-    private void SetupDisplays()
-    {
-        Debug.Log("displays connected: " + Display.displays.Length);
-        // Display.displays[0] は主要なデフォルトのディスプレイで、常にオンです。ですから、インデックス 1 から始まります。
-        for (var i = 1; i < Display.displays.Length; i++)
-        {
-            Display.displays[i].Activate();
-        }
+        _playerSpawn.SpawnPlayer(_gameConfig.playerPrefab, _playerSpawn.GetRandomSpawnPosition(), 0);
+        _playerSpawn.SpawnPlayer(_gameConfig.subPlayerPrefab, _playerSpawn.GetRandomSpawnPosition(), 1);
     }
     
     private void SetupEventSubscriptions()
@@ -150,7 +130,7 @@ public class WithPlayerEntryPoint : IStartable, ITickable, IDisposable
                 }
                 
                 // ゲーム終了判定
-                var gameManagerService = _gameManager as WithPlayerGameManagerService;
+                var gameManagerService = _gameManager as PlayerGameManagerService;
                 if (gameManagerService != null && _gameManager.GetElapsedTime() >= gameManagerService.GetGameLength())
                 {
                     _gameManager.SetGameState(2);

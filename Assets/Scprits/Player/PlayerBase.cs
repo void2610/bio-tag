@@ -11,6 +11,7 @@ public class PlayerBase : MonoBehaviour
     [SerializeField] protected float jumpPower = 6f;
     [SerializeField] protected float walkSpeed = 6f;
     public Vector3 velocity = Vector3.zero;
+    public int Index => _index;
     
     protected Animator Animator => GetComponent<Animator>();
     protected CharacterController CCon => GetComponent<CharacterController>();
@@ -24,19 +25,14 @@ public class PlayerBase : MonoBehaviour
     protected bool JumpInput = false;
     protected IGameManagerService Gm;
     private const float FOOTSTEP_AUDIO_VOLUME = 0.5f;
-
-    public int index = -1;
-    
-    [Inject]
-    public void Construct(IGameManagerService gameManager)
-    {
-        Gm = gameManager;
-    }
+    private int _index = -1;
     
     public void SetWalkSpeed(float s) => walkSpeed = s;
 
-    protected virtual void Start()
+    public void Initialize(IGameManagerService gameManager, int index)
     {
+        _index = index;
+        Gm = gameManager;
         ItEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
     }
 
@@ -106,7 +102,7 @@ public class PlayerBase : MonoBehaviour
 
         // VContainerからゲーム状態を取得してItエフェクトを制御
         bool isGamePlaying = Gm?.GameState == 1;
-        bool isIt = this.index == Gm?.ItIndex;
+        bool isIt = this._index == Gm?.ItIndex;
         
         if (isIt && isGamePlaying)
         {

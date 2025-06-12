@@ -8,7 +8,7 @@ public class SingleMainPlayer : PlayerBase
         if (!MyPlayerCamera)
         {
             MyPlayerCamera = transform.GetComponentInChildren<PlayerCamera>().gameObject;
-            MyPlayerCamera.name = "PlayerCamera" + index;
+            MyPlayerCamera.name = "PlayerCamera" + Index;
         }
         LocalMoving();
     }
@@ -16,6 +16,6 @@ public class SingleMainPlayer : PlayerBase
     private void OnTriggerEnter(Collider other)
     {
         if (Gm?.GameState != 1) return;
-        Gm?.ChangeIt(index);
+        Gm?.ChangeIt(Index);
     }
 }

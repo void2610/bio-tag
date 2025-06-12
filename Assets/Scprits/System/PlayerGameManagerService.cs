@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
 
-public class WithPlayerGameManagerService : IGameManagerService
+public class PlayerGameManagerService : IGameManagerService
 {
     public int? GameState { get; private set; } = 0;
     public int ItIndex { get; private set; }
@@ -17,7 +17,7 @@ public class WithPlayerGameManagerService : IGameManagerService
     private readonly GameConfig _gameConfig;
     
     [Inject]
-    public WithPlayerGameManagerService(GameConfig gameConfig)
+    public PlayerGameManagerService(GameConfig gameConfig)
     {
         _gameConfig = gameConfig;
     }

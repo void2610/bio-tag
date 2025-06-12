@@ -15,12 +15,12 @@ public class PlayerGameLifetimeScope : LifetimeScope
         builder.Register<IPlayerDataService, PlayerDataService>(Lifetime.Singleton);
         
         // WithPlayer専用サービス
-        builder.Register<IGameManagerService, WithPlayerGameManagerService>(Lifetime.Singleton);
+        builder.Register<IGameManagerService, PlayerGameManagerService>(Lifetime.Singleton);
         builder.Register<IPlayerSpawnService, PlayerSpawnService>(Lifetime.Singleton);
         builder.Register<IGameUIService, GameUIService>(Lifetime.Singleton);
         
         // 設定値をコンテナに登録
-        builder.RegisterInstance(gameConfig);
+        builder.RegisterInstance(gameConfig).As<GameConfig>();
         builder.RegisterInstance(playerNameUIPrefab).As<PlayerNameUI>();
         
         // ゲーム関連コンポーネント
@@ -29,6 +29,6 @@ public class PlayerGameLifetimeScope : LifetimeScope
         builder.RegisterComponentInHierarchy<SensorManager>();
         
         // WithPlayerEntryPointをEntryPointとして登録
-        builder.RegisterEntryPoint<WithPlayerEntryPoint>();
+        builder.RegisterEntryPoint<PlayerGameEntryPoint>();
     }
 }
