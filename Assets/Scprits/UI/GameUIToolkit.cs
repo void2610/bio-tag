@@ -62,7 +62,7 @@ public class GameUIToolkit : MonoBehaviour
     
     private void Update()
     {
-        if (GameManagerBase.Instance == null) return;
+        if (_gameManagerService == null) return;
         
         UpdateTimer();
         UpdateItPlayer();
@@ -137,37 +137,15 @@ public class GameUIToolkit : MonoBehaviour
     
     private void UpdateTimer()
     {
-        if (_timerValue == null) return;
+        if (_timerValue == null || _gameManagerService == null) return;
         
-        // Use injected game manager service
-        if (_gameManagerService != null)
+        if (_gameManagerService.GameState == 1)
         {
-            if (_gameManagerService.GameState == 1)
-            {
-                var elapsedTime = _gameManagerService.GetElapsedTime();
-                _timerValue.text = elapsedTime.ToString("F2");
-            }
-            else
-            {
-                _timerValue.text = "0.00";
-            }
-        }
-        else if (GameManagerBase.Instance && GameManagerBase.Instance.GetType() == typeof(OfflinePlayerGameManager))
-        {
-            var offlineManager = (OfflinePlayerGameManager)GameManagerBase.Instance;
-            if (offlineManager.GameState == 1)
-            {
-                var elapsedTime = offlineManager.GetElapsedTime();
-                _timerValue.text = elapsedTime.ToString("F2");
-            }
-            else
-            {
-                _timerValue.text = "0.00";
-            }
+            var elapsedTime = _gameManagerService.GetElapsedTime();
+            _timerValue.text = elapsedTime.ToString("F2");
         }
         else
         {
-            // For other game managers, just show default
             _timerValue.text = "0.00";
         }
     }
@@ -176,34 +154,14 @@ public class GameUIToolkit : MonoBehaviour
     
     private void UpdateItPlayer()
     {
-        if (_itValue == null) return;
+        if (_itValue == null || _gameManagerService == null) return;
         
-        if (_gameManagerService != null)
+        var itIndex = _gameManagerService.ItIndex;
+        var playerNames = _gameManagerService.PlayerNames;
+        
+        if (itIndex >= 0 && itIndex < playerNames.Count)
         {
-            var itIndex = _gameManagerService.ItIndex;
-            var playerNames = _gameManagerService.PlayerNames;
-            
-            if (itIndex >= 0 && itIndex < playerNames.Count)
-            {
-                _itValue.text = playerNames[itIndex];
-            }
-            else
-            {
-                _itValue.text = "---";
-            }
-        }
-        else if (GameManagerBase.Instance)
-        {
-            var itIndex = GameManagerBase.Instance.itIndex;
-            
-            if (itIndex >= 0 && itIndex < GameManagerBase.Instance.playerNames.Count)
-            {
-                _itValue.text = GameManagerBase.Instance.playerNames[itIndex];
-            }
-            else
-            {
-                _itValue.text = "---";
-            }
+            _itValue.text = playerNames[itIndex];
         }
         else
         {
@@ -215,23 +173,12 @@ public class GameUIToolkit : MonoBehaviour
     
     private void UpdateScoreBoard()
     {
-        if (_scoreBoardContent == null) return;
+        if (_scoreBoardContent == null || _gameManagerService == null) return;
         
-        List<string> playerNames = null;
-        List<float> playerScores = null;
+        var playerNames = _gameManagerService.PlayerNames;
+        var playerScores = _gameManagerService.PlayerScores;
         
-        if (_gameManagerService != null)
-        {
-            playerNames = _gameManagerService.PlayerNames;
-            playerScores = _gameManagerService.PlayerScores;
-        }
-        else if (GameManagerBase.Instance)
-        {
-            playerNames = GameManagerBase.Instance.playerNames;
-            playerScores = GameManagerBase.Instance.playerScores;
-        }
-        
-        if (playerNames == null || playerScores == null)
+        if (playerNames == null || playerScores == null || playerNames.Count == 0)
         {
             _scoreBoardContent.text = "No scores available";
             return;
@@ -247,7 +194,7 @@ public class GameUIToolkit : MonoBehaviour
             .ToList();
         
         // Build score text with simple string concatenation
-        string scoreText = "";
+        var scoreText = "";
         for (int i = 0; i < scoreEntries.Count; i++)
         {
             if (i > 0) scoreText += "\n";
