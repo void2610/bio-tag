@@ -6,12 +6,14 @@ using DG.Tweening;
 using VContainer;
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using R3;
+using System;
 
 public class Npc : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 8f;
     
-    private readonly List<Transform> _fleeAnchors = new List<Transform>();
+    private readonly List<Transform> _fleeAnchors = new ();
     private Animator Animator => GetComponent<Animator>();
     private NavMeshAgent Agent => this.GetComponent<NavMeshAgent>();
     private int _index = -1;
@@ -20,17 +22,13 @@ public class Npc : MonoBehaviour
     private Transform _target;
     private bool _isJumping = false;
     private Transform _currentFleeTarget = null;
-    private float _lastFleeCalculationTime = 0f;
     private IGameManagerService _gameManager;
     
-    private const float FLEE_RECALCULATION_INTERVAL = 2f; // 2秒ごとに再計算
+    private const float FLEE_RECALCULATION_INTERVAL = 0.25f;
+    private readonly ReactiveProperty<bool> _shouldRecalculateFlee = new(true);
+    private CancellationTokenSource _fleeRecalculationCts;
+    private Vector3 _lastPlayerPosition;
     
-    [Inject]
-    public void Construct(IGameManagerService gameManager)
-    {
-        _gameManager = gameManager;
-    }
-
     private async UniTaskVoid Wait(float time)
     {
         _isMovable = false;
@@ -38,11 +36,12 @@ public class Npc : MonoBehaviour
         _isMovable = true;
     }
 
-    public void Initialize(int index, Transform target, Transform fleeParent)
+    public void Initialize(IGameManagerService gameManager, int index, Transform target, Transform fleeParent)
     {
+        _gameManager = gameManager;
         _index = index;
         _target = target;
-        
+
         foreach (var f in fleeParent.GetComponentsInChildren<Transform>())
             _fleeAnchors.Add(f);
         
@@ -54,6 +53,9 @@ public class Npc : MonoBehaviour
         var vfx = transform.Find("PlayerTrail").GetComponent<VisualEffect>();
         SensorManager.Instance.AddVFX(vfx);
         _itEffect = transform.Find("ItEffect").GetComponent<VisualEffect>();
+        
+        // 逃げる再計算タイマーの開始
+        StartFleeRecalculationTimer().Forget();
     }
 
     private void Update()
@@ -127,50 +129,89 @@ public class Npc : MonoBehaviour
         _isJumping = false;
     }
 
+    private async UniTaskVoid StartFleeRecalculationTimer()
+    {
+        _fleeRecalculationCts = new CancellationTokenSource();
+        var token = CancellationTokenSource.CreateLinkedTokenSource(
+            _fleeRecalculationCts.Token,
+            this.GetCancellationTokenOnDestroy()
+        ).Token;
+        
+        while (!token.IsCancellationRequested)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(FLEE_RECALCULATION_INTERVAL), cancellationToken: token);
+            _shouldRecalculateFlee.Value = true;
+        }
+    }
+    
     private void Flee()
     {
         if (!_target) return;
-        if (_fleeAnchors.Count == 0)
-        {
-            Debug.LogWarning("No flee anchors available.");
-            return;
-        }
+        if (_fleeAnchors.Count == 0) return;
         
         // 一定時間ごとに逃げる目標を再計算、またはまだ計算していない場合
-        bool shouldRecalculate = _currentFleeTarget == null || 
-                                (Time.time - _lastFleeCalculationTime > FLEE_RECALCULATION_INTERVAL) ||
+        var shouldRecalculate = !_currentFleeTarget || 
+                                _shouldRecalculateFlee.Value ||
                                 (Agent.hasPath && Agent.remainingDistance < 1f);
         
         if (shouldRecalculate)
         {
-            // アンカーポイントの中から、最もプレイヤーから遠いものを選択
-            Transform farthestAnchor = null;
-            var maxDistance = float.MinValue;
-
+            var myPosition = transform.position;
+            var playerPosition = _target.position;
+            
+            // Step 1: プレイヤーからNPCへのベクトル（逃げる方向）
+            var fleeDirection = (myPosition - playerPosition).normalized;
+            
+            Transform bestFleeTarget = null;
+            var maxSafetyScore = float.MinValue;
+            
             foreach (var anchor in _fleeAnchors)
             {
                 if (!anchor) continue;
                 
-                var distanceToTarget = Vector3.Distance(anchor.position, _target.position);
-                if (distanceToTarget > maxDistance)
+                // Step 2: NavMeshパスの確認
+                var path = new NavMeshPath();
+                if (!Agent.CalculatePath(anchor.position, path) || path.status != NavMeshPathStatus.PathComplete)
+                    continue;
+                
+                // Step 3: アンカーの位置がプレイヤーの反対方向にあるかチェック
+                var toAnchorDirection = (anchor.position - myPosition).normalized;
+                var directionAlignment = Vector3.Dot(fleeDirection, toAnchorDirection);
+                
+                // Step 4: プレイヤーに向かう方向は完全に排除
+                if (directionAlignment < 0.1f) // 逃げる方向とほぼ同じか、少しでも逆だったら除外
+                    continue;
+                
+                // Step 5: 安全性スコア計算
+                var distanceFromPlayer = Vector3.Distance(anchor.position, playerPosition);
+                var distanceFromMe = Vector3.Distance(anchor.position, myPosition);
+                
+                // シンプルなスコア: 方向性 + プレイヤーからの距離
+                var safetyScore = (directionAlignment * 10f) + (distanceFromPlayer * 0.1f);
+                
+                // 遠すぎる場所は減点（効率的な逃走のため）
+                if (distanceFromMe > 30f)
+                    safetyScore *= 0.5f;
+                
+                if (safetyScore > maxSafetyScore)
                 {
-                    // NavMesh上で有効な経路かどうかを確認
-                    var path = new NavMeshPath();
-                    Agent.CalculatePath(anchor.position, path);
-
-                    if (path.status == NavMeshPathStatus.PathComplete)
-                    {
-                        maxDistance = distanceToTarget;
-                        farthestAnchor = anchor;
-                    }
+                    maxSafetyScore = safetyScore;
+                    bestFleeTarget = anchor;
                 }
             }
 
-            if (farthestAnchor != null)
+            if (bestFleeTarget)
             {
-                _currentFleeTarget = farthestAnchor;
-                _lastFleeCalculationTime = Time.time;
-                Agent.SetDestination(farthestAnchor.position);
+                _currentFleeTarget = bestFleeTarget;
+                _shouldRecalculateFlee.Value = false;
+                Agent.speed = moveSpeed;
+                Agent.SetDestination(bestFleeTarget.position);
+            }
+            else
+            {
+                // フォールバック: プレイヤーの反対方向に直接移動
+                var fallbackTarget = myPosition + fleeDirection * 15f;
+                Agent.SetDestination(fallbackTarget);
             }
         }
     }
@@ -182,5 +223,11 @@ public class Npc : MonoBehaviour
         _gameManager?.ChangeIt(_index);
         Wait(1f).Forget();
     }
-
+    
+    private void OnDestroy()
+    {
+        _fleeRecalculationCts?.Cancel();
+        _fleeRecalculationCts?.Dispose();
+        _shouldRecalculateFlee?.Dispose();
+    }
 }
