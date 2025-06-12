@@ -8,14 +8,16 @@ public class PlayerSpawnService : IPlayerSpawnService
     public List<GameObject> SpawnedPlayers { get; private set; } = new ();
     
     private readonly IObjectResolver _container;
-    private IPlayerDataService _playerDataService;
+    private readonly IPlayerDataService _playerDataService;
     private readonly PlayerNameUI _playerNameUIPrefab;
+    private readonly GameConfig _gameConfig;
     
     [Inject]
-    public PlayerSpawnService(IObjectResolver container, IPlayerDataService playerDataService, PlayerNameUI playerNameUIPrefab)
+    public PlayerSpawnService(IObjectResolver container, IPlayerDataService playerDataService, GameConfig gameConfig, PlayerNameUI playerNameUIPrefab)
     {
         _container = container;
         _playerDataService = playerDataService;
+        _gameConfig = gameConfig;
         _playerNameUIPrefab = playerNameUIPrefab;
     }
     
@@ -54,7 +56,7 @@ public class PlayerSpawnService : IPlayerSpawnService
         {
             // VContainerで依存注入を実行
             _container.Inject(npcComponent);
-            npcComponent.Initialize(index, $"NPC{index}", target);
+            npcComponent.Initialize(index, target, _gameConfig.fleeParent);
             var playerNameUI = nameUI.GetComponent<PlayerNameUI>();
             playerNameUI.Initialize(npc.transform, $"NPC{index}");
         }

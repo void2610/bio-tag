@@ -8,7 +8,6 @@ public class PlayerNameUI : MonoBehaviour
     private Transform _playerCamera;
     private string _playerName;
 
-    // Remove [Inject] - this method will be called manually after instantiation
     public void Initialize(Transform player, string playerName)
     {
         _targetPlayer = player;
@@ -17,7 +16,6 @@ public class PlayerNameUI : MonoBehaviour
         _playerNameText.text = _playerName;
     }
 
-    // Update is called once per frame
     private void Update()
     {
         if (!_targetPlayer) return;

@@ -6,7 +6,6 @@ using VContainer.Unity;
 public class NpcGameLifetimeScope : LifetimeScope
 {
     [SerializeField] private PlayerNameUI playerNameUIPrefab;
-    [SerializeField] private Transform fleeParent;
     [SerializeField] private GameConfig gameConfig;
     protected override void Configure(IContainerBuilder builder)
     {
@@ -22,7 +21,6 @@ public class NpcGameLifetimeScope : LifetimeScope
         
         // 設定値をコンテナに登録
         builder.RegisterInstance(gameConfig);
-        builder.RegisterInstance(fleeParent).As<Transform>();
         builder.RegisterInstance(playerNameUIPrefab).As<PlayerNameUI>();
         
         // ゲーム関連コンポーネント

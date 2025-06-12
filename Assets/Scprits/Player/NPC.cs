@@ -26,13 +26,9 @@ public class Npc : MonoBehaviour
     private const float FLEE_RECALCULATION_INTERVAL = 2f; // 2秒ごとに再計算
     
     [Inject]
-    public void Construct(IGameManagerService gameManager, Transform fleeParent)
+    public void Construct(IGameManagerService gameManager)
     {
         _gameManager = gameManager;
-        foreach (var f in fleeParent.GetComponentsInChildren<Transform>())
-        {
-            _fleeAnchors.Add(f);
-        }
     }
 
     private async UniTaskVoid Wait(float time)
@@ -42,10 +38,13 @@ public class Npc : MonoBehaviour
         _isMovable = true;
     }
 
-    public void Initialize(int index, string playerName, Transform target)
+    public void Initialize(int index, Transform target, Transform fleeParent)
     {
         _index = index;
         _target = target;
+        
+        foreach (var f in fleeParent.GetComponentsInChildren<Transform>())
+            _fleeAnchors.Add(f);
         
         // NavMeshAgent設定
         Agent.speed = moveSpeed;
