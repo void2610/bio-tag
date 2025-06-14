@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "unity-compiler": {
+      "command": "node",
+      "args": ["<ABSOLUTE_PATH_TO_PROJECT>/unity-mcp-server/unity-mcp-bridge.js"],
+      "env": {
+        "UNITY_MCP_PORT": "8080",
+        "UNITY_MCP_HOST": "localhost"
+      }
+    }
+  }
+}
