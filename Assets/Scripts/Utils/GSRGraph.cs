@@ -15,6 +15,10 @@ public class GsrGraph : MonoBehaviour
     [SerializeField] private Material lineMaterial;
     public bool IsExcited { get; private set; } = false;
     public List<Vector2> data = new ();
+
+    // 現在のGSR生値を取得
+    public float CurrentGsrRaw { get; private set; } = 0f;
+
     private UILineRenderer _lr;
     private UILineRenderer _thresholdLine1;
     private UILineRenderer _thresholdLine2;
@@ -28,12 +32,33 @@ public class GsrGraph : MonoBehaviour
     public void AddData(float d)
     {
         d = Mathf.Clamp(d, 0f, 1024f);
+        CurrentGsrRaw = d; // 生値を記録
         // Debug.Log(d);
 
         for (var i = 0; i < dataLength - 1; i++)
             data[i] = data[i + 1];
         data[dataLength - 1] = new Vector3(0, d, 0);
         AdjustAndApplyData();
+    }
+
+    /// <summary>
+    /// GSRデータの平均値を計算
+    /// </summary>
+    public float GetMeanGsr()
+    {
+        if (data.Count == 0) return 0f;
+        return data.Average(v => v.y);
+    }
+
+    /// <summary>
+    /// GSRデータの標準偏差を計算
+    /// </summary>
+    public float GetStandardDeviationGsr()
+    {
+        if (data.Count == 0) return 0f;
+        var mean = GetMeanGsr();
+        var sumOfSquares = data.Sum(v => (v.y - mean) * (v.y - mean));
+        return Mathf.Sqrt(sumOfSquares / data.Count);
     }
 
     private void AdjustAndApplyData()

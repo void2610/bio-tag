@@ -1,0 +1,212 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+using Unity.Logging;
+using Unity.Logging.Sinks;
+
+namespace ControlTask
+{
+    public class ControlTaskDataLogger : MonoBehaviour
+    {
+        private string _sessionDirectory;
+        private StreamWriter _trialSummaryWriter;
+        private StreamWriter _timeSeriesWriter;
+
+        private SessionInfo _sessionInfo;
+        private List<TimeSeriesRecord> _timeSeriesBuffer = new();
+        private const int BufferFlushThreshold = 100; // バッファサイズ閾値
+
+        private int _currentTrialNumber = 0;
+        private float _trialStartTime;
+        private List<float> _trialGsrData = new();
+
+        private Unity.Logging.Logger _logger;
+
+        private void Awake()
+        {
+            // Unity Loggingの初期化
+            _logger = new Unity.Logging.Logger(new LoggerConfig()
+                .MinimumLevel.Set(LogLevel.Info)
+                .OutputTemplate("{Message}"));
+        }
+
+        /// <summary>
+        /// セッション開始（ディレクトリとファイルの作成）
+        /// </summary>
+        public void StartSession(SessionInfo sessionInfo)
+        {
+            _sessionInfo = sessionInfo;
+            _sessionInfo.datetime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+
+            // セッションディレクトリの作成
+            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var dirName = $"{sessionInfo.participantInfo.participantID}_{sessionInfo.participantInfo.testType}_{timestamp}";
+            _sessionDirectory = Path.Combine(Application.persistentDataPath, "ExperimentData", dirName);
+            Directory.CreateDirectory(_sessionDirectory);
+
+            Log.Info($"Session started: {_sessionDirectory}");
+
+            // セッション情報をJSONで保存
+            SaveSessionInfo();
+
+            // CSVファイルの初期化
+            InitializeCsvFiles();
+        }
+
+        /// <summary>
+        /// セッション情報をJSON形式で保存
+        /// </summary>
+        private void SaveSessionInfo()
+        {
+            var json = JsonUtility.ToJson(_sessionInfo, true);
+            var filePath = Path.Combine(_sessionDirectory, "session.json");
+            File.WriteAllText(filePath, json);
+            Log.Info("Session info saved to JSON");
+        }
+
+        /// <summary>
+        /// CSVファイルの初期化（ヘッダー書き込み）
+        /// </summary>
+        private void InitializeCsvFiles()
+        {
+            // 試行サマリーCSV
+            var summaryPath = Path.Combine(_sessionDirectory, "trial_summary.csv");
+            _trialSummaryWriter = new StreamWriter(summaryPath, false, Encoding.UTF8);
+            _trialSummaryWriter.WriteLine(TrialSummary.CsvHeader);
+
+            // 時系列データCSV
+            var timeSeriesPath = Path.Combine(_sessionDirectory, "timeseries.csv");
+            _timeSeriesWriter = new StreamWriter(timeSeriesPath, false, Encoding.UTF8);
+            _timeSeriesWriter.WriteLine(TimeSeriesRecord.CsvHeader);
+
+            Log.Info("CSV files initialized");
+        }
+
+        /// <summary>
+        /// 試行開始
+        /// </summary>
+        public void StartTrial(ControlState targetState)
+        {
+            _currentTrialNumber++;
+            _trialStartTime = Time.time;
+            _trialGsrData.Clear();
+
+            Log.Info($"Trial {_currentTrialNumber} started: Target={targetState}");
+        }
+
+        /// <summary>
+        /// 試行終了とサマリー記録
+        /// </summary>
+        public void EndTrial(ControlState targetState, int score, float successRate)
+        {
+            if (_trialGsrData.Count == 0) return;
+
+            var duration = (Time.time - _trialStartTime) * 1000; // ミリ秒に変換
+            var meanGsr = _trialGsrData.Average();
+            var sdGsr = CalculateStandardDeviation(_trialGsrData);
+
+            var summary = new TrialSummary
+            {
+                ParticipantID = _sessionInfo.participantInfo.participantID,
+                TestType = _sessionInfo.participantInfo.testType,
+                TrialNumber = _currentTrialNumber,
+                TargetState = targetState.ToString(),
+                DurationMS = (int)duration,
+                Score = score,
+                SuccessRate = successRate,
+                MeanGsr = meanGsr,
+                SDGsr = sdGsr,
+                ResponseTimeMS = 0 // TODO: 実装が必要な場合
+            };
+
+            _trialSummaryWriter.WriteLine(summary.ToCsvRow());
+            _trialSummaryWriter.Flush();
+
+            Log.Info($"Trial {_currentTrialNumber} ended: Score={score}, SuccessRate={successRate:F2}");
+        }
+
+        /// <summary>
+        /// 時系列データの記録（高頻度呼び出し用）
+        /// </summary>
+        public void RecordTimeSeriesData(float gsrRaw, ControlState targetState, ControlState currentState,
+                                         int instantaneousScore, int cumulativeScore)
+        {
+            var timestamp = (int)((Time.time - _trialStartTime) * 1000); // ミリ秒
+
+            var record = new TimeSeriesRecord
+            {
+                ParticipantID = _sessionInfo.participantInfo.participantID,
+                TestType = _sessionInfo.participantInfo.testType,
+                TrialNumber = _currentTrialNumber,
+                TimestampMS = timestamp,
+                GsrRaw = gsrRaw,
+                TargetValue = targetState.ToString(),
+                CurrentState = currentState.ToString(),
+                InstantaneousScore = instantaneousScore,
+                CumulativeScore = cumulativeScore
+            };
+
+            _timeSeriesBuffer.Add(record);
+            _trialGsrData.Add(gsrRaw);
+
+            // バッファが閾値に達したらフラッシュ
+            if (_timeSeriesBuffer.Count >= BufferFlushThreshold)
+            {
+                FlushTimeSeriesBuffer();
+            }
+        }
+
+        /// <summary>
+        /// バッファをディスクに書き込み
+        /// </summary>
+        private void FlushTimeSeriesBuffer()
+        {
+            if (_timeSeriesBuffer.Count == 0) return;
+
+            foreach (var record in _timeSeriesBuffer)
+            {
+                _timeSeriesWriter.WriteLine(record.ToCsvRow());
+            }
+            _timeSeriesWriter.Flush();
+            _timeSeriesBuffer.Clear();
+        }
+
+        /// <summary>
+        /// セッション終了とクリーンアップ
+        /// </summary>
+        public void EndSession()
+        {
+            FlushTimeSeriesBuffer();
+
+            _trialSummaryWriter?.Close();
+            _timeSeriesWriter?.Close();
+
+            Log.Info($"Session ended. Data saved to: {_sessionDirectory}");
+        }
+
+        /// <summary>
+        /// 標準偏差の計算
+        /// </summary>
+        private float CalculateStandardDeviation(List<float> values)
+        {
+            if (values.Count == 0) return 0f;
+
+            var mean = values.Average();
+            var sumOfSquares = values.Sum(v => (v - mean) * (v - mean));
+            return Mathf.Sqrt(sumOfSquares / values.Count);
+        }
+
+        private void OnDestroy()
+        {
+            EndSession();
+        }
+
+        private void OnApplicationQuit()
+        {
+            EndSession();
+        }
+    }
+}
