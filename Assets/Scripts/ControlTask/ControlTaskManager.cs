@@ -134,17 +134,35 @@ namespace ControlTask
 
         private void Update()
         {
+            var isCorrect = false;
+
             // Rest状態ではスコアをカウントしない
             if (TargetState.Value != ControlState.Rest)
             {
                 if (gsrGraph.IsExcited == (TargetState.Value == ControlState.Excited))
                 {
                     Score.Value += 1;
+                    isCorrect = true;
                 }
             }
 
             // 経過時間を記録
             CurrentTime.Value += Time.deltaTime;
+
+            // 時系列データの記録（Rest以外）
+            if (enableLogging && _dataLogger != null && TargetState.Value != ControlState.Rest)
+            {
+                var currentState = gsrGraph.IsExcited ? ControlState.Excited : ControlState.Calmed;
+                var instantaneousScore = isCorrect ? 100 : 0;
+
+                _dataLogger.RecordTimeSeriesData(
+                    gsrGraph.CurrentGsrRaw,
+                    TargetState.Value,
+                    currentState,
+                    instantaneousScore,
+                    Score.Value
+                );
+            }
         }
     }
 }
