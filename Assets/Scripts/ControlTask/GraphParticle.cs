@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-namespace GSRGame
+namespace ControlTask
 {
     public class GraphParticle : MonoBehaviour
     {
@@ -22,7 +22,7 @@ namespace GSRGame
 
         private void Update()
         {
-            var target = GsrGameManager.Instance.TargetState.Value == GsrState.Excited;
+            var target = ControlTaskManager.Instance.TargetState.Value == ControlState.Excited;
             if (graph.IsExcited != target && !_isPlaying)
             {
                 _isPlaying = true;

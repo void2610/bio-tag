@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -910,10 +910,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dataLength: 150
   threshold: 2
-  threshold2: 1
+  thresholdMagni: 1.5
   checkLength: 0.2
-  panelStartPos: {x: -10, y: -5}
-  panelEndPos: {x: 10, y: 5}
+  v1: 580
+  v2: 200
   lineMaterial: {fileID: 2100000, guid: 889fd4f4e6399463dba266c78d0bbfb5, type: 2}
   data: []
 --- !u!4 &302484808
@@ -1003,9 +1003,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 603767640}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a95fb12cac3b40e681341561bc39ac2, type: 3}
+  m_Script: {fileID: 11500000, guid: 95e87ff68d70d4ea09b9fcd565ba986e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gsrGraph: {fileID: 302484807}
 --- !u!4 &603767642
 Transform:
   m_ObjectHideFlags: 0
@@ -1069,6 +1070,7 @@ MonoBehaviour:
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
 --- !u!114 &652312835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1565,6 +1567,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2a1ee15e13634341aae8be21c360670, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gsrGraph: {fileID: 302484807}
 --- !u!4 &1331494000
 Transform:
   m_ObjectHideFlags: 0

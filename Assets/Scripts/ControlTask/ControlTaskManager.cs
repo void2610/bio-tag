@@ -2,35 +2,35 @@ using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
-namespace GSRGame
+namespace ControlTask
 {
-    public enum GsrState
+    public enum ControlState
     {
         Excited,
         Calmed
     }
-    public class GsrGameManager : MonoBehaviour
+    public class ControlTaskManager : MonoBehaviour
     {
-        public static GsrGameManager Instance;
+        public static ControlTaskManager Instance;
         
         [SerializeField] private GsrGraph gsrGraph;
         
-        public readonly ReactiveProperty<GsrState> TargetState = new();
+        public readonly ReactiveProperty<ControlState> TargetState = new();
         public readonly ReactiveProperty<int> Score = new(0);
         public readonly ReactiveProperty<float> CurrentTime = new(0);
         public const float TIME_LIMIT = 60.0f;
-        
+
         private bool _isGameEnd = false;
 
         private async UniTaskVoid UpdateTarget()
         {
-            TargetState.Value = GsrState.Calmed;
+            TargetState.Value = ControlState.Calmed;
             await UniTask.Delay(15 * 1000);
-            TargetState.Value = GsrState.Excited;
+            TargetState.Value = ControlState.Excited;
             await UniTask.Delay(15 * 1000);
-            TargetState.Value = GsrState.Calmed;
+            TargetState.Value = ControlState.Calmed;
             await UniTask.Delay(15 * 1000);
-            TargetState.Value = GsrState.Excited;
+            TargetState.Value = ControlState.Excited;
         }
     
         private void Awake()
@@ -43,7 +43,7 @@ namespace GSRGame
 
         private void Update()
         {
-            if (gsrGraph.IsExcited == (TargetState.Value == GsrState.Excited))
+            if (gsrGraph.IsExcited == (TargetState.Value == ControlState.Excited))
             {
                 Score.Value += 1;
             }

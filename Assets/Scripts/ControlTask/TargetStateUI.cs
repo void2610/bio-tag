@@ -2,7 +2,7 @@ using TMPro;
 using R3;
 using UnityEngine;
 
-namespace GSRGame
+namespace ControlTask
 {
     public class TargetStateUI : MonoBehaviour
     {
@@ -10,10 +10,10 @@ namespace GSRGame
         private void Start()
         {
             _text = this.GetComponent<TextMeshProUGUI>();
-            GsrGameManager.Instance.TargetState.Subscribe((state) =>
+            ControlTaskManager.Instance.TargetState.Subscribe((state) =>
             {
                 _text.text = state.ToString();
-                _text.color = state == GsrState.Excited ? Color.red : Color.white;
+                _text.color = state == ControlState.Excited ? Color.red : Color.white;
             }).AddTo(this);
         }
     }

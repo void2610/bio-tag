@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors (GSR/galvanic skin response) to influence gameplay. Players' stress levels detected through hardware sensors affect their movement speed and visual effects, creating a unique physiological gaming experience.
+Bio-Tag is a Unity-based research project designed to test whether biofeedback-enabled tag games can improve participants' self-regulation abilities of biometric signals. The game integrates biometric sensors (GSR/galvanic skin response) to influence gameplay, where players' stress levels detected through hardware sensors affect their movement speed and visual effects. This physiological gaming experience aims to train participants to consciously regulate their biometric responses.
 
 ## Core Architecture
 
@@ -16,7 +16,7 @@ Bio-Tag is a Unity-based multiplayer tag game that integrates biometric sensors 
 
 ### Game Management System
 - **GameManagerBase**: Abstract base class for all game modes at `Assets/Scprits/System/GameManagerBase.cs:5`
-- **GSRGameManager**: Core tag game logic at `Assets/Scprits/GSRGame/GSRGameManager.cs`
+- **ControlTaskManager**: Self-regulation ability assessment task logic at `Assets/Scripts/ControlTask/ControlTaskManager.cs`
 - **NPCGameManager**: Manages AI-controlled games at `Assets/Scprits/System/NPCGameManager.cs`
 - **OfflinePlayerGameManager**: Single-player offline mode at `Assets/Scprits/System/OfflinePlayerGameManager.cs`
 
@@ -140,7 +140,7 @@ poetry run python determine_values.py  # Calibration tool
 ## Scene Structure
 
 - **Title.unity**: Main menu with VContainer setup (TitleLifetimeScope)
-- **GSRGame.unity**: Core biometric tag game
+- **ControlTask.unity**: Self-regulation ability assessment task - measures participants' ability to control their biometric state (Excited/Calmed) over 60 seconds
 - **WithPlayer.unity**: Single player mode with mock sensor data
 - **WithNPC.unity**: AI opponent mode
 - **Test/UIToolkitTitle.unity**: UI Toolkit test scene
