@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Unity.Logging;
-using Unity.Logging.Sinks;
 
 namespace ControlTask
 {
@@ -23,16 +21,6 @@ namespace ControlTask
         private float _trialStartTime;
         private List<float> _trialGsrData = new();
 
-        private Unity.Logging.Logger _logger;
-
-        private void Awake()
-        {
-            // Unity Loggingの初期化
-            _logger = new Unity.Logging.Logger(new LoggerConfig()
-                .MinimumLevel.Set(LogLevel.Info)
-                .OutputTemplate("{Message}"));
-        }
-
         /// <summary>
         /// セッション開始（ディレクトリとファイルの作成）
         /// </summary>
@@ -47,7 +35,7 @@ namespace ControlTask
             _sessionDirectory = Path.Combine(Application.persistentDataPath, "ExperimentData", dirName);
             Directory.CreateDirectory(_sessionDirectory);
 
-            Log.Info($"Session started: {_sessionDirectory}");
+            Debug.Log($"[ExperimentData] Session started: {_sessionDirectory}");
 
             // セッション情報をJSONで保存
             SaveSessionInfo();
@@ -64,7 +52,7 @@ namespace ControlTask
             var json = JsonUtility.ToJson(_sessionInfo, true);
             var filePath = Path.Combine(_sessionDirectory, "session.json");
             File.WriteAllText(filePath, json);
-            Log.Info("Session info saved to JSON");
+            Debug.Log("[ExperimentData] Session info saved to JSON");
         }
 
         /// <summary>
@@ -82,7 +70,7 @@ namespace ControlTask
             _timeSeriesWriter = new StreamWriter(timeSeriesPath, false, Encoding.UTF8);
             _timeSeriesWriter.WriteLine(TimeSeriesRecord.CsvHeader);
 
-            Log.Info("CSV files initialized");
+            Debug.Log("[ExperimentData] CSV files initialized");
         }
 
         /// <summary>
@@ -94,7 +82,7 @@ namespace ControlTask
             _trialStartTime = Time.time;
             _trialGsrData.Clear();
 
-            Log.Info($"Trial {_currentTrialNumber} started: Target={targetState}");
+            Debug.Log($"[ExperimentData] Trial {_currentTrialNumber} started: Target={targetState}");
         }
 
         /// <summary>
@@ -125,7 +113,7 @@ namespace ControlTask
             _trialSummaryWriter.WriteLine(summary.ToCsvRow());
             _trialSummaryWriter.Flush();
 
-            Log.Info($"Trial {_currentTrialNumber} ended: Score={score}, SuccessRate={successRate:F2}");
+            Debug.Log($"[ExperimentData] Trial {_currentTrialNumber} ended: Score={score}, SuccessRate={successRate:F2}");
         }
 
         /// <summary>
@@ -184,7 +172,7 @@ namespace ControlTask
             _trialSummaryWriter?.Close();
             _timeSeriesWriter?.Close();
 
-            Log.Info($"Session ended. Data saved to: {_sessionDirectory}");
+            Debug.Log($"[ExperimentData] Session ended. Data saved to: {_sessionDirectory}");
         }
 
         /// <summary>

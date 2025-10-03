@@ -104,7 +104,7 @@ public class GsrGraph : MonoBehaviour
     {
         _lr = this.GetComponent<UILineRenderer>();
         Debug.Assert(_lr != null, "UILineRenderer component is missing.");
-        _lr.material = lineMaterial;
+        _lr.material = Instantiate(lineMaterial);
         _thresholdLine1 = this.transform.Find("th1").GetComponent<UILineRenderer>();
         _thresholdLine2 = this.transform.Find("th2").GetComponent<UILineRenderer>();
         _thresholdLine1.points = new Vector2[2];
