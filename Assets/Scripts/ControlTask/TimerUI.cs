@@ -12,7 +12,7 @@ namespace ControlTask
             _text = this.GetComponent<TextMeshProUGUI>();
             ControlTaskManager.Instance.CurrentTime.Subscribe((t) =>
             {
-                _text.text = (ControlTaskManager.TIME_LIMIT - t).ToString("F2");
+                _text.text = (ControlTaskManager.Instance.TotalDuration - t).ToString("F2");
             }).AddTo(this);
         }
     }

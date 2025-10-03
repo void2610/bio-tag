@@ -7,30 +7,51 @@ namespace ControlTask
     public enum ControlState
     {
         Excited,
-        Calmed
+        Calmed,
+        Rest
     }
     public class ControlTaskManager : MonoBehaviour
     {
         public static ControlTaskManager Instance;
-        
+
         [SerializeField] private GsrGraph gsrGraph;
-        
+
+        [Header("Task Settings")]
+        [SerializeField] private float calmedDuration = 15f;
+        [SerializeField] private float excitedDuration = 15f;
+        [SerializeField] private float restDuration = 5f;
+        [SerializeField] private int repeatCount = 2;
+
         public readonly ReactiveProperty<ControlState> TargetState = new();
         public readonly ReactiveProperty<int> Score = new(0);
         public readonly ReactiveProperty<float> CurrentTime = new(0);
-        public const float TIME_LIMIT = 60.0f;
+        
+        public float TotalDuration => (calmedDuration + excitedDuration + 2 * restDuration) * repeatCount;
 
-        private bool _isGameEnd = false;
-
+        // 固定パターン: Calmed → Rest → Excited → Rest を繰り返す
         private async UniTaskVoid UpdateTarget()
         {
-            TargetState.Value = ControlState.Calmed;
-            await UniTask.Delay(15 * 1000);
-            TargetState.Value = ControlState.Excited;
-            await UniTask.Delay(15 * 1000);
-            TargetState.Value = ControlState.Calmed;
-            await UniTask.Delay(15 * 1000);
-            TargetState.Value = ControlState.Excited;
+            for (var i = 0; i < repeatCount; i++)
+            {
+                // Calmed状態
+                TargetState.Value = ControlState.Calmed;
+                await UniTask.Delay((int)(calmedDuration * 1000));
+
+                // 休憩
+                TargetState.Value = ControlState.Rest;
+                await UniTask.Delay((int)(restDuration * 1000));
+
+                // Excited状態
+                TargetState.Value = ControlState.Excited;
+                await UniTask.Delay((int)(excitedDuration * 1000));
+
+                // 休憩
+                TargetState.Value = ControlState.Rest;
+                await UniTask.Delay((int)(restDuration * 1000));
+            }
+
+            // 全パターン完了後、タスク終了
+            Debug.Log($"Task Complete! Score: {Score.Value}");
         }
     
         private void Awake()
@@ -43,18 +64,17 @@ namespace ControlTask
 
         private void Update()
         {
-            if (gsrGraph.IsExcited == (TargetState.Value == ControlState.Excited))
+            // Rest状態ではスコアをカウントしない
+            if (TargetState.Value != ControlState.Rest)
             {
-                Score.Value += 1;
+                if (gsrGraph.IsExcited == (TargetState.Value == ControlState.Excited))
+                {
+                    Score.Value += 1;
+                }
             }
-            
+
+            // 経過時間を記録
             CurrentTime.Value += Time.deltaTime;
-            
-            if (CurrentTime.Value >= TIME_LIMIT && !_isGameEnd)
-            {
-                _isGameEnd = true;
-                Debug.Log($"Score: {Score.Value}");
-            }
         }
     }
 }
