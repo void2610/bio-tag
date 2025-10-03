@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Serialization;
 
+[RequireComponent(typeof(UILineRenderer))]
 public class GsrGraph : MonoBehaviour
 {
     [SerializeField] private int dataLength = 500;
@@ -77,6 +78,7 @@ public class GsrGraph : MonoBehaviour
     private void Awake()
     {
         _lr = this.GetComponent<UILineRenderer>();
+        Debug.Assert(_lr != null, "UILineRenderer component is missing.");
         _lr.material = lineMaterial;
         _thresholdLine1 = this.transform.Find("th1").GetComponent<UILineRenderer>();
         _thresholdLine2 = this.transform.Find("th2").GetComponent<UILineRenderer>();
