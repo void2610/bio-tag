@@ -12,6 +12,8 @@ using System;
 public class Npc : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 8f;
+    [SerializeField] protected AudioClip[] footstepAudioClips;
+    [SerializeField] protected AudioClip landingAudioClip;
     
     private readonly List<Transform> _fleeAnchors = new ();
     private Animator Animator => GetComponent<Animator>();
@@ -23,6 +25,7 @@ public class Npc : MonoBehaviour
     private bool _isJumping = false;
     private Transform _currentFleeTarget = null;
     private IGameManagerService _gameManager;
+    private float _onLandTime = 0f;
     
     private const float FLEE_RECALCULATION_INTERVAL = 0.25f;
     private readonly ReactiveProperty<bool> _shouldRecalculateFlee = new(true);
@@ -229,5 +232,23 @@ public class Npc : MonoBehaviour
         _fleeRecalculationCts?.Cancel();
         _fleeRecalculationCts?.Dispose();
         _shouldRecalculateFlee?.Dispose();
+    }
+    
+    protected void OnFootstep(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        {
+            var i = UnityEngine.Random.Range(0, footstepAudioClips.Length);
+            AudioSource.PlayClipAtPoint(footstepAudioClips[i], transform.position, 0.5f);
+        }
+    }
+
+    protected void OnLand(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - _onLandTime > 0.1f)
+        {
+            _onLandTime = Time.time;
+            AudioSource.PlayClipAtPoint(landingAudioClip, transform.position, 0.5f);
+        }
     }
 }
