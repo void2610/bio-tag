@@ -49,15 +49,49 @@ namespace ControlTask
         public readonly ReactiveProperty<ControlState> TargetState = new();
         public readonly ReactiveProperty<int> Score = new(0);
         public readonly ReactiveProperty<float> CurrentTime = new(0);
-        
+
         // 総実験時間 = キャリブレーション + (試行時間 × 試行数)
         public float TotalDuration => calibrationDuration +
             (goalPresentationDuration + preparationDuration + measurementDuration + feedbackDuration + restDuration) * trialCount;
+
+        // 現在のフェーズの開始時刻
+        private float _phaseStartTime = 0f;
+
+        // 現在のフェーズの持続時間
+        public float CurrentPhaseDuration
+        {
+            get
+            {
+                return TargetState.Value switch
+                {
+                    ControlState.Calibration => calibrationDuration,
+                    ControlState.GoalPresentation => goalPresentationDuration,
+                    ControlState.Preparation => preparationDuration,
+                    ControlState.Calmed => measurementDuration,
+                    ControlState.Excited => measurementDuration,
+                    ControlState.Feedback => feedbackDuration,
+                    ControlState.Rest => restDuration,
+                    _ => 0f
+                };
+            }
+        }
+
+        // 現在のフェーズの残り時間
+        public float CurrentPhaseRemainingTime
+        {
+            get
+            {
+                var elapsed = CurrentTime.Value - _phaseStartTime;
+                var remaining = CurrentPhaseDuration - elapsed;
+                return Mathf.Max(0f, remaining);
+            }
+        }
 
         // 実験フロー: キャリブレーション → 9試行（目標提示 → 準備 → 測定 → フィードバック → 休憩）
         private async UniTaskVoid UpdateTarget()
         {
             // 1. キャリブレーションフェーズ
+            _phaseStartTime = CurrentTime.Value;
             TargetState.Value = ControlState.Calibration;
             Debug.Log("[ControlTask] Calibration started");
             await UniTask.Delay((int)(calibrationDuration * 1000));
@@ -68,16 +102,19 @@ namespace ControlTask
                 var targetState = (i % 2 == 0) ? ControlState.Calmed : ControlState.Excited; // 交互に切り替え
 
                 // 目標提示
+                _phaseStartTime = CurrentTime.Value;
                 TargetState.Value = ControlState.GoalPresentation;
                 _currentTrialTargetState = targetState; // 目標状態を記録
                 Debug.Log($"[ControlTask] Trial {i + 1}/{trialCount}: Goal = {targetState}");
                 await UniTask.Delay((int)(goalPresentationDuration * 1000));
 
                 // 準備期間
+                _phaseStartTime = CurrentTime.Value;
                 TargetState.Value = ControlState.Preparation;
                 await UniTask.Delay((int)(preparationDuration * 1000));
 
                 // 測定期間
+                _phaseStartTime = CurrentTime.Value;
                 _lastScore = Score.Value;
                 TargetState.Value = targetState;
                 if (enableLogging) _dataLogger.StartTrial(targetState);
@@ -85,6 +122,7 @@ namespace ControlTask
                 if (enableLogging) EndAndLogTrial(targetState);
 
                 // フィードバック
+                _phaseStartTime = CurrentTime.Value;
                 TargetState.Value = ControlState.Feedback;
                 _trialScore = Score.Value - _lastScore; // 試行スコアを記録
                 Debug.Log($"[ControlTask] Trial {i + 1} Score: {_trialScore}");
@@ -93,6 +131,7 @@ namespace ControlTask
                 // 休憩（設定されている場合）
                 if (restDuration > 0)
                 {
+                    _phaseStartTime = CurrentTime.Value;
                     TargetState.Value = ControlState.Rest;
                     await UniTask.Delay((int)(restDuration * 1000));
                 }

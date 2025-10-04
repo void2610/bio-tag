@@ -10,9 +10,11 @@ namespace ControlTask
         private void Start()
         {
             _text = this.GetComponent<TextMeshProUGUI>();
-            ControlTaskManager.Instance.CurrentTime.Subscribe((t) =>
+            // 現在のフェーズの残り時間を表示
+            ControlTaskManager.Instance.CurrentTime.Subscribe(_ =>
             {
-                _text.text = (ControlTaskManager.Instance.TotalDuration - t).ToString("F2");
+                var remainingTime = ControlTaskManager.Instance.CurrentPhaseRemainingTime;
+                _text.text = remainingTime.ToString("F1");
             }).AddTo(this);
         }
     }
