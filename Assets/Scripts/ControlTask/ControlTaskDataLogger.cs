@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using Utils;
@@ -8,11 +7,11 @@ using Utils;
 namespace ControlTask
 {
     /// <summary>
-    /// 実験データのロギングを管理するクラス
+    /// ControlTask実験データのロギングを管理するクラス
     /// </summary>
     public class ControlTaskDataLogger : IDisposable
     {
-        private string _sessionDirectory;
+        private ExperimentSession _session;
         private CsvWriter<TrialSummary> _trialSummaryWriter;
         private CsvWriter<TimeSeriesRecord> _timeSeriesWriter;
 
@@ -30,30 +29,15 @@ namespace ControlTask
             _sessionInfo = sessionInfo;
             _sessionInfo.datetime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
 
-            // セッションディレクトリの作成
-            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var dirName = $"{sessionInfo.participantInfo.participantID}_{sessionInfo.participantInfo.testType}_{timestamp}";
-            _sessionDirectory = Path.Combine(Application.persistentDataPath, "ExperimentData", dirName);
-            Directory.CreateDirectory(_sessionDirectory);
-
-            Debug.Log($"[ExperimentData] Session started: {_sessionDirectory}");
+            var sessionName = $"{sessionInfo.participantInfo.participantID}_{sessionInfo.participantInfo.testType}";
+            // セッションの生成
+            _session = new ExperimentSession(sessionName);
 
             // セッション情報をJSONで保存
-            SaveSessionInfo();
+            _session.SaveJson("session.json", _sessionInfo);
 
             // CSVファイルの初期化
             InitializeCsvFiles();
-        }
-
-        /// <summary>
-        /// セッション情報をJSON形式で保存
-        /// </summary>
-        private void SaveSessionInfo()
-        {
-            var json = JsonUtility.ToJson(_sessionInfo, true);
-            var filePath = Path.Combine(_sessionDirectory, "session.json");
-            File.WriteAllText(filePath, json);
-            Debug.Log("[ExperimentData] Session info saved to JSON");
         }
 
         /// <summary>
@@ -62,12 +46,9 @@ namespace ControlTask
         private void InitializeCsvFiles()
         {
             // 試行サマリーCSV
-            var summaryPath = Path.Combine(_sessionDirectory, "trial_summary.csv");
-            _trialSummaryWriter = new CsvWriter<TrialSummary>(summaryPath, new TrialSummary());
-
+            _trialSummaryWriter = _session.CreateCsvWriter("trial_summary.csv", new TrialSummary());
             // 時系列データCSV
-            var timeSeriesPath = Path.Combine(_sessionDirectory, "timeseries.csv");
-            _timeSeriesWriter = new CsvWriter<TimeSeriesRecord>(timeSeriesPath, new TimeSeriesRecord());
+            _timeSeriesWriter = _session.CreateCsvWriter("timeseries.csv", new TimeSeriesRecord());
 
             Debug.Log("[ExperimentData] CSV files initialized");
         }
@@ -145,10 +126,8 @@ namespace ControlTask
         /// </summary>
         public void EndSession()
         {
-            _trialSummaryWriter?.Dispose();
-            _timeSeriesWriter?.Dispose();
-
-            Debug.Log($"[ExperimentData] Session ended. Data saved to: {_sessionDirectory}");
+            _session?.Dispose();
+            Debug.Log($"[ExperimentData] Session ended. Data saved to: {_session?.SessionDirectory}");
         }
 
         /// <summary>
