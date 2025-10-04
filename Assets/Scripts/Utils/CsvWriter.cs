@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-namespace Utils
+namespace Experiment
 {
     /// <summary>
     /// CSV形式でシリアライズ可能なデータ構造のインターフェース

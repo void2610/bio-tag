@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace Utils
+namespace Experiment
 {
     /// <summary>
     /// 実験セッションの管理クラス
