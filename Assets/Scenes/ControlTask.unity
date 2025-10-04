@@ -410,7 +410,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 490}
-  m_SizeDelta: {x: 500, y: 100}
+  m_SizeDelta: {x: 1000, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &132958588
 MonoBehaviour:
@@ -466,7 +466,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 4
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -1012,10 +1012,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gsrGraph: {fileID: 302484807}
-  calmedDuration: 15
-  excitedDuration: 15
+  calibrationDuration: 30
+  trialCount: 9
+  goalPresentationDuration: 3
+  preparationDuration: 2
+  measurementDuration: 20
+  feedbackDuration: 5
   restDuration: 5
-  repeatCount: 2
+  enableLogging: 1
+  participantId: P001
+  experimentGroup: 0
+  testType: 0
+  roomTemperature: 23.5
+  roomHumidity: 45
+  baselineGsr: 2.45
+  minGsr: 1.82
+  maxGsr: 4.31
 --- !u!4 &603767642
 Transform:
   m_ObjectHideFlags: 0

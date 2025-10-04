@@ -6,9 +6,13 @@ namespace ControlTask
 {
     public enum ControlState
     {
-        Excited,
-        Calmed,
-        Rest
+        Calibration,      // キャリブレーション
+        GoalPresentation, // 目標提示
+        Preparation,      // 準備期間
+        Excited,          // 測定（興奮）
+        Calmed,           // 測定（冷静）
+        Feedback,         // フィードバック
+        Rest              // 休憩
     }
     public class ControlTaskManager : MonoBehaviour
     {
@@ -16,11 +20,16 @@ namespace ControlTask
 
         [SerializeField] private GsrGraph gsrGraph;
 
-        [Header("Task Settings")]
-        [SerializeField] private float calmedDuration = 15f;
-        [SerializeField] private float excitedDuration = 15f;
-        [SerializeField] private float restDuration = 5f;
-        [SerializeField] private int repeatCount = 2;
+        [Header("Calibration Settings")]
+        [SerializeField] private float calibrationDuration = 30f;
+
+        [Header("Trial Settings")]
+        [SerializeField] private int trialCount = 9;
+        [SerializeField] private float goalPresentationDuration = 3f;
+        [SerializeField] private float preparationDuration = 2f;
+        [SerializeField] private float measurementDuration = 20f;
+        [SerializeField] private float feedbackDuration = 5f;
+        [SerializeField] private float restDuration = 0f;
 
         [Header("Experiment Settings")]
         [SerializeField] private bool enableLogging = true;
@@ -30,11 +39,10 @@ namespace ControlTask
         [SerializeField] private float roomTemperature = 23.5f;
         [SerializeField] private float roomHumidity = 45.0f;
 
-        [Header("Calibration Settings")]
+        [Header("Baseline GSR Settings")]
         [SerializeField] private float baselineGsr = 2.45f;
         [SerializeField] private float minGsr = 1.82f;
         [SerializeField] private float maxGsr = 4.31f;
-        [SerializeField] private int calibrationDurationMs = 30000;
 
         private ControlTaskDataLogger _dataLogger;
 
@@ -42,40 +50,61 @@ namespace ControlTask
         public readonly ReactiveProperty<int> Score = new(0);
         public readonly ReactiveProperty<float> CurrentTime = new(0);
         
-        public float TotalDuration => (calmedDuration + excitedDuration + 2 * restDuration) * repeatCount;
+        // 総実験時間 = キャリブレーション + (試行時間 × 試行数)
+        public float TotalDuration => calibrationDuration +
+            (goalPresentationDuration + preparationDuration + measurementDuration + feedbackDuration + restDuration) * trialCount;
 
-        // 固定パターン: Calmed → Rest → Excited → Rest を繰り返す
+        // 実験フロー: キャリブレーション → 9試行（目標提示 → 準備 → 測定 → フィードバック → 休憩）
         private async UniTaskVoid UpdateTarget()
         {
-            for (var i = 0; i < repeatCount; i++)
+            // 1. キャリブレーションフェーズ
+            TargetState.Value = ControlState.Calibration;
+            Debug.Log("[ControlTask] Calibration started");
+            await UniTask.Delay((int)(calibrationDuration * 1000));
+
+            // 2. 本測定（9試行）
+            for (var i = 0; i < trialCount; i++)
             {
-                // Calmed試行
+                var targetState = (i % 2 == 0) ? ControlState.Calmed : ControlState.Excited; // 交互に切り替え
+
+                // 目標提示
+                TargetState.Value = ControlState.GoalPresentation;
+                _currentTrialTargetState = targetState; // 目標状態を記録
+                Debug.Log($"[ControlTask] Trial {i + 1}/{trialCount}: Goal = {targetState}");
+                await UniTask.Delay((int)(goalPresentationDuration * 1000));
+
+                // 準備期間
+                TargetState.Value = ControlState.Preparation;
+                await UniTask.Delay((int)(preparationDuration * 1000));
+
+                // 測定期間
                 _lastScore = Score.Value;
-                TargetState.Value = ControlState.Calmed;
-                if (enableLogging) _dataLogger.StartTrial(ControlState.Calmed);
-                await UniTask.Delay((int)(calmedDuration * 1000));
-                if (enableLogging) EndAndLogTrial(ControlState.Calmed);
+                TargetState.Value = targetState;
+                if (enableLogging) _dataLogger.StartTrial(targetState);
+                await UniTask.Delay((int)(measurementDuration * 1000));
+                if (enableLogging) EndAndLogTrial(targetState);
 
-                // 休憩
-                TargetState.Value = ControlState.Rest;
-                await UniTask.Delay((int)(restDuration * 1000));
+                // フィードバック
+                TargetState.Value = ControlState.Feedback;
+                _trialScore = Score.Value - _lastScore; // 試行スコアを記録
+                Debug.Log($"[ControlTask] Trial {i + 1} Score: {_trialScore}");
+                await UniTask.Delay((int)(feedbackDuration * 1000));
 
-                // Excited試行
-                _lastScore = Score.Value;
-                TargetState.Value = ControlState.Excited;
-                if (enableLogging) _dataLogger.StartTrial(ControlState.Excited);
-                await UniTask.Delay((int)(excitedDuration * 1000));
-                if (enableLogging) EndAndLogTrial(ControlState.Excited);
-
-                // 休憩
-                TargetState.Value = ControlState.Rest;
-                await UniTask.Delay((int)(restDuration * 1000));
+                // 休憩（設定されている場合）
+                if (restDuration > 0)
+                {
+                    TargetState.Value = ControlState.Rest;
+                    await UniTask.Delay((int)(restDuration * 1000));
+                }
             }
 
-            // 全パターン完了後、タスク終了
-            Debug.Log($"Task Complete! Score: {Score.Value}");
+            // 全試行完了
+            Debug.Log($"[ControlTask] All trials complete! Total Score: {Score.Value}");
             if (enableLogging) _dataLogger.EndSession();
         }
+
+        private ControlState _currentTrialTargetState; // 現在の試行の目標状態
+        private int _trialScore; // 試行ごとのスコア
 
         /// <summary>
         /// 試行終了とログ記録
@@ -83,7 +112,7 @@ namespace ControlTask
         private void EndAndLogTrial(ControlState targetState)
         {
             var trialScore = Score.Value - _lastScore;
-            var maxPossibleScore = (targetState == ControlState.Calmed ? calmedDuration : excitedDuration) * 60; // 60fps想定
+            var maxPossibleScore = measurementDuration * 60; // 60fps想定
             var successRate = maxPossibleScore > 0 ? trialScore / maxPossibleScore : 0f;
 
             _dataLogger.EndTrial(targetState, trialScore, successRate);
@@ -123,7 +152,7 @@ namespace ControlTask
                     baselineGsr = baselineGsr,
                     minGsr = minGsr,
                     maxGsr = maxGsr,
-                    calibrationDurationMS = calibrationDurationMs
+                    calibrationDurationMS = (int)(calibrationDuration * 1000)
                 },
                 roomTemperature = roomTemperature,
                 roomHumidity = roomHumidity
@@ -136,8 +165,8 @@ namespace ControlTask
         {
             var isCorrect = false;
 
-            // Rest状態ではスコアをカウントしない
-            if (TargetState.Value != ControlState.Rest)
+            // 測定期間（Calmed or Excited）のみスコアをカウント
+            if (TargetState.Value == ControlState.Calmed || TargetState.Value == ControlState.Excited)
             {
                 if (gsrGraph.IsExcited == (TargetState.Value == ControlState.Excited))
                 {
@@ -149,8 +178,9 @@ namespace ControlTask
             // 経過時間を記録
             CurrentTime.Value += Time.deltaTime;
 
-            // 時系列データの記録（Rest以外）
-            if (enableLogging && _dataLogger != null && TargetState.Value != ControlState.Rest)
+            // 時系列データの記録（測定期間のみ）
+            if (enableLogging && _dataLogger &&
+                TargetState.Value is ControlState.Calmed or ControlState.Excited)
             {
                 var currentState = gsrGraph.IsExcited ? ControlState.Excited : ControlState.Calmed;
                 var instantaneousScore = isCorrect ? 100 : 0;
