@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Utils;
 
 namespace ControlTask
 {
@@ -48,7 +49,7 @@ namespace ControlTask
     }
 
     // 試行サマリーデータ（CSV形式で保存）
-    public class TrialSummary
+    public class TrialSummary : ICsvSerializable
     {
         public string ParticipantID;
         public string TestType;
@@ -61,17 +62,13 @@ namespace ControlTask
         public float SDGsr;
         public int ResponseTimeMS;
 
-        // CSVヘッダー
-        public static string CsvHeader =>
-            "participant_id,test_type,trial_number,target_state,duration_ms,score,success_rate,mean_gsr,sd_gsr,response_time_ms";
-
-        // CSV行に変換
-        public string ToCsvRow() =>
-            $"{ParticipantID},{TestType},{TrialNumber},{TargetState},{DurationMS},{Score:F1},{SuccessRate:F2},{MeanGsr:F2},{SDGsr:F2},{ResponseTimeMS}";
+        // ICsvSerializable実装
+        public string GetCsvHeader() => "participant_id,test_type,trial_number,target_state,duration_ms,score,success_rate,mean_gsr,sd_gsr,response_time_ms";
+        public string ToCsvRow() => $"{ParticipantID},{TestType},{TrialNumber},{TargetState},{DurationMS},{Score:F1},{SuccessRate:F2},{MeanGsr:F2},{SDGsr:F2},{ResponseTimeMS}";
     }
 
     // 時系列データ（CSV形式で保存）
-    public class TimeSeriesRecord
+    public class TimeSeriesRecord : ICsvSerializable
     {
         public string ParticipantID;
         public string TestType;
@@ -83,12 +80,8 @@ namespace ControlTask
         public int InstantaneousScore;
         public int CumulativeScore;
 
-        // CSVヘッダー
-        public static string CsvHeader =>
-            "participant_id,test_type,trial_number,timestamp_ms,gsr_raw,target_value,current_state,instantaneous_score,cumulative_score";
-
-        // CSV行に変換
-        public string ToCsvRow() =>
-            $"{ParticipantID},{TestType},{TrialNumber},{TimestampMS},{GsrRaw:F2},{TargetValue},{CurrentState},{InstantaneousScore},{CumulativeScore}";
+        // ICsvSerializable実装
+        public string GetCsvHeader() => "participant_id,test_type,trial_number,timestamp_ms,gsr_raw,target_value,current_state,instantaneous_score,cumulative_score";
+        public string ToCsvRow() => $"{ParticipantID},{TestType},{TrialNumber},{TimestampMS},{GsrRaw:F2},{TargetValue},{CurrentState},{InstantaneousScore},{CumulativeScore}";
     }
 }

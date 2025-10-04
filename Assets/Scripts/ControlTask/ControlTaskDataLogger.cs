@@ -2,22 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UnityEngine;
+using Utils;
 
 namespace ControlTask
 {
-    public class ControlTaskDataLogger : MonoBehaviour
+    /// <summary>
+    /// 実験データのロギングを管理するクラス
+    /// </summary>
+    public class ControlTaskDataLogger : IDisposable
     {
         private string _sessionDirectory;
-        private StreamWriter _trialSummaryWriter;
-        private StreamWriter _timeSeriesWriter;
+        private CsvWriter<TrialSummary> _trialSummaryWriter;
+        private CsvWriter<TimeSeriesRecord> _timeSeriesWriter;
 
         private SessionInfo _sessionInfo;
-        private List<TimeSeriesRecord> _timeSeriesBuffer = new();
-        private const int BufferFlushThreshold = 100; // バッファサイズ閾値
 
-        private int _currentTrialNumber = 0;
+        private int _currentTrialNumber;
         private float _trialStartTime;
         private List<float> _trialGsrData = new();
 
@@ -62,13 +63,11 @@ namespace ControlTask
         {
             // 試行サマリーCSV
             var summaryPath = Path.Combine(_sessionDirectory, "trial_summary.csv");
-            _trialSummaryWriter = new StreamWriter(summaryPath, false, Encoding.UTF8);
-            _trialSummaryWriter.WriteLine(TrialSummary.CsvHeader);
+            _trialSummaryWriter = new CsvWriter<TrialSummary>(summaryPath, new TrialSummary());
 
             // 時系列データCSV
             var timeSeriesPath = Path.Combine(_sessionDirectory, "timeseries.csv");
-            _timeSeriesWriter = new StreamWriter(timeSeriesPath, false, Encoding.UTF8);
-            _timeSeriesWriter.WriteLine(TimeSeriesRecord.CsvHeader);
+            _timeSeriesWriter = new CsvWriter<TimeSeriesRecord>(timeSeriesPath, new TimeSeriesRecord());
 
             Debug.Log("[ExperimentData] CSV files initialized");
         }
@@ -110,7 +109,7 @@ namespace ControlTask
                 ResponseTimeMS = 0 // TODO: 実装が必要な場合
             };
 
-            _trialSummaryWriter.WriteLine(summary.ToCsvRow());
+            _trialSummaryWriter.WriteRecord(summary);
             _trialSummaryWriter.Flush();
 
             Debug.Log($"[ExperimentData] Trial {_currentTrialNumber} ended: Score={score}, SuccessRate={successRate:F2}");
@@ -137,29 +136,8 @@ namespace ControlTask
                 CumulativeScore = cumulativeScore
             };
 
-            _timeSeriesBuffer.Add(record);
+            _timeSeriesWriter.WriteRecord(record);
             _trialGsrData.Add(gsrRaw);
-
-            // バッファが閾値に達したらフラッシュ
-            if (_timeSeriesBuffer.Count >= BufferFlushThreshold)
-            {
-                FlushTimeSeriesBuffer();
-            }
-        }
-
-        /// <summary>
-        /// バッファをディスクに書き込み
-        /// </summary>
-        private void FlushTimeSeriesBuffer()
-        {
-            if (_timeSeriesBuffer.Count == 0) return;
-
-            foreach (var record in _timeSeriesBuffer)
-            {
-                _timeSeriesWriter.WriteLine(record.ToCsvRow());
-            }
-            _timeSeriesWriter.Flush();
-            _timeSeriesBuffer.Clear();
         }
 
         /// <summary>
@@ -167,10 +145,8 @@ namespace ControlTask
         /// </summary>
         public void EndSession()
         {
-            FlushTimeSeriesBuffer();
-
-            _trialSummaryWriter?.Close();
-            _timeSeriesWriter?.Close();
+            _trialSummaryWriter?.Dispose();
+            _timeSeriesWriter?.Dispose();
 
             Debug.Log($"[ExperimentData] Session ended. Data saved to: {_sessionDirectory}");
         }
@@ -187,12 +163,10 @@ namespace ControlTask
             return Mathf.Sqrt(sumOfSquares / values.Count);
         }
 
-        private void OnDestroy()
-        {
-            EndSession();
-        }
-
-        private void OnApplicationQuit()
+        /// <summary>
+        /// リソースを解放
+        /// </summary>
+        public void Dispose()
         {
             EndSession();
         }

@@ -166,11 +166,16 @@ namespace ControlTask
             // データロガーの初期化
             if (enableLogging)
             {
-                _dataLogger = gameObject.AddComponent<ControlTaskDataLogger>();
+                _dataLogger = new ControlTaskDataLogger();
                 InitializeSession();
             }
 
             UpdateTarget().Forget();
+        }
+
+        private void OnDestroy()
+        {
+            _dataLogger?.Dispose();
         }
 
         /// <summary>
@@ -218,7 +223,7 @@ namespace ControlTask
             CurrentTime.Value += Time.deltaTime;
 
             // 時系列データの記録（測定期間のみ）
-            if (enableLogging && _dataLogger &&
+            if (enableLogging && _dataLogger != null &&
                 TargetState.Value is ControlState.Calmed or ControlState.Excited)
             {
                 var currentState = gsrGraph.IsExcited ? ControlState.Excited : ControlState.Calmed;
