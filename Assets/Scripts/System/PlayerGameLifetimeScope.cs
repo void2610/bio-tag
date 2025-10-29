@@ -3,6 +3,7 @@ using VContainer;
 using VContainer.Unity;
 using VitalRouter;
 using BioTag.Audio;
+using BioTag.Biometric;
 
 public class PlayerGameLifetimeScope : LifetimeScope
 {
@@ -26,6 +27,9 @@ public class PlayerGameLifetimeScope : LifetimeScope
         builder.RegisterInstance(audioConfig).As<AudioConfig>();
         builder.Register<AudioService>(Lifetime.Singleton);
 
+        // BiometricService (VitalRouter使用)
+        builder.Register<BiometricService>(Lifetime.Singleton);
+
         // 設定値をコンテナに登録
         builder.RegisterInstance(gameConfig).As<GameConfig>();
         builder.RegisterInstance(playerNameUIPrefab).As<PlayerNameUI>();
@@ -47,6 +51,12 @@ public class PlayerGameLifetimeScope : LifetimeScope
         if (Container.TryResolve<AudioService>(out var audioService))
         {
             audioService.MapTo(Router.Default);
+        }
+
+        // BiometricServiceをVitalRouterのデフォルトルーターに登録
+        if (Container.TryResolve<BiometricService>(out var biometricService))
+        {
+            biometricService.MapTo(Router.Default);
         }
     }
 }

@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Serialization;
+using VitalRouter;
+using BioTag.Biometric;
 
 [RequireComponent(typeof(UILineRenderer))]
 public class GsrGraph : MonoBehaviour
@@ -18,6 +20,9 @@ public class GsrGraph : MonoBehaviour
 
     // 現在のGSR生値を取得
     public float CurrentGsrRaw { get; private set; } = 0f;
+
+    // 前回のIsExcited状態 (状態変化検知用)
+    private bool _previousIsExcited = false;
 
     private UILineRenderer _lr;
     private UILineRenderer _thresholdLine1;
@@ -137,6 +142,18 @@ public class GsrGraph : MonoBehaviour
 
         IsExcited = CheckExcited(data.Select(v => v.y).ToList());
         _lr.material.color = IsExcited ? Color.red : Color.white;
+
+        // 状態変化を検知してCommandを発行
+        if (IsExcited != _previousIsExcited)
+        {
+            var newState = IsExcited ? BiometricState.Excited : BiometricState.Calm;
+            var previousState = _previousIsExcited ? BiometricState.Excited : BiometricState.Calm;
+            var intensity = CurrentGsrRaw;
+
+            Router.Default.PublishAsync(new BiometricStateChangedCommand(newState, previousState, intensity));
+
+            _previousIsExcited = IsExcited;
+        }
 
         if (Input.GetKeyDown(KeyCode.Y))
             threshold -= 1f;
