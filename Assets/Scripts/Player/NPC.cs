@@ -239,7 +239,7 @@ public class Npc : MonoBehaviour
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
             var position = transform.position;
-            Router.Default.PublishAsync(new PlayFootstepCommand(position));
+            Router.Default.PublishAsync(new PlayFootstepCommand(position, FootstepType.Step));
         }
     }
 
@@ -249,7 +249,7 @@ public class Npc : MonoBehaviour
         {
             _onLandTime = Time.time;
             var position = transform.position;
-            Router.Default.PublishAsync(new PlayLandingCommand(position));
+            Router.Default.PublishAsync(new PlayFootstepCommand(position, FootstepType.Landing));
         }
     }
 }

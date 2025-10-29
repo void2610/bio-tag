@@ -127,7 +127,7 @@ public class PlayerBase : MonoBehaviour
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
             var position = transform.TransformPoint(CCon.center);
-            Router.Default.PublishAsync(new PlayFootstepCommand(position));
+            Router.Default.PublishAsync(new PlayFootstepCommand(position, FootstepType.Step));
         }
     }
 
@@ -137,7 +137,7 @@ public class PlayerBase : MonoBehaviour
         {
             OnLandTime = Time.time;
             var position = transform.TransformPoint(CCon.center);
-            Router.Default.PublishAsync(new PlayLandingCommand(position));
+            Router.Default.PublishAsync(new PlayFootstepCommand(position, FootstepType.Landing));
         }
     }
 }
