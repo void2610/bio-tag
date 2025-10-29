@@ -8,13 +8,13 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using R3;
 using System;
+using VitalRouter;
+using BioTag.Audio;
 
 public class Npc : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 8f;
-    [SerializeField] protected AudioClip[] footstepAudioClips;
-    [SerializeField] protected AudioClip landingAudioClip;
-    
+
     private readonly List<Transform> _fleeAnchors = new ();
     private Animator Animator => GetComponent<Animator>();
     private NavMeshAgent Agent => this.GetComponent<NavMeshAgent>();
@@ -31,7 +31,7 @@ public class Npc : MonoBehaviour
     private readonly ReactiveProperty<bool> _shouldRecalculateFlee = new(true);
     private CancellationTokenSource _fleeRecalculationCts;
     private Vector3 _lastPlayerPosition;
-    
+
     private async UniTaskVoid Wait(float time)
     {
         _isMovable = false;
@@ -238,8 +238,8 @@ public class Npc : MonoBehaviour
     {
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
-            var i = UnityEngine.Random.Range(0, footstepAudioClips.Length);
-            AudioSource.PlayClipAtPoint(footstepAudioClips[i], transform.position, 0.5f);
+            var position = transform.position;
+            Router.Default.PublishAsync(new PlayFootstepCommand(position));
         }
     }
 
@@ -248,7 +248,8 @@ public class Npc : MonoBehaviour
         if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - _onLandTime > 0.1f)
         {
             _onLandTime = Time.time;
-            AudioSource.PlayClipAtPoint(landingAudioClip, transform.position, 0.5f);
+            var position = transform.position;
+            Router.Default.PublishAsync(new PlayLandingCommand(position));
         }
     }
 }
