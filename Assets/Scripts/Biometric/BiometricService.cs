@@ -135,7 +135,11 @@ namespace BioTag.Biometric
         {
             if (_playerSpawn?.SpawnedPlayers != null && _playerSpawn.SpawnedPlayers.Count > 0)
             {
-                return _playerSpawn.SpawnedPlayers[0]?.GetComponent<PlayerBase>();
+                var playerObj = _playerSpawn.SpawnedPlayers[0];
+                if (playerObj != null)
+                {
+                    return playerObj.GetComponent<PlayerBase>();
+                }
             }
             return null;
         }
