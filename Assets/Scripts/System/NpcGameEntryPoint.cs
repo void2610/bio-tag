@@ -76,15 +76,7 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
     
     private void OnGameStateChanged(int newState)
     {
-        switch (newState)
-        {
-            case 1: // Playing
-                _gameUI.ClearMessage();
-                break;
-            case 2: // Game Over
-                _gameUI.ShowGameOver();
-                break;
-        }
+        // GameStateChangedCommandで処理されるため、ここでは何もしない
     }
     
     private GameObject GetPlayerByIndex(int index)
@@ -137,6 +129,12 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
                 // タイマー更新Commandを発行
                 var elapsedTime = _gameManager.GetElapsedTime();
                 Router.Default.PublishAsync(new UpdateTimerCommand(elapsedTime));
+
+                // スコアボード更新Commandを発行
+                Router.Default.PublishAsync(new UpdateScoreBoardCommand(
+                    _gameManager.PlayerNames,
+                    _gameManager.PlayerScores
+                ));
 
                 // ゲーム終了判定
                 if (_gameManager.GetElapsedTime() >= _gameConfig.gameLength)

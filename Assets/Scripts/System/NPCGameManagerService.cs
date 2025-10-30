@@ -4,7 +4,8 @@ using VContainer;
 using VitalRouter;
 using BioTag.GameUI;
 
-public class NPCGameManagerService : IGameManagerService
+[Routes]
+public partial class NPCGameManagerService : IGameManagerService
 {
     public int? GameState { get; private set; } = 0;
     public int ItIndex { get; private set; }
@@ -59,8 +60,12 @@ public class NPCGameManagerService : IGameManagerService
     {
         if (GameState != state)
         {
+            var previousState = GameState;
             GameState = state;
             OnGameStateChanged?.Invoke(state);
+
+            // ゲーム状態変更Commandを発行
+            Router.Default.PublishAsync(new GameStateChangedCommand(state, previousState));
         }
     }
     
@@ -82,5 +87,14 @@ public class NPCGameManagerService : IGameManagerService
     public float GetElapsedTime()
     {
         return Time.time - _startTime;
+    }
+
+    /// <summary>
+    /// タグイベントコマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(PlayerTaggedCommand cmd)
+    {
+        ChangeIt(cmd.TaggedPlayerIndex);
     }
 }

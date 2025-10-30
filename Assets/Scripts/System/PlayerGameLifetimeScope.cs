@@ -58,5 +58,11 @@ public class PlayerGameLifetimeScope : LifetimeScope
         {
             biometricService.MapTo(Router.Default);
         }
+
+        // GameManagerServiceをVitalRouterのデフォルトルーターに登録
+        if (Container.TryResolve<IGameManagerService>(out var gameManagerService))
+        {
+            (gameManagerService as PlayerGameManagerService)?.MapTo(Router.Default);
+        }
     }
 }

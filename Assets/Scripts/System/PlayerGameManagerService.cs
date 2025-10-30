@@ -4,7 +4,8 @@ using VContainer;
 using VitalRouter;
 using BioTag.GameUI;
 
-public class PlayerGameManagerService : IGameManagerService
+[Routes]
+public partial class PlayerGameManagerService : IGameManagerService
 {
     public int? GameState { get; private set; } = 0;
     public int ItIndex { get; private set; }
@@ -54,8 +55,12 @@ public class PlayerGameManagerService : IGameManagerService
     {
         if (GameState != state)
         {
+            var previousState = GameState;
             GameState = state;
             OnGameStateChanged?.Invoke(state);
+
+            // ゲーム状態変更Commandを発行
+            Router.Default.PublishAsync(new GameStateChangedCommand(state, previousState));
         }
     }
     
@@ -73,5 +78,14 @@ public class PlayerGameManagerService : IGameManagerService
     public float GetGameLength()
     {
         return _gameConfig.gameLength;
+    }
+
+    /// <summary>
+    /// タグイベントコマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(PlayerTaggedCommand cmd)
+    {
+        ChangeIt(cmd.TaggedPlayerIndex);
     }
 }

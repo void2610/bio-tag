@@ -10,6 +10,7 @@ using R3;
 using System;
 using VitalRouter;
 using BioTag.Audio;
+using BioTag.GameUI;
 
 public class Npc : MonoBehaviour
 {
@@ -222,8 +223,8 @@ public class Npc : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player") || _index == _gameManager?.ItIndex) return;
-        
-        _gameManager?.ChangeIt(_index);
+
+        Router.Default.PublishAsync(new PlayerTaggedCommand(_index));
         Wait(1f).Forget();
     }
     

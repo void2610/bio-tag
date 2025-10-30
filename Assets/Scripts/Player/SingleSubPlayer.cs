@@ -1,12 +1,14 @@
 using UnityEngine;
 using UnityEngine.VFX;
+using VitalRouter;
+using BioTag.GameUI;
 
 public class SingleSubPlayer : PlayerBase
 {
     private void CreatePlayerCamera()
     {
         if (MyPlayerCamera) return;
-        
+
         MyPlayerCamera = Instantiate(playerCameraPrefab, this.transform);
         MyPlayerCamera.name = "PlayerCamera";
         Destroy(MyPlayerCamera.GetComponent<AudioListener>());
@@ -16,11 +18,7 @@ public class SingleSubPlayer : PlayerBase
 
     private void OnTriggerEnter(Collider other)
     {
-        if (Gm?.GameState != 1)
-        {
-            return;
-        }
-
-        Gm?.ChangeIt(Index);
+        if (Gm?.GameState != 1) return;
+        Router.Default.PublishAsync(new PlayerTaggedCommand(Index));
     }
 }

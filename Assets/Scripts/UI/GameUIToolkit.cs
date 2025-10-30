@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Linq;
-using System.Collections.Generic;
 using VContainer;
 using VitalRouter;
 using BioTag.GameUI;
@@ -19,14 +18,6 @@ public partial class GameUIToolkit : MonoBehaviour
     private Label _itValue;
     private Label _scoreBoardContent;
     private VisualElement _scoreBoardContainer;
-    
-    private IGameManagerService _gameManagerService;
-    
-    [Inject]
-    public void Construct(IGameManagerService gameManagerService)
-    {
-        _gameManagerService = gameManagerService;
-    }
     
     public enum MessageType
     {
@@ -69,13 +60,6 @@ public partial class GameUIToolkit : MonoBehaviour
     {
         // VitalRouterから登録解除
         this.UnmapRoutes();
-    }
-    
-    private void Update()
-    {
-        if (_gameManagerService == null) return;
-
-        UpdateScoreBoard();
     }
     
     public void SetMessage(string message, MessageType messageType = MessageType.Default)
@@ -140,30 +124,33 @@ public partial class GameUIToolkit : MonoBehaviour
             _itValue.text = cmd.ItName ?? "---";
         }
     }
-    
-    // Score Board Methods
-    private void UpdateScoreBoard()
+
+    /// <summary>
+    /// スコアボード更新コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(UpdateScoreBoardCommand cmd)
     {
-        if (_scoreBoardContent == null || _gameManagerService == null) return;
-        
-        var playerNames = _gameManagerService.PlayerNames;
-        var playerScores = _gameManagerService.PlayerScores;
-        
+        if (_scoreBoardContent == null) return;
+
+        var playerNames = cmd.PlayerNames;
+        var playerScores = cmd.PlayerScores;
+
         if (playerNames == null || playerScores == null || playerNames.Count == 0)
         {
             _scoreBoardContent.text = "No scores available";
             return;
         }
-        
+
         // Create sorted score list
         var scoreEntries = playerNames
-            .Select((playerName, index) => new { 
-                Name = playerName, 
-                Score = index < playerScores.Count ? playerScores[index] : 0f 
+            .Select((playerName, index) => new {
+                Name = playerName,
+                Score = index < playerScores.Count ? playerScores[index] : 0f
             })
             .OrderBy(entry => entry.Score)
             .ToList();
-        
+
         // Build score text with simple string concatenation
         var scoreText = "";
         for (int i = 0; i < scoreEntries.Count; i++)
@@ -171,8 +158,25 @@ public partial class GameUIToolkit : MonoBehaviour
             if (i > 0) scoreText += "\n";
             scoreText += $"{i + 1}. {scoreEntries[i].Name}: {scoreEntries[i].Score:F1}";
         }
-        
+
         _scoreBoardContent.text = scoreText;
     }
-    
+
+    /// <summary>
+    /// ゲーム状態変更コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(GameStateChangedCommand cmd)
+    {
+        switch (cmd.NewState)
+        {
+            case 1: // Playing
+                ClearMessage();
+                break;
+            case 2: // Game Over
+                SetMessage("Game Over", MessageType.Info);
+                break;
+        }
+    }
+
 }
