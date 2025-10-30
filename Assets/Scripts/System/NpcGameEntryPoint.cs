@@ -53,14 +53,11 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
         // プレーヤーを生成
         var playerPosition = _playerSpawn.GetRandomSpawnPosition();
         var player = _playerSpawn.SpawnPlayer(_gameConfig.playerPrefab, playerPosition, 0);
-        var playerName = _playerDataService.GetPlayerName();
-        _gameManager.AddPlayerName(playerName);
-        
         // NPCを生成
         for (int i = 1; i < _gameConfig.npcCount + 1; i++)
         {
             var npcPosition = _playerSpawn.GetRandomSpawnPosition();
-             _playerSpawn.SpawnNpc(_gameConfig.npcPrefab, npcPosition, i, player.transform);
+            _playerSpawn.SpawnNpc(_gameConfig.npcPrefab, npcPosition, i, player.transform);
             _gameManager.AddPlayerName($"NPC{i}");
         }
     }
@@ -74,10 +71,7 @@ public class NpcGameEntryPoint : IStartable, ITickable, IDisposable
     private void OnItChanged(int newItIndex)
     {
         var targetPlayer = GetPlayerByIndex(newItIndex);
-        if (targetPlayer)
-        {
-            _itMarker.SetTarget(targetPlayer.transform);
-        }
+        if (targetPlayer) _itMarker.SetTarget(targetPlayer.transform);
     }
     
     private void OnGameStateChanged(int newState)
