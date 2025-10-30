@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
+using VitalRouter;
+using BioTag.GameUI;
 
 public class PlayerGameManagerService : IGameManagerService
 {
@@ -28,6 +30,10 @@ public class PlayerGameManagerService : IGameManagerService
         ItIndex = Random.Range(0, 2);
         _startTime = Time.time;
         OnItChanged?.Invoke(ItIndex);
+
+        // "It"プレイヤー更新Commandを発行
+        var itName = ItIndex >= 0 && ItIndex < PlayerNames.Count ? PlayerNames[ItIndex] : "---";
+        Router.Default.PublishAsync(new UpdateItPlayerCommand(ItIndex, itName));
     }
     
     public void ChangeIt(int index)
@@ -37,6 +43,10 @@ public class PlayerGameManagerService : IGameManagerService
             ItIndex = index;
             LastTagTime = Time.time;
             OnItChanged?.Invoke(ItIndex);
+
+            // "It"プレイヤー更新Commandを発行
+            var itName = ItIndex >= 0 && ItIndex < PlayerNames.Count ? PlayerNames[ItIndex] : "---";
+            Router.Default.PublishAsync(new UpdateItPlayerCommand(ItIndex, itName));
         }
     }
     

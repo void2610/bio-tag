@@ -74,9 +74,7 @@ public partial class GameUIToolkit : MonoBehaviour
     private void Update()
     {
         if (_gameManagerService == null) return;
-        
-        UpdateTimer();
-        UpdateItPlayer();
+
         UpdateScoreBoard();
     }
     
@@ -119,22 +117,6 @@ public partial class GameUIToolkit : MonoBehaviour
         }
     }
     
-    // Timer Methods
-    private void UpdateTimer()
-    {
-        if (_timerValue == null || _gameManagerService == null) return;
-
-        if (_gameManagerService.GameState == 1)
-        {
-            var elapsedTime = _gameManagerService.GetElapsedTime();
-            _timerValue.text = elapsedTime.ToString("F2");
-        }
-        else
-        {
-            _timerValue.text = "0.00";
-        }
-    }
-
     /// <summary>
     /// タイマー更新コマンドハンドラ
     /// </summary>
@@ -146,22 +128,16 @@ public partial class GameUIToolkit : MonoBehaviour
             _timerValue.text = cmd.ElapsedTime.ToString("F2");
         }
     }
-    
-    // It Player Methods
-    private void UpdateItPlayer()
+
+    /// <summary>
+    /// "It"プレイヤー更新コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(UpdateItPlayerCommand cmd)
     {
-        if (_itValue == null || _gameManagerService == null) return;
-        
-        var itIndex = _gameManagerService.ItIndex;
-        var playerNames = _gameManagerService.PlayerNames;
-        
-        if (itIndex >= 0 && itIndex < playerNames.Count)
+        if (_itValue != null)
         {
-            _itValue.text = playerNames[itIndex];
-        }
-        else
-        {
-            _itValue.text = "---";
+            _itValue.text = cmd.ItName ?? "---";
         }
     }
     
