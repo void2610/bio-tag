@@ -2,6 +2,8 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 using System;
+using VitalRouter;
+using BioTag.GameUI;
 
 public class PlayerGameEntryPoint : IStartable, ITickable, IDisposable
 {
@@ -128,13 +130,17 @@ public class PlayerGameEntryPoint : IStartable, ITickable, IDisposable
                 {
                     itPlayerScores[_gameManager.ItIndex] += Time.deltaTime;
                 }
-                
+
+                // タイマー更新Commandを発行
+                var elapsedTime = _gameManager.GetElapsedTime();
+                Router.Default.PublishAsync(new UpdateTimerCommand(elapsedTime));
+
                 // ゲーム終了判定
                 if (_gameManager is PlayerGameManagerService gameManagerService && _gameManager.GetElapsedTime() >= gameManagerService.GetGameLength())
                 {
                     _gameManager.SetGameState(2);
                 }
-                
+
                 // プレーヤー間距離をUDPで送信（元の実装を維持）
                 SendPlayerDistance();
                 break;
