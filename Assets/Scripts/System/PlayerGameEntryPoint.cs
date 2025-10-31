@@ -126,9 +126,13 @@ public class PlayerGameEntryPoint : IStartable, ITickable
                     _gameManager.PlayerScores
                 ));
 
+                // ログ記録を更新
+                _gameManager.UpdateLogging();
+
                 // ゲーム終了判定
                 if (_gameManager is PlayerGameManagerService gameManagerService && _gameManager.GetElapsedTime() >= gameManagerService.GetGameLength())
                 {
+                    _gameManager.EndGame();
                     _gameManager.SetGameState(2);
                 }
 

@@ -19,4 +19,6 @@ public interface IGameManagerService
     void SetGameState(int state);
     void AddPlayerName(string name);
     float GetElapsedTime();
+    void UpdateLogging();
+    void EndGame();
 }

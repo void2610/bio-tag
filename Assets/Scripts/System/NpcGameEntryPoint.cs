@@ -132,9 +132,13 @@ public class NpcGameEntryPoint : IStartable, ITickable
                     _gameManager.PlayerScores
                 ));
 
+                // ログ記録を更新
+                _gameManager.UpdateLogging();
+
                 // ゲーム終了判定
                 if (_gameManager.GetElapsedTime() >= _gameConfig.gameLength)
                 {
+                    _gameManager.EndGame();
                     _gameManager.SetGameState(2);
                 }
 
