@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
+using TagGame;
 
 public class NPCGameManagerService : IGameManagerService
 {
@@ -9,17 +10,33 @@ public class NPCGameManagerService : IGameManagerService
     public float LastTagTime { get; private set; }
     public List<float> PlayerScores { get; private set; } = new List<float>();
     public List<string> PlayerNames { get; private set; } = new List<string>();
-    
+
     public event System.Action<int> OnGameStateChanged;
     public event System.Action<int> OnItChanged;
-    
+
     private float _startTime;
     private readonly GameConfig _gameConfig;
-    
+    private TagGameDataLogger _dataLogger;
+    private IPlayerSpawnService _playerSpawnService;
+
+    // ログ設定
+    public bool EnableLogging { get; set; } = false;
+    public string ParticipantID { get; set; } = "P001";
+    public string ExperimentGroup { get; set; } = "BfHuman";
+    public string TestType { get; set; } = "Pre";
+
     [Inject]
     public NPCGameManagerService(GameConfig gameConfig)
     {
         _gameConfig = gameConfig;
+    }
+
+    /// <summary>
+    /// IPlayerSpawnServiceを設定（プレイヤー位置取得用）
+    /// </summary>
+    public void SetPlayerSpawnService(IPlayerSpawnService playerSpawnService)
+    {
+        _playerSpawnService = playerSpawnService;
     }
     
     public void StartGame()
@@ -33,6 +50,36 @@ public class NPCGameManagerService : IGameManagerService
         ItIndex = Random.Range(0, _gameConfig.npcCount + 1);
         _startTime = Time.time;
         OnItChanged?.Invoke(ItIndex);
+
+        // ログ記録開始
+        if (EnableLogging)
+        {
+            InitializeLogger();
+            _dataLogger.RecordGameStart(ItIndex, GetPlayerPositions());
+        }
+    }
+
+    /// <summary>
+    /// ロガーを初期化
+    /// </summary>
+    private void InitializeLogger()
+    {
+        _dataLogger = new TagGameDataLogger();
+
+        var sessionInfo = new TagGameSessionInfo
+        {
+            participantID = ParticipantID,
+            experimentGroup = ExperimentGroup,
+            testType = TestType,
+            gameMode = GameMode.PlayerVsNPC,
+            playerCount = 1,
+            npcCount = _gameConfig.npcCount,
+            gameLengthSeconds = _gameConfig.gameLength,
+            roomTemperature = 23.5f,
+            roomHumidity = 45.0f
+        };
+
+        _dataLogger.StartSession(sessionInfo);
     }
     
     public void ChangeIt(int index)
@@ -42,6 +89,12 @@ public class NPCGameManagerService : IGameManagerService
             ItIndex = index;
             LastTagTime = Time.time;
             OnItChanged?.Invoke(ItIndex);
+
+            // 鬼交代をログ記録
+            if (EnableLogging && _dataLogger != null)
+            {
+                _dataLogger.RecordItChange(ItIndex, GetPlayerPositions(), GetGsrValue(), GetIsExcited());
+            }
         }
     }
     
@@ -72,5 +125,69 @@ public class NPCGameManagerService : IGameManagerService
     public float GetElapsedTime()
     {
         return Time.time - _startTime;
+    }
+
+    /// <summary>
+    /// ゲーム状態の定期記録（Update()から呼び出す想定）
+    /// </summary>
+    public void UpdateLogging()
+    {
+        if (EnableLogging && _dataLogger != null && GameState == 1)
+        {
+            // 1秒ごとに記録（フレームレート非依存）
+            if (Time.frameCount % 60 == 0)
+            {
+                _dataLogger.RecordGameTick(ItIndex, GetPlayerPositions(), GetGsrValue(), GetIsExcited());
+            }
+        }
+    }
+
+    /// <summary>
+    /// ゲーム終了処理
+    /// </summary>
+    public void EndGame()
+    {
+        if (EnableLogging && _dataLogger != null)
+        {
+            _dataLogger.RecordGameEnd(PlayerNames, PlayerScores, GetPlayerPositions());
+            _dataLogger.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// プレイヤー位置を取得
+    /// </summary>
+    private List<Vector3> GetPlayerPositions()
+    {
+        var positions = new List<Vector3>();
+
+        if (_playerSpawnService?.SpawnedPlayers != null)
+        {
+            foreach (var player in _playerSpawnService.SpawnedPlayers)
+            {
+                if (player != null)
+                    positions.Add(player.transform.position);
+            }
+        }
+
+        return positions;
+    }
+
+    /// <summary>
+    /// GSR値を取得（TODO: GsrGraphから取得）
+    /// </summary>
+    private float GetGsrValue()
+    {
+        // TODO: GsrGraph.Instance?.CurrentGsrRaw ?? 0f;
+        return 0f;
+    }
+
+    /// <summary>
+    /// 興奮状態を取得（TODO: GsrGraphから取得）
+    /// </summary>
+    private bool GetIsExcited()
+    {
+        // TODO: GsrGraph.Instance?.IsExcited ?? false;
+        return false;
     }
 }
