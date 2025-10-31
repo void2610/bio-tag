@@ -24,10 +24,10 @@ public partial class NPCGameManagerService : IGameManagerService
     private IPlayerSpawnService _playerSpawnService;
 
     // ログ設定
-    public bool EnableLogging { get; set; } = false;
+    public bool EnableLogging { get; set; } = true;
     public string ParticipantID { get; set; } = "P001";
     public string ExperimentGroup { get; set; } = "BfHuman";
-    public string TestType { get; set; } = "Pre";
+    public string TestType { get; set; } = "Game";
 
     [Inject]
     public NPCGameManagerService(GameConfig gameConfig)
