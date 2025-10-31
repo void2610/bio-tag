@@ -18,6 +18,7 @@
   "dependencies": {
     "com.cysharp.r3": "1.2.9",
     "com.cysharp.unitask": "2.5.10",
+    "com.github-glitchenzo.nugetforunity": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
     "com.unity.ai.navigation": "2.0.9",
     "com.unity.cinemachine": "2.10.4",
     "com.unity.collab-proxy": "2.9.3",
@@ -36,6 +37,7 @@
     "com.unity.visualeffectgraph": "17.0.4",
     "com.unity.visualscripting": "1.9.7",
     "jp.hadashikick.vcontainer": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer#1.16.8",
+    "jp.hadashikick.vitalrouter.unity": "https://github.com/hadashiA/VitalRouter.git?path=/src/VitalRouter.Unity/Assets/VitalRouter",
     "org.nuget.r3": "1.2.9",
     "org.nuget.scriban": "2.1.0",
     "com.unity.modules.accessibility": "1.0.0",

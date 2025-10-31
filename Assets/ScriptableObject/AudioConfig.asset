@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ff7dbf1338114e3a8eb24914c8d5b67, type: 3}
+  m_Name: AudioConfig
+  m_EditorClassIdentifier: 
+  footstepClips:
+  - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}
+  - {fileID: 8300000, guid: 22537e39083884518b948b6542639237, type: 3}
+  - {fileID: 8300000, guid: 43db7da7ab06f44108f08affa300c419, type: 3}
+  - {fileID: 8300000, guid: 73f07aa753dc1463ebf904d34973e49d, type: 3}
+  - {fileID: 8300000, guid: d3fd818a8ea5a49f8af96c6f37f066f7, type: 3}
+  - {fileID: 8300000, guid: 90d68c2128ad54149a1f1310c64bfa22, type: 3}
+  - {fileID: 8300000, guid: ff8ebcc7ee9e24189a958b6d55efe7f0, type: 3}
+  - {fileID: 8300000, guid: 58617bea5edbf4eaf887b9e5bc9b8069, type: 3}
+  - {fileID: 8300000, guid: 82ffb1d8dbecd446fb1eb573921ad7de, type: 3}
+  - {fileID: 8300000, guid: 5ee2b731a277645fe86f15e96042556b, type: 3}
+  landingClip: {fileID: 8300000, guid: 1e27bdb7813524c9791edadb30b134c1, type: 3}
