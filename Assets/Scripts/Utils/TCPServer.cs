@@ -1,6 +1,5 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;    // UniTask
-using R3;                        // Reactive Extensions for Unity (R3)
 using System;
 using System.Net;
 using System.Net.Sockets;
