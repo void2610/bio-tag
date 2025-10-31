@@ -8,13 +8,14 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using R3;
 using System;
+using VitalRouter;
+using BioTag.Audio;
+using BioTag.GameUI;
 
 public class Npc : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 8f;
-    [SerializeField] protected AudioClip[] footstepAudioClips;
-    [SerializeField] protected AudioClip landingAudioClip;
-    
+
     private readonly List<Transform> _fleeAnchors = new ();
     private Animator Animator => GetComponent<Animator>();
     private NavMeshAgent Agent => this.GetComponent<NavMeshAgent>();
@@ -31,7 +32,7 @@ public class Npc : MonoBehaviour
     private readonly ReactiveProperty<bool> _shouldRecalculateFlee = new(true);
     private CancellationTokenSource _fleeRecalculationCts;
     private Vector3 _lastPlayerPosition;
-    
+
     private async UniTaskVoid Wait(float time)
     {
         _isMovable = false;
@@ -65,7 +66,7 @@ public class Npc : MonoBehaviour
     {
         // VContainerからゲーム状態を取得
         var isGamePlaying = _gameManager?.GameState == 1;
-        var currentItIndex = _gameManager?.ItIndex ?? -1;
+        var currentItIndex = _gameManager?.CurrentItIndex ?? -1;
         
         Agent.isStopped = !_isMovable;
         if (_target && isGamePlaying && _isMovable)
@@ -221,9 +222,10 @@ public class Npc : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player") || _index == _gameManager?.ItIndex) return;
-        
-        _gameManager?.ChangeIt(_index);
+        if (!other.CompareTag("Player") || _index == _gameManager?.CurrentItIndex) return;
+
+        // 自分自身のTransformを含めてCommandを発行
+        Router.Default.PublishAsync(new PlayerTaggedCommand(_index, transform));
         Wait(1f).Forget();
     }
     
@@ -238,8 +240,8 @@ public class Npc : MonoBehaviour
     {
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
-            var i = UnityEngine.Random.Range(0, footstepAudioClips.Length);
-            AudioSource.PlayClipAtPoint(footstepAudioClips[i], transform.position, 0.5f);
+            var position = transform.position;
+            Router.Default.PublishAsync(new PlayFootstepCommand(position, FootstepType.Step));
         }
     }
 
@@ -248,7 +250,8 @@ public class Npc : MonoBehaviour
         if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - _onLandTime > 0.1f)
         {
             _onLandTime = Time.time;
-            AudioSource.PlayClipAtPoint(landingAudioClip, transform.position, 0.5f);
+            var position = transform.position;
+            Router.Default.PublishAsync(new PlayFootstepCommand(position, FootstepType.Landing));
         }
     }
 }

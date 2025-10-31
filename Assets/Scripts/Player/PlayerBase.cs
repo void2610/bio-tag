@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEngine.VFX;
 using UnityEngine.InputSystem;
 using VContainer;
+using VitalRouter;
+using BioTag.Audio;
 
 public class PlayerBase : MonoBehaviour
 {
     [SerializeField] protected GameObject playerCameraPrefab;
-    [SerializeField] protected AudioClip[] footstepAudioClips;
-    [SerializeField] protected AudioClip landingAudioClip;
     [SerializeField] protected float jumpPower = 6f;
     [SerializeField] protected float walkSpeed = 6f;
     public Vector3 velocity = Vector3.zero;
@@ -24,7 +24,6 @@ public class PlayerBase : MonoBehaviour
     protected Vector3 MovementInput;
     protected bool JumpInput = false;
     protected IGameManagerService Gm;
-    private const float FOOTSTEP_AUDIO_VOLUME = 0.5f;
 
     public void SetWalkSpeed(float s) => walkSpeed = s;
 
@@ -101,7 +100,7 @@ public class PlayerBase : MonoBehaviour
 
         // VContainerからゲーム状態を取得してItエフェクトを制御
         var isGamePlaying = Gm?.GameState == 1;
-        var isIt = this.Index == Gm?.ItIndex;
+        var isIt = this.Index == Gm?.CurrentItIndex;
         
         if (isIt && isGamePlaying)
         {
@@ -127,8 +126,8 @@ public class PlayerBase : MonoBehaviour
     {
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
-            var i = Random.Range(0, footstepAudioClips.Length);
-            AudioSource.PlayClipAtPoint(footstepAudioClips[i], transform.TransformPoint(CCon.center), FOOTSTEP_AUDIO_VOLUME);
+            var position = transform.TransformPoint(CCon.center);
+            Router.Default.PublishAsync(new PlayFootstepCommand(position, FootstepType.Step));
         }
     }
 
@@ -137,7 +136,8 @@ public class PlayerBase : MonoBehaviour
         if (animationEvent.animatorClipInfo.weight > 0.2f && Time.time - OnLandTime > 0.1f)
         {
             OnLandTime = Time.time;
-            AudioSource.PlayClipAtPoint(landingAudioClip, transform.TransformPoint(CCon.center), FOOTSTEP_AUDIO_VOLUME);
+            var position = transform.TransformPoint(CCon.center);
+            Router.Default.PublishAsync(new PlayFootstepCommand(position, FootstepType.Landing));
         }
     }
 }

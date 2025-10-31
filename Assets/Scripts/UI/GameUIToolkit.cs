@@ -1,14 +1,16 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Linq;
-using System.Collections.Generic;
 using VContainer;
+using VitalRouter;
+using BioTag.GameUI;
 
 /// <summary>
 /// Unified Game UI controller for tag game using UI Toolkit
 /// Combines Game Message, Timer, It Player display, and Score Board functionality
 /// </summary>
-public class GameUIToolkit : MonoBehaviour
+[Routes]
+public partial class GameUIToolkit : MonoBehaviour
 {
     // UI Elements
     private Label _gameMessageLabel;
@@ -16,14 +18,6 @@ public class GameUIToolkit : MonoBehaviour
     private Label _itValue;
     private Label _scoreBoardContent;
     private VisualElement _scoreBoardContainer;
-    
-    private IGameManagerService _gameManagerService;
-    
-    [Inject]
-    public void Construct(IGameManagerService gameManagerService)
-    {
-        _gameManagerService = gameManagerService;
-    }
     
     public enum MessageType
     {
@@ -38,34 +32,34 @@ public class GameUIToolkit : MonoBehaviour
     {
         var uiDocument = GetComponent<UIDocument>();
         var root = uiDocument.rootVisualElement;
-        
+
         // Query UI elements
         _gameMessageLabel = root.Q<Label>("game-message-label");
         _timerValue = root.Q<Label>("timer-value");
         _itValue = root.Q<Label>("it-value");
         _scoreBoardContainer = root.Q<VisualElement>("score-board-container");
         _scoreBoardContent = root.Q<Label>("score-board-content");
-        
+
         // Initially clear the message
         if (_gameMessageLabel != null)
         {
             _gameMessageLabel.text = "";
         }
-        
+
         // Always show score board
         if (_scoreBoardContainer != null)
         {
             _scoreBoardContainer.style.display = DisplayStyle.Flex;
         }
+
+        // VitalRouterのデフォルトルーターに登録
+        this.MapTo(Router.Default);
     }
-    
-    private void Update()
+
+    private void OnDisable()
     {
-        if (_gameManagerService == null) return;
-        
-        UpdateTimer();
-        UpdateItPlayer();
-        UpdateScoreBoard();
+        // VitalRouterから登録解除
+        this.UnmapRoutes();
     }
     
     public void SetMessage(string message, MessageType messageType = MessageType.Default)
@@ -107,63 +101,57 @@ public class GameUIToolkit : MonoBehaviour
         }
     }
     
-    // Timer Methods
-    private void UpdateTimer()
+    /// <summary>
+    /// タイマー更新コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(UpdateTimerCommand cmd)
     {
-        if (_timerValue == null || _gameManagerService == null) return;
-        
-        if (_gameManagerService.GameState == 1)
+        if (_timerValue != null)
         {
-            var elapsedTime = _gameManagerService.GetElapsedTime();
-            _timerValue.text = elapsedTime.ToString("F2");
-        }
-        else
-        {
-            _timerValue.text = "0.00";
+            _timerValue.text = cmd.ElapsedTime.ToString("F2");
         }
     }
-    
-    // It Player Methods
-    private void UpdateItPlayer()
+
+    /// <summary>
+    /// "It"プレイヤー変更コマンドハンドラ
+    /// 鬼プレイヤーが変更されたらUI表示を更新
+    /// </summary>
+    [Route]
+    private void On(ItChangedCommand cmd)
     {
-        if (_itValue == null || _gameManagerService == null) return;
-        
-        var itIndex = _gameManagerService.ItIndex;
-        var playerNames = _gameManagerService.PlayerNames;
-        
-        if (itIndex >= 0 && itIndex < playerNames.Count)
+        if (_itValue != null)
         {
-            _itValue.text = playerNames[itIndex];
-        }
-        else
-        {
-            _itValue.text = "---";
+            _itValue.text = cmd.ItName ?? "---";
         }
     }
-    
-    // Score Board Methods
-    private void UpdateScoreBoard()
+
+    /// <summary>
+    /// スコアボード更新コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(UpdateScoreBoardCommand cmd)
     {
-        if (_scoreBoardContent == null || _gameManagerService == null) return;
-        
-        var playerNames = _gameManagerService.PlayerNames;
-        var playerScores = _gameManagerService.PlayerScores;
-        
+        if (_scoreBoardContent == null) return;
+
+        var playerNames = cmd.PlayerNames;
+        var playerScores = cmd.PlayerScores;
+
         if (playerNames == null || playerScores == null || playerNames.Count == 0)
         {
             _scoreBoardContent.text = "No scores available";
             return;
         }
-        
+
         // Create sorted score list
         var scoreEntries = playerNames
-            .Select((playerName, index) => new { 
-                Name = playerName, 
-                Score = index < playerScores.Count ? playerScores[index] : 0f 
+            .Select((playerName, index) => new {
+                Name = playerName,
+                Score = index < playerScores.Count ? playerScores[index] : 0f
             })
             .OrderBy(entry => entry.Score)
             .ToList();
-        
+
         // Build score text with simple string concatenation
         var scoreText = "";
         for (int i = 0; i < scoreEntries.Count; i++)
@@ -171,8 +159,25 @@ public class GameUIToolkit : MonoBehaviour
             if (i > 0) scoreText += "\n";
             scoreText += $"{i + 1}. {scoreEntries[i].Name}: {scoreEntries[i].Score:F1}";
         }
-        
+
         _scoreBoardContent.text = scoreText;
     }
-    
+
+    /// <summary>
+    /// ゲーム状態変更コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(GameStateChangedCommand cmd)
+    {
+        switch (cmd.NewState)
+        {
+            case 1: // Playing
+                ClearMessage();
+                break;
+            case 2: // Game Over
+                SetMessage("Game Over", MessageType.Info);
+                break;
+        }
+    }
+
 }

@@ -1,6 +1,8 @@
 using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
+using VitalRouter;
+using BioTag.Biometric;
 
 namespace ControlTask
 {
@@ -14,7 +16,9 @@ namespace ControlTask
         Feedback,         // フィードバック
         Rest              // 休憩
     }
-    public class ControlTaskManager : MonoBehaviour
+
+    [Routes]
+    public partial class ControlTaskManager : MonoBehaviour
     {
         public static ControlTaskManager Instance;
 
@@ -145,6 +149,9 @@ namespace ControlTask
         private ControlState _currentTrialTargetState; // 現在の試行の目標状態
         private int _trialScore; // 試行ごとのスコア
 
+        // 現在の生体状態 (BiometricStateChangedCommandから更新)
+        private BiometricState _currentBiometricState = BiometricState.Calm;
+
         /// <summary>
         /// 試行終了とログ記録
         /// </summary>
@@ -170,12 +177,25 @@ namespace ControlTask
                 InitializeSession();
             }
 
+            // VitalRouterのデフォルトルーターに登録
+            this.MapTo(Router.Default);
+
             UpdateTarget().Forget();
         }
 
         private void OnDestroy()
         {
             _dataLogger?.Dispose();
+            UnmapRoutes();
+        }
+
+        /// <summary>
+        /// 生体状態変化コマンドハンドラ
+        /// </summary>
+        [Route]
+        private void On(BiometricStateChangedCommand cmd)
+        {
+            _currentBiometricState = cmd.NewState;
         }
 
         /// <summary>
@@ -212,7 +232,12 @@ namespace ControlTask
             // 測定期間（Calmed or Excited）のみスコアをカウント
             if (TargetState.Value == ControlState.Calmed || TargetState.Value == ControlState.Excited)
             {
-                if (gsrGraph.IsExcited == (TargetState.Value == ControlState.Excited))
+                // BiometricStateと目標状態を比較 (ポーリング不要)
+                var targetBiometricState = TargetState.Value == ControlState.Excited
+                    ? BiometricState.Excited
+                    : BiometricState.Calm;
+
+                if (_currentBiometricState == targetBiometricState)
                 {
                     Score.Value += 1;
                     isCorrect = true;
@@ -226,7 +251,9 @@ namespace ControlTask
             if (enableLogging && _dataLogger != null &&
                 TargetState.Value is ControlState.Calmed or ControlState.Excited)
             {
-                var currentState = gsrGraph.IsExcited ? ControlState.Excited : ControlState.Calmed;
+                var currentState = _currentBiometricState == BiometricState.Excited
+                    ? ControlState.Excited
+                    : ControlState.Calmed;
                 var instantaneousScore = isCorrect ? 100 : 0;
 
                 _dataLogger.RecordTimeSeriesData(

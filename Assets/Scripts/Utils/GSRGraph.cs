@@ -2,9 +2,16 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Serialization;
+using VitalRouter;
+using BioTag.Biometric;
 
+/// <summary>
+/// GSRデータのグラフ表示と興奮状態判定
+/// VitalRouterでGsrDataReceivedCommandを受信してデータ追加
+/// </summary>
 [RequireComponent(typeof(UILineRenderer))]
-public class GsrGraph : MonoBehaviour
+[Routes]
+public partial class GsrGraph : MonoBehaviour
 {
     [SerializeField] private int dataLength = 500;
     [SerializeField] private float threshold = 5f;
@@ -19,17 +26,32 @@ public class GsrGraph : MonoBehaviour
     // 現在のGSR生値を取得
     public float CurrentGsrRaw { get; private set; } = 0f;
 
+    // 前回のIsExcited状態 (状態変化検知用)
+    private bool _previousIsExcited = false;
+
     private UILineRenderer _lr;
     private UILineRenderer _thresholdLine1;
     private UILineRenderer _thresholdLine2;
     private float _max = 10;
     private float _min = -10;
     private Vector3 _lastData = Vector3.zero;
-    private float _test = 0f;
 
     public void SetLineColor(Color c) => _lr.material.color = c;
     public Vector3 GetLastData() => _lastData;
-    public void AddData(float d)
+
+    /// <summary>
+    /// GSRデータ受信コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(GsrDataReceivedCommand cmd)
+    {
+        AddData(cmd.RawValue);
+    }
+
+    /// <summary>
+    /// GSRデータをグラフに追加
+    /// </summary>
+    private void AddData(float d)
     {
         d = Mathf.Clamp(d, 0f, 1024f);
         CurrentGsrRaw = d; // 生値を記録
@@ -44,7 +66,7 @@ public class GsrGraph : MonoBehaviour
     /// <summary>
     /// GSRデータの平均値を計算
     /// </summary>
-    public float GetMeanGsr()
+    private float GetMeanGsr()
     {
         if (data.Count == 0) return 0f;
         return data.Average(v => v.y);
@@ -111,6 +133,18 @@ public class GsrGraph : MonoBehaviour
         _thresholdLine2.points = new Vector2[2];
     }
 
+    private void OnEnable()
+    {
+        // VitalRouterのデフォルトルーターに登録
+        this.MapTo(Router.Default);
+    }
+
+    private void OnDisable()
+    {
+        // VitalRouterから登録解除
+        this.UnmapRoutes();
+    }
+
     private void Start()
     {
         data = new List<Vector2>(dataLength);
@@ -138,18 +172,22 @@ public class GsrGraph : MonoBehaviour
         IsExcited = CheckExcited(data.Select(v => v.y).ToList());
         _lr.material.color = IsExcited ? Color.red : Color.white;
 
+        // 状態変化を検知してCommandを発行
+        if (IsExcited != _previousIsExcited)
+        {
+            var newState = IsExcited ? BiometricState.Excited : BiometricState.Calm;
+            var previousState = _previousIsExcited ? BiometricState.Excited : BiometricState.Calm;
+            var intensity = CurrentGsrRaw;
+
+            Router.Default.PublishAsync(new BiometricStateChangedCommand(newState, previousState, intensity));
+
+            _previousIsExcited = IsExcited;
+        }
+
+        // 閾値の手動調整（デバッグ用）
         if (Input.GetKeyDown(KeyCode.Y))
             threshold -= 1f;
         else if (Input.GetKeyDown(KeyCode.U))
             threshold += 1f;
-
-        // if (TcpServer.Instance && TcpServer.Instance.IsConnected.CurrentValue)
-        // {
-        //     AddData(TcpServer.Instance.LastValue.CurrentValue);
-        // }
-        
-        // test
-        _test += 1 * Random.Range(0f, 1f) > 0.5f ? 1f : -1f;
-        AddData(_test);
     }
 }

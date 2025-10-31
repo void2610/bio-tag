@@ -1,13 +1,24 @@
 using UnityEngine;
+using VContainer.Unity;
+using VitalRouter;
+using BioTag.Biometric;
 
-public class GsrMock : MonoBehaviour
+/// <summary>
+/// GSRデータのモック生成サービス
+/// VContainerで管理され、毎フレームランダムなGSRデータを生成
+/// VitalRouterでGsrDataReceivedCommandを発行してGsrGraphにデータを送信
+/// </summary>
+public class GsrMock : ITickable
 {
-    [SerializeField] private GsrGraph gsrGraph;
-    private float _current = 0;
-    private void Update()
+    private float _current;
+
+    /// <summary>
+    /// 毎フレーム呼び出される (VContainer ITickable)
+    /// </summary>
+    public void Tick()
     {
-        //ランダムにGSRGraphに値を送る
-        gsrGraph.AddData(_current);
-        _current += Random.Range(-0.1f, 0.1f);
+        // ランダムにGSRデータを生成してCommandで送信
+        Router.Default.PublishAsync(new GsrDataReceivedCommand(_current));
+        _current += Random.Range(-0.5f, 0.5f);
     }
 }
