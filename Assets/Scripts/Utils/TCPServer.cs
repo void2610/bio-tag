@@ -6,14 +6,21 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using VContainer.Unity;
+using VitalRouter;
+using BioTag.Biometric;
 
-public sealed class TcpServer : MonoBehaviour
+/// <summary>
+/// TCPサーバーサービス (ポート10001)
+/// VContainerで管理され、外部センサーからGSRデータを受信
+/// VitalRouter Commandで配信、R3 Observableでも配信
+/// </summary>
+public sealed class TcpServer : IStartable, IDisposable
 {
-    public static TcpServer Instance { get; private set; }
     public Observable<int> OnReceive => _onReceive;       // 外部公開（Subscribe 可能）
     public ReadOnlyReactiveProperty<int> LastValue => _lastValue;
     public ReadOnlyReactiveProperty<bool> IsConnected => _isConnected;  // リアクティブに購読
-    
+
     private readonly Subject<int> _onReceive = new();      // 受信した int を流す
     private readonly ReactiveProperty<bool> _isConnected = new(false);
     private readonly ReactiveProperty<int> _lastValue = new(-1);
@@ -21,24 +28,21 @@ public sealed class TcpServer : MonoBehaviour
     // ────────── Lifecycle ──────────
     private CancellationTokenSource _cts;
 
-    private void Awake()
-    {
-        if (Instance == null) Instance = this;
-        else { Destroy(gameObject); return; }
-        DontDestroyOnLoad(gameObject);
-    }
-    
-    private void Start()
+    public void Start()
     {
         _cts = new CancellationTokenSource();
         // fire-and-forget で待ち受けループ開始
         ListenLoopAsync(_cts.Token).Forget();
     }
 
-    private void OnDestroy()
+    public void Dispose()
     {
         _cts?.Cancel();
+        _cts?.Dispose();
         _onReceive.OnCompleted();
+        _onReceive.Dispose();
+        _isConnected.Dispose();
+        _lastValue.Dispose();
     }
 
     // ────────── Core Logic ──────────
@@ -98,6 +102,9 @@ public sealed class TcpServer : MonoBehaviour
                 {
                     _lastValue.Value = v;               // 最新値を保持
                     _onReceive.OnNext(v);               // ストリームに流す
+
+                    // VitalRouter CommandでGSRデータを配信
+                    Router.Default.PublishAsync(new GsrDataReceivedCommand(v));
                 }
                 else
                 {

@@ -30,6 +30,10 @@ public class PlayerGameLifetimeScope : LifetimeScope
         // BiometricService (VitalRouter使用)
         builder.Register<BiometricService>(Lifetime.Singleton);
 
+        // GSRデータソース
+        // builder.Register<TcpServer>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+        builder.Register<GsrMock>(Lifetime.Singleton).AsImplementedInterfaces();
+
         // 設定値をコンテナに登録
         builder.RegisterInstance(gameConfig).As<GameConfig>();
         builder.RegisterInstance(playerNameUIPrefab).As<PlayerNameUI>();
