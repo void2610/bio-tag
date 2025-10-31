@@ -32,7 +32,6 @@ public partial class NPCGameManagerService : IGameManagerService
     public bool EnableLogging { get; set; } = true;
     public string ParticipantID { get; set; } = "P001";
     public string ExperimentGroup { get; set; } = "BfHuman";
-    public string TestType { get; set; } = "Game";
 
     [Inject]
     public NPCGameManagerService(GameConfig gameConfig)
@@ -82,7 +81,6 @@ public partial class NPCGameManagerService : IGameManagerService
         {
             participantID = ParticipantID,
             experimentGroup = ExperimentGroup,
-            testType = TestType,
             gameMode = GameMode.PlayerVsNPC,
             playerCount = 1,
             npcCount = _gameConfig.npcCount,

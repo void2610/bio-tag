@@ -29,7 +29,7 @@ namespace TagGame
             _sessionInfo.datetime = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
 
             // セッション名を生成
-            var sessionName = $"{sessionInfo.participantID}_{sessionInfo.gameMode}_{sessionInfo.testType}";
+            var sessionName = $"{sessionInfo.participantID}_{sessionInfo.gameMode}";
 
             // ExperimentSessionを作成
             _session = new ExperimentSession(sessionName);
