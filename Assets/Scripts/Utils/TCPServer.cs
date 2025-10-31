@@ -17,33 +17,7 @@ using BioTag.Biometric;
 /// </summary>
 public sealed class TcpServer : IStartable, IDisposable
 {
-    public Observable<int> OnReceive => _onReceive;       // 外部公開（Subscribe 可能）
-    public ReadOnlyReactiveProperty<int> LastValue => _lastValue;
-    public ReadOnlyReactiveProperty<bool> IsConnected => _isConnected;  // リアクティブに購読
-
-    private readonly Subject<int> _onReceive = new();      // 受信した int を流す
-    private readonly ReactiveProperty<bool> _isConnected = new(false);
-    private readonly ReactiveProperty<int> _lastValue = new(-1);
-
-    // ────────── Lifecycle ──────────
     private CancellationTokenSource _cts;
-
-    public void Start()
-    {
-        _cts = new CancellationTokenSource();
-        // fire-and-forget で待ち受けループ開始
-        ListenLoopAsync(_cts.Token).Forget();
-    }
-
-    public void Dispose()
-    {
-        _cts?.Cancel();
-        _cts?.Dispose();
-        _onReceive.OnCompleted();
-        _onReceive.Dispose();
-        _isConnected.Dispose();
-        _lastValue.Dispose();
-    }
 
     // ────────── Core Logic ──────────
     /// <summary>TCPListener を立ててクライアント接続を待ち受けるループ</summary>
@@ -64,7 +38,6 @@ public sealed class TcpServer : IStartable, IDisposable
                     .AsUniTask()                     // UniTask<TcpClient>
                     .AttachExternalCancellation(token);
                 
-                _isConnected.Value = true;         // 接続
                 Debug.Log($"クライアント接続: {client.Client.RemoteEndPoint}");
 
                 // 別タスクで受信処理（切断時に自動終了）
@@ -79,7 +52,6 @@ public sealed class TcpServer : IStartable, IDisposable
         finally
         {
             listener.Stop();
-            _isConnected.Value = false;        // 切断
             Debug.Log("TCP サーバー停止");
         }
     }
@@ -100,11 +72,8 @@ public sealed class TcpServer : IStartable, IDisposable
                 var msg = Encoding.UTF8.GetString(buffer, 0, n);
                 if (int.TryParse(msg, out var v))
                 {
-                    _lastValue.Value = v;               // 最新値を保持
-                    _onReceive.OnNext(v);               // ストリームに流す
-
                     // VitalRouter CommandでGSRデータを配信
-                    Router.Default.PublishAsync(new GsrDataReceivedCommand(v));
+                    await Router.Default.PublishAsync(new GsrDataReceivedCommand(v));
                 }
                 else
                 {
@@ -122,5 +91,18 @@ public sealed class TcpServer : IStartable, IDisposable
             client.Close();
             Debug.Log("クライアント切断");
         }
+    }
+
+    public void Start()
+    {
+        _cts = new CancellationTokenSource();
+        // fire-and-forget で待ち受けループ開始
+        ListenLoopAsync(_cts.Token).Forget();
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
     }
 }
