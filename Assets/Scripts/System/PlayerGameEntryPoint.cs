@@ -142,22 +142,7 @@ public class PlayerGameEntryPoint : IStartable, ITickable
                     _gameManager.SetGameState(2);
                 }
 
-                // プレーヤー間距離をUDPで送信（元の実装を維持）
-                SendPlayerDistance();
                 break;
-        }
-    }
-    
-    private void SendPlayerDistance()
-    {
-        var players = _playerSpawn.SpawnedPlayers;
-        if (players.Count >= 2)
-        {
-            var distance = Vector3.Distance(
-                players[0].transform.position,
-                players[1].transform.position
-            );
-            UDP.instance.SendData(distance);
         }
     }
 }
