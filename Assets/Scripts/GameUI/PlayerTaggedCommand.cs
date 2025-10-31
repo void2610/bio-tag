@@ -1,3 +1,4 @@
+using UnityEngine;
 using VitalRouter;
 
 namespace BioTag.GameUI
@@ -9,10 +10,12 @@ namespace BioTag.GameUI
     public readonly struct PlayerTaggedCommand : ICommand
     {
         public readonly int TaggedPlayerIndex;
+        public readonly Transform TaggedPlayerTransform;
 
-        public PlayerTaggedCommand(int taggedPlayerIndex)
+        public PlayerTaggedCommand(int taggedPlayerIndex, Transform taggedPlayerTransform)
         {
             TaggedPlayerIndex = taggedPlayerIndex;
+            TaggedPlayerTransform = taggedPlayerTransform;
         }
     }
 }

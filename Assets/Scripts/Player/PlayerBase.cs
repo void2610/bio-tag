@@ -100,7 +100,7 @@ public class PlayerBase : MonoBehaviour
 
         // VContainerからゲーム状態を取得してItエフェクトを制御
         var isGamePlaying = Gm?.GameState == 1;
-        var isIt = this.Index == Gm?.ItIndex;
+        var isIt = this.Index == Gm?.CurrentItIndex;
         
         if (isIt && isGamePlaying)
         {

@@ -66,7 +66,7 @@ public class Npc : MonoBehaviour
     {
         // VContainerからゲーム状態を取得
         var isGamePlaying = _gameManager?.GameState == 1;
-        var currentItIndex = _gameManager?.ItIndex ?? -1;
+        var currentItIndex = _gameManager?.CurrentItIndex ?? -1;
         
         Agent.isStopped = !_isMovable;
         if (_target && isGamePlaying && _isMovable)
@@ -222,9 +222,10 @@ public class Npc : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player") || _index == _gameManager?.ItIndex) return;
+        if (!other.CompareTag("Player") || _index == _gameManager?.CurrentItIndex) return;
 
-        Router.Default.PublishAsync(new PlayerTaggedCommand(_index));
+        // 自分自身のTransformを含めてCommandを発行
+        Router.Default.PublishAsync(new PlayerTaggedCommand(_index, transform));
         Wait(1f).Forget();
     }
     

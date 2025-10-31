@@ -114,10 +114,11 @@ public partial class GameUIToolkit : MonoBehaviour
     }
 
     /// <summary>
-    /// "It"プレイヤー更新コマンドハンドラ
+    /// "It"プレイヤー変更コマンドハンドラ
+    /// 鬼プレイヤーが変更されたらUI表示を更新
     /// </summary>
     [Route]
-    private void On(UpdateItPlayerCommand cmd)
+    private void On(ItChangedCommand cmd)
     {
         if (_itValue != null)
         {

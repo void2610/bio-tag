@@ -4,50 +4,52 @@ using VContainer;
 using VitalRouter;
 using BioTag.GameUI;
 
+/// <summary>
+/// WithPlayerシーン用ゲームマネージャーサービス
+/// VitalRouter Commandでゲーム状態の変化を通知
+/// </summary>
 [Routes]
 public partial class PlayerGameManagerService : IGameManagerService
 {
     public int? GameState { get; private set; } = 0;
-    public int ItIndex { get; private set; }
+    public int CurrentItIndex { get; private set; }
     public float LastTagTime { get; private set; }
     public List<float> PlayerScores { get; private set; } = new ();
     public List<string> PlayerNames { get; private set; } = new ();
-    
-    public event System.Action<int> OnGameStateChanged;
-    public event System.Action<int> OnItChanged;
-    
+
     private float _startTime;
     private readonly GameConfig _gameConfig;
-    
+
     [Inject]
     public PlayerGameManagerService(GameConfig gameConfig)
     {
         _gameConfig = gameConfig;
     }
-    
+
     public void StartGame()
     {
         SetGameState(1);
-        ItIndex = Random.Range(0, 2);
+        CurrentItIndex = Random.Range(0, 2);
         _startTime = Time.time;
-        OnItChanged?.Invoke(ItIndex);
 
-        // "It"プレイヤー更新Commandを発行
-        var itName = ItIndex >= 0 && ItIndex < PlayerNames.Count ? PlayerNames[ItIndex] : "---";
-        Router.Default.PublishAsync(new UpdateItPlayerCommand(ItIndex, itName));
+        // "It"プレイヤー更新Commandを発行（Transform無し - ゲーム開始時）
+        var itName = CurrentItIndex >= 0 && CurrentItIndex < PlayerNames.Count ? PlayerNames[CurrentItIndex] : "---";
+        Router.Default.PublishAsync(new ItChangedCommand(CurrentItIndex, itName, null));
     }
-    
-    public void ChangeIt(int index)
-    {
-        if (Time.time - LastTagTime > 1 && ItIndex != index && GameState == 1)
-        {
-            ItIndex = index;
-            LastTagTime = Time.time;
-            OnItChanged?.Invoke(ItIndex);
 
-            // "It"プレイヤー更新Commandを発行
-            var itName = ItIndex >= 0 && ItIndex < PlayerNames.Count ? PlayerNames[ItIndex] : "---";
-            Router.Default.PublishAsync(new UpdateItPlayerCommand(ItIndex, itName));
+    /// <summary>
+    /// "It"プレイヤー変更（Transformあり）
+    /// </summary>
+    public void ChangeIt(int index, Transform targetTransform)
+    {
+        if (Time.time - LastTagTime > 1 && CurrentItIndex != index && GameState == 1)
+        {
+            CurrentItIndex = index;
+            LastTagTime = Time.time;
+
+            // "It"プレイヤー変更Commandを発行
+            var itName = CurrentItIndex >= 0 && CurrentItIndex < PlayerNames.Count ? PlayerNames[CurrentItIndex] : "---";
+            Router.Default.PublishAsync(new ItChangedCommand(CurrentItIndex, itName, targetTransform));
         }
     }
     
@@ -57,7 +59,6 @@ public partial class PlayerGameManagerService : IGameManagerService
         {
             var previousState = GameState;
             GameState = state;
-            OnGameStateChanged?.Invoke(state);
 
             // ゲーム状態変更Commandを発行
             Router.Default.PublishAsync(new GameStateChangedCommand(state, previousState));
@@ -86,6 +87,6 @@ public partial class PlayerGameManagerService : IGameManagerService
     [Route]
     private void On(PlayerTaggedCommand cmd)
     {
-        ChangeIt(cmd.TaggedPlayerIndex);
+        ChangeIt(cmd.TaggedPlayerIndex, cmd.TaggedPlayerTransform);
     }
 }
