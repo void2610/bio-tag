@@ -36,6 +36,12 @@ public class PlayerGameEntryPoint : IStartable, ITickable
 
     public void Start()
     {
+        // GameManagerにPlayerSpawnServiceを設定
+        if (_gameManager is PlayerGameManagerService playerGameManager)
+        {
+            playerGameManager.SetPlayerSpawnService(_playerSpawn);
+        }
+
         InitializeGame();
 
         if (Display.displays.Length > 1) Display.displays[1].Activate();

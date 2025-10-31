@@ -3,6 +3,7 @@ using UnityEngine;
 using VContainer;
 using VitalRouter;
 using BioTag.GameUI;
+using BioTag.Biometric;
 using TagGame;
 
 /// <summary>
@@ -22,6 +23,10 @@ public partial class NPCGameManagerService : IGameManagerService
     private readonly GameConfig _gameConfig;
     private TagGameDataLogger _dataLogger;
     private IPlayerSpawnService _playerSpawnService;
+
+    // GSRデータ（VitalRouterで更新）
+    private float _currentGsrRaw = 0f;
+    private bool _isExcited = false;
 
     // ログ設定
     public bool EnableLogging { get; set; } = true;
@@ -189,21 +194,37 @@ public partial class NPCGameManagerService : IGameManagerService
     }
 
     /// <summary>
-    /// GSR値を取得（TODO: GsrGraphから取得）
+    /// GSR値を取得
     /// </summary>
     private float GetGsrValue()
     {
-        // TODO: GsrGraph.Instance?.CurrentGsrRaw ?? 0f;
-        return 0f;
+        return _currentGsrRaw;
     }
 
     /// <summary>
-    /// 興奮状態を取得（TODO: GsrGraphから取得）
+    /// 興奮状態を取得
     /// </summary>
     private bool GetIsExcited()
     {
-        // TODO: GsrGraph.Instance?.IsExcited ?? false;
-        return false;
+        return _isExcited;
+    }
+
+    /// <summary>
+    /// GSRデータ受信コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(GsrDataReceivedCommand cmd)
+    {
+        _currentGsrRaw = cmd.RawValue;
+    }
+
+    /// <summary>
+    /// 生体状態変化コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(BiometricStateChangedCommand cmd)
+    {
+        _isExcited = cmd.NewState == BiometricState.Excited;
     }
 
     /// <summary>

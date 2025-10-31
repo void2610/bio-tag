@@ -36,6 +36,12 @@ public class NpcGameEntryPoint : IStartable, ITickable
 
     public void Start()
     {
+        // GameManagerにPlayerSpawnServiceを設定
+        if (_gameManager is NPCGameManagerService npcGameManager)
+        {
+            npcGameManager.SetPlayerSpawnService(_playerSpawn);
+        }
+
         InitializeGame();
     }
 
