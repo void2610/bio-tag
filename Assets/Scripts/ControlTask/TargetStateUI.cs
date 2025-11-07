@@ -1,21 +1,20 @@
 using TMPro;
-using R3;
 using UnityEngine;
 
 namespace ControlTask
 {
+    /// <summary>
+    /// 目標状態表示UI - 単純なUIコンポーネント
+    /// </summary>
     [RequireComponent(typeof(TextMeshProUGUI))]
     public class TargetStateUI : MonoBehaviour
     {
         private TextMeshProUGUI _text;
-        private void Start()
+
+        public void SetState(ControlState state)
         {
-            _text = this.GetComponent<TextMeshProUGUI>();
-            ControlTaskManager.Instance.TargetState.Subscribe((state) =>
-            {
-                _text.text = GetJapaneseStateName(state);
-                _text.color = state == ControlState.Excited ? Color.red : Color.white;
-            }).AddTo(this);
+            _text.text = GetJapaneseStateName(state);
+            _text.color = state == ControlState.Excited ? Color.red : Color.white;
         }
     
         private string GetJapaneseStateName(ControlState state)
@@ -31,6 +30,11 @@ namespace ControlTask
                 ControlState.Rest => "休憩中",
                 _ => ""
             };
+        }
+        
+        private void Awake()
+        {
+            _text = this.GetComponent<TextMeshProUGUI>();
         }
     }
 }

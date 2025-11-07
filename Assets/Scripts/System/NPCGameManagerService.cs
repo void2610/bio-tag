@@ -3,6 +3,8 @@ using UnityEngine;
 using VContainer;
 using VitalRouter;
 using BioTag.GameUI;
+using BioTag.Biometric;
+using TagGame;
 
 /// <summary>
 /// WithNPCシーン用ゲームマネージャーサービス
@@ -19,11 +21,30 @@ public partial class NPCGameManagerService : IGameManagerService
 
     private float _startTime;
     private readonly GameConfig _gameConfig;
+    private TagGameDataLogger _dataLogger;
+    private IPlayerSpawnService _playerSpawnService;
+
+    // GSRデータ（VitalRouterで更新）
+    private float _currentGsrRaw = 0f;
+    private bool _isExcited = false;
+
+    // ログ設定
+    public bool EnableLogging { get; set; } = true;
+    public string ParticipantID { get; set; } = "P001";
+    public string ExperimentGroup { get; set; } = "BfHuman";
 
     [Inject]
     public NPCGameManagerService(GameConfig gameConfig)
     {
         _gameConfig = gameConfig;
+    }
+
+    /// <summary>
+    /// IPlayerSpawnServiceを設定（プレイヤー位置取得用）
+    /// </summary>
+    public void SetPlayerSpawnService(IPlayerSpawnService playerSpawnService)
+    {
+        _playerSpawnService = playerSpawnService;
     }
 
     public void StartGame()
@@ -40,6 +61,35 @@ public partial class NPCGameManagerService : IGameManagerService
         // "It"プレイヤー更新Commandを発行（Transform無し - ゲーム開始時）
         var itName = CurrentItIndex >= 0 && CurrentItIndex < PlayerNames.Count ? PlayerNames[CurrentItIndex] : "---";
         Router.Default.PublishAsync(new ItChangedCommand(CurrentItIndex, itName, null));
+
+        // ログ記録開始
+        if (EnableLogging)
+        {
+            InitializeLogger();
+            _dataLogger.RecordGameStart(CurrentItIndex, GetPlayerPositions());
+        }
+    }
+
+    /// <summary>
+    /// ロガーを初期化
+    /// </summary>
+    private void InitializeLogger()
+    {
+        _dataLogger = new TagGameDataLogger();
+
+        var sessionInfo = new TagGameSessionInfo
+        {
+            participantID = ParticipantID,
+            experimentGroup = ExperimentGroup,
+            gameMode = GameMode.PlayerVsNPC,
+            playerCount = 1,
+            npcCount = _gameConfig.npcCount,
+            gameLengthSeconds = _gameConfig.gameLength,
+            roomTemperature = 23.5f,
+            roomHumidity = 45.0f
+        };
+
+        _dataLogger.StartSession(sessionInfo);
     }
 
     /// <summary>
@@ -48,13 +98,19 @@ public partial class NPCGameManagerService : IGameManagerService
     public void ChangeIt(int index, Transform targetTransform)
     {
         if (!(Time.time - LastTagTime > 1) || CurrentItIndex == index || GameState != 1) return;
-        
+
         CurrentItIndex = index;
         LastTagTime = Time.time;
 
         // "It"プレイヤー変更Commandを発行
         var itName = CurrentItIndex >= 0 && CurrentItIndex < PlayerNames.Count ? PlayerNames[CurrentItIndex] : "---";
         Router.Default.PublishAsync(new ItChangedCommand(CurrentItIndex, itName, targetTransform));
+
+        // 鬼交代をログ記録
+        if (EnableLogging && _dataLogger != null)
+        {
+            _dataLogger.RecordItChange(CurrentItIndex, GetPlayerPositions(), GetGsrValue(), GetIsExcited());
+        }
     }
     
     public void SetGameState(int state)
@@ -87,6 +143,86 @@ public partial class NPCGameManagerService : IGameManagerService
     public float GetElapsedTime()
     {
         return Time.time - _startTime;
+    }
+
+    /// <summary>
+    /// ゲーム状態の定期記録（Update()から呼び出す想定）
+    /// </summary>
+    public void UpdateLogging()
+    {
+        if (EnableLogging && _dataLogger != null && GameState == 1)
+        {
+            // 1秒ごとに記録（フレームレート非依存）
+            if (Time.frameCount % 60 == 0)
+            {
+                _dataLogger.RecordGameTick(CurrentItIndex, GetPlayerPositions(), GetGsrValue(), GetIsExcited());
+            }
+        }
+    }
+
+    /// <summary>
+    /// ゲーム終了処理
+    /// </summary>
+    public void EndGame()
+    {
+        if (EnableLogging && _dataLogger != null)
+        {
+            _dataLogger.RecordGameEnd(PlayerNames, PlayerScores, GetPlayerPositions());
+            _dataLogger.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// プレイヤー位置を取得
+    /// </summary>
+    private List<Vector3> GetPlayerPositions()
+    {
+        var positions = new List<Vector3>();
+
+        if (_playerSpawnService?.SpawnedPlayers != null)
+        {
+            foreach (var player in _playerSpawnService.SpawnedPlayers)
+            {
+                if (player != null)
+                    positions.Add(player.transform.position);
+            }
+        }
+
+        return positions;
+    }
+
+    /// <summary>
+    /// GSR値を取得
+    /// </summary>
+    private float GetGsrValue()
+    {
+        return _currentGsrRaw;
+    }
+
+    /// <summary>
+    /// 興奮状態を取得
+    /// </summary>
+    private bool GetIsExcited()
+    {
+        return _isExcited;
+    }
+
+    /// <summary>
+    /// GSRデータ受信コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(GsrDataReceivedCommand cmd)
+    {
+        _currentGsrRaw = cmd.RawValue;
+    }
+
+    /// <summary>
+    /// 生体状態変化コマンドハンドラ
+    /// </summary>
+    [Route]
+    private void On(BiometricStateChangedCommand cmd)
+    {
+        _isExcited = cmd.NewState == BiometricState.Excited;
     }
 
     /// <summary>

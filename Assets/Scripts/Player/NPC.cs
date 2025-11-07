@@ -3,10 +3,8 @@ using UnityEngine.AI;
 using UnityEngine.VFX;
 using System.Collections.Generic;
 using DG.Tweening;
-using VContainer;
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using R3;
 using System;
 using VitalRouter;
 using BioTag.Audio;
@@ -23,13 +21,13 @@ public class Npc : MonoBehaviour
     private bool _isMovable = true;
     private VisualEffect _itEffect;
     private Transform _target;
-    private bool _isJumping = false;
-    private Transform _currentFleeTarget = null;
+    private bool _isJumping;
+    private Transform _currentFleeTarget;
     private IGameManagerService _gameManager;
-    private float _onLandTime = 0f;
+    private float _onLandTime;
     
     private const float FLEE_RECALCULATION_INTERVAL = 0.25f;
-    private readonly ReactiveProperty<bool> _shouldRecalculateFlee = new(true);
+    private bool _shouldRecalculateFlee = true;
     private CancellationTokenSource _fleeRecalculationCts;
     private Vector3 _lastPlayerPosition;
 
@@ -144,7 +142,7 @@ public class Npc : MonoBehaviour
         while (!token.IsCancellationRequested)
         {
             await UniTask.Delay(TimeSpan.FromSeconds(FLEE_RECALCULATION_INTERVAL), cancellationToken: token);
-            _shouldRecalculateFlee.Value = true;
+            _shouldRecalculateFlee = true;
         }
     }
     
@@ -155,7 +153,7 @@ public class Npc : MonoBehaviour
         
         // 一定時間ごとに逃げる目標を再計算、またはまだ計算していない場合
         var shouldRecalculate = !_currentFleeTarget || 
-                                _shouldRecalculateFlee.Value ||
+                                _shouldRecalculateFlee ||
                                 (Agent.hasPath && Agent.remainingDistance < 1f);
         
         if (shouldRecalculate)
@@ -207,7 +205,7 @@ public class Npc : MonoBehaviour
             if (bestFleeTarget)
             {
                 _currentFleeTarget = bestFleeTarget;
-                _shouldRecalculateFlee.Value = false;
+                _shouldRecalculateFlee = false;
                 Agent.speed = moveSpeed;
                 Agent.SetDestination(bestFleeTarget.position);
             }
@@ -233,7 +231,6 @@ public class Npc : MonoBehaviour
     {
         _fleeRecalculationCts?.Cancel();
         _fleeRecalculationCts?.Dispose();
-        _shouldRecalculateFlee?.Dispose();
     }
     
     protected void OnFootstep(AnimationEvent animationEvent)

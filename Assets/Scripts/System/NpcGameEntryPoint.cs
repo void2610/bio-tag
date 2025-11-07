@@ -36,6 +36,12 @@ public class NpcGameEntryPoint : IStartable, ITickable
 
     public void Start()
     {
+        // GameManagerにPlayerSpawnServiceを設定
+        if (_gameManager is NPCGameManagerService npcGameManager)
+        {
+            npcGameManager.SetPlayerSpawnService(_playerSpawn);
+        }
+
         InitializeGame();
     }
 
@@ -132,28 +138,17 @@ public class NpcGameEntryPoint : IStartable, ITickable
                     _gameManager.PlayerScores
                 ));
 
+                // ログ記録を更新
+                _gameManager.UpdateLogging();
+
                 // ゲーム終了判定
                 if (_gameManager.GetElapsedTime() >= _gameConfig.gameLength)
                 {
+                    _gameManager.EndGame();
                     _gameManager.SetGameState(2);
                 }
 
-                // プレーヤー間距離をUDPで送信（元の実装を維持）
-                SendPlayerDistance();
                 break;
-        }
-    }
-    
-    private void SendPlayerDistance()
-    {
-        var players = _playerSpawn.SpawnedPlayers;
-        if (players.Count >= 2)
-        {
-            var distance = Vector3.Distance(
-                players[0].transform.position,
-                players[1].transform.position
-            );
-            UDP.instance.SendData(distance);
         }
     }
 }

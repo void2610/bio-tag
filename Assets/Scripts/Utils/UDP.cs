@@ -44,14 +44,6 @@ public class UDP : MonoBehaviour
         udp.BeginReceive(new AsyncCallback(ReceiveCallback), null);
     }
 
-    // 追加: 数値を送信するメソッド
-    public void SendData(float value)
-    {
-        var message = value.ToString();
-        var data = Encoding.UTF8.GetBytes(message);
-        udp.Send(data, data.Length, REMOTE_IP, REMOTE_PORT);
-    }
-
     // 非同期受信のコールバック
     private void ReceiveCallback(IAsyncResult ar)
     {
