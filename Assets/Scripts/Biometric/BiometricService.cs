@@ -133,10 +133,10 @@ namespace BioTag.Biometric
         /// </summary>
         private PlayerBase GetMainPlayer()
         {
-            if (_playerSpawn?.SpawnedPlayers != null && _playerSpawn.SpawnedPlayers.Count > 0)
+            if (_playerSpawn?.SpawnedPlayers is { Count: > 0 })
             {
                 var playerObj = _playerSpawn.SpawnedPlayers[0];
-                if (playerObj != null)
+                if (playerObj)
                 {
                     return playerObj.GetComponent<PlayerBase>();
                 }
