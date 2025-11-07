@@ -15,6 +15,7 @@ namespace ControlTask
         private readonly ControlTaskPresenter _presenter;
         private readonly IControlTaskService _service;
         private readonly CameraEffectService _cameraEffect;
+        private readonly TcpServer _tcpServer; // Optional: GsrMock使用時はnull
 
         // 実験設定（LifetimeScopeから注入）
         private readonly string _participantId;
@@ -26,12 +27,16 @@ namespace ControlTask
         private readonly float _minGsr;
         private readonly float _maxGsr;
 
+        // 実験開始フラグ
+        private bool _experimentStarted = false;
+
         [Inject]
         public ControlTaskEntryPoint(
             ControlTaskModel model,
             ControlTaskPresenter presenter,
             IControlTaskService service,
             CameraEffectService cameraEffect,
+            IObjectResolver resolver,
             string participantId,
             ExperimentGroup experimentGroup,
             TestType testType,
@@ -45,6 +50,10 @@ namespace ControlTask
             _presenter = presenter;
             _service = service;
             _cameraEffect = cameraEffect;
+
+            // TcpServerをOptionalに解決（GsrMock使用時はnull）
+            resolver.TryResolve<TcpServer>(out _tcpServer);
+
             _participantId = participantId;
             _experimentGroup = experimentGroup;
             _testType = testType;
@@ -62,6 +71,26 @@ namespace ControlTask
 
             // カメラエフェクトサービスを初期化
             _cameraEffect.Initialize(Camera.main);
+
+            // TcpServer使用時は接続待機、GsrMock時は即座に開始
+            if (_tcpServer != null)
+            {
+                Debug.Log("[ControlTaskEntryPoint] TcpServer接続待機中...");
+            }
+            else
+            {
+                Debug.Log("[ControlTaskEntryPoint] GsrMock使用 - 即座に実験開始");
+                StartExperimentFlow();
+            }
+        }
+
+        /// <summary>
+        /// 実験フローを開始
+        /// </summary>
+        private void StartExperimentFlow()
+        {
+            if (_experimentStarted) return;
+            _experimentStarted = true;
 
             // セッション情報を生成
             var sessionInfo = new SessionInfo
@@ -94,8 +123,23 @@ namespace ControlTask
 
         public void Tick()
         {
-            _presenter.UpdateTime(Time.deltaTime);
-            _presenter.UpdateScoring();
+            // TcpServer使用時は接続確認後に実験開始
+            if (!_experimentStarted && _tcpServer != null)
+            {
+                if (_tcpServer.IsConnected)
+                {
+                    Debug.Log("[ControlTaskEntryPoint] TcpServer接続完了 - 実験開始");
+                    StartExperimentFlow();
+                }
+                return; // 接続待機中はUpdateを実行しない
+            }
+
+            // 実験開始後の通常更新
+            if (_experimentStarted)
+            {
+                _presenter.UpdateTime(Time.deltaTime);
+                _presenter.UpdateScoring();
+            }
         }
     }
 }

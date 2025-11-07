@@ -31,6 +31,8 @@ public class ControlTaskLifetimeScope : LifetimeScope
         // ExperimentConfigをインスタンス登録
         builder.RegisterInstance(experimentConfig);
 
+        // Note: GSRデータソース(TcpServer/GsrMock)とBiometricServiceはRootLifetimeScopeで管理
+
         // Model (ExperimentConfigから設定を注入)
         builder.Register<ControlTaskModel>(Lifetime.Singleton).AsSelf();
 

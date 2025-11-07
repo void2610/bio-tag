@@ -18,6 +18,9 @@ public sealed class TcpServer : IStartable, IDisposable
 {
     private CancellationTokenSource _cts;
 
+    /// <summary>クライアントが接続中かどうか</summary>
+    public bool IsConnected { get; private set; } = false;
+
     // ────────── Core Logic ──────────
     /// <summary>TCPListener を立ててクライアント接続を待ち受けるループ</summary>
     private async UniTaskVoid ListenLoopAsync(CancellationToken token)
@@ -61,6 +64,9 @@ public sealed class TcpServer : IStartable, IDisposable
         await using var stream = client.GetStream();
         var buffer = new byte[512];
 
+        // クライアント接続時に状態を更新
+        IsConnected = true;
+
         try
         {
             while (!token.IsCancellationRequested && client.Connected)
@@ -87,6 +93,7 @@ public sealed class TcpServer : IStartable, IDisposable
         }
         finally
         {
+            IsConnected = false;
             client.Close();
             Debug.Log("クライアント切断");
         }
