@@ -23,7 +23,8 @@ namespace ControlTask
         /// <summary>
         /// 時系列データを記録
         /// </summary>
-        void RecordTimeSeriesData(float gsrRaw, ControlState targetState, ControlState currentState,
+        void RecordTimeSeriesData(float gsrRaw, float gsrFiltered, float gsrDerivative, float gsrThreshold,
+                                 ControlState targetState, ControlState currentState,
                                  int instantaneousScore, int cumulativeScore);
 
         /// <summary>

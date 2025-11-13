@@ -63,7 +63,8 @@ namespace ControlTask
         /// <summary>
         /// 時系列データを記録
         /// </summary>
-        public void RecordTimeSeriesData(float gsrRaw, ControlState targetState, ControlState currentState,
+        public void RecordTimeSeriesData(float gsrRaw, float gsrFiltered, float gsrDerivative, float gsrThreshold,
+                                        ControlState targetState, ControlState currentState,
                                         int instantaneousScore, int cumulativeScore)
         {
             if (!EnableLogging) return;
@@ -77,6 +78,9 @@ namespace ControlTask
                 TrialNumber = _currentTrialNumber,
                 TimestampMS = timestamp,
                 GsrRaw = gsrRaw,
+                GsrFiltered = gsrFiltered,
+                GsrDerivative = gsrDerivative,
+                GsrThreshold = gsrThreshold,
                 TargetValue = targetState.ToString(),
                 CurrentState = currentState.ToString(),
                 InstantaneousScore = instantaneousScore,

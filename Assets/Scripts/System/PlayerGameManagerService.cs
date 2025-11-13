@@ -23,6 +23,7 @@ public partial class PlayerGameManagerService : IGameManagerService
     private readonly GameConfig _gameConfig;
     private TagGameDataLogger _dataLogger;
     private IPlayerSpawnService _playerSpawnService;
+    private GsrGraph _gsrGraph;
 
     // GSRデータ（VitalRouterで更新）
     private float _currentGsrRaw = 0f;
@@ -35,9 +36,10 @@ public partial class PlayerGameManagerService : IGameManagerService
     public string TestType { get; set; } = "Pre";
 
     [Inject]
-    public PlayerGameManagerService(GameConfig gameConfig)
+    public PlayerGameManagerService(GameConfig gameConfig, GsrGraph gsrGraph)
     {
         _gameConfig = gameConfig;
+        _gsrGraph = gsrGraph;
     }
 
     /// <summary>
@@ -105,7 +107,10 @@ public partial class PlayerGameManagerService : IGameManagerService
             // 鬼交代をログ記録
             if (EnableLogging && _dataLogger != null)
             {
-                _dataLogger.RecordItChange(CurrentItIndex, GetPlayerPositions(), GetGsrValue(), GetIsExcited());
+                _dataLogger.RecordItChange(CurrentItIndex, GetPlayerPositions(),
+                    _gsrGraph.CurrentGsrRaw, _gsrGraph.CurrentGsrFiltered,
+                    _gsrGraph.CurrentGsrDerivative, _gsrGraph.CurrentThreshold,
+                    GetIsExcited());
             }
         }
     }
@@ -148,7 +153,10 @@ public partial class PlayerGameManagerService : IGameManagerService
             // 1秒ごとに記録（フレームレート非依存）
             if (Time.frameCount % 60 == 0)
             {
-                _dataLogger.RecordGameTick(CurrentItIndex, GetPlayerPositions(), GetGsrValue(), GetIsExcited());
+                _dataLogger.RecordGameTick(CurrentItIndex, GetPlayerPositions(),
+                    _gsrGraph.CurrentGsrRaw, _gsrGraph.CurrentGsrFiltered,
+                    _gsrGraph.CurrentGsrDerivative, _gsrGraph.CurrentThreshold,
+                    GetIsExcited());
             }
         }
     }

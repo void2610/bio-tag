@@ -13,6 +13,7 @@ using BioTag.Biometric;
 [Routes]
 public partial class GsrGraph : MonoBehaviour
 {
+    [SerializeField] private int filterWindowSize = 10;
     [SerializeField] private int dataLength = 500;
     [SerializeField] private float threshold = 5f;
     [SerializeField] private float thresholdMagni = 1.5f;
@@ -20,15 +21,20 @@ public partial class GsrGraph : MonoBehaviour
     [SerializeField] private float v1 = 580f;
     [SerializeField] private float v2 = 200f;
     [SerializeField] private Material lineMaterial;
-    public bool IsExcited { get; private set; } = false;
+    public bool IsExcited { get; private set; }
     public List<Vector2> data = new ();
 
     // 現在のGSR生値を取得
-    public float CurrentGsrRaw { get; private set; } = 0f;
-
-    // 前回のIsExcited状態 (状態変化検知用)
-    private bool _previousIsExcited = false;
-
+    public float CurrentGsrRaw { get; private set; }
+    // 現在のGSRフィルタ済み値（移動平均）
+    public float CurrentGsrFiltered { get; private set; }
+    // 現在のGSR微分値 dG(t)/dt
+    public float CurrentGsrDerivative { get; private set; }
+    // 現在の閾値θ
+    public float CurrentThreshold => threshold;
+    
+    private bool _previousIsExcited;
+    private float _previousGsrRaw;
     private UILineRenderer _lr;
     private UILineRenderer _thresholdLine1;
     private UILineRenderer _thresholdLine2;
@@ -54,13 +60,38 @@ public partial class GsrGraph : MonoBehaviour
     private void AddData(float d)
     {
         d = Mathf.Clamp(d, 0f, 1024f);
+
+        // 微分値を計算（前回値との差分）
+        CurrentGsrDerivative = d - _previousGsrRaw;
+        _previousGsrRaw = d;
+
         CurrentGsrRaw = d; // 生値を記録
         // Debug.Log(d);
 
         for (var i = 0; i < dataLength - 1; i++)
             data[i] = data[i + 1];
         data[dataLength - 1] = new Vector3(0, d, 0);
+
+        // フィルタ済み値を計算（移動平均）
+        CurrentGsrFiltered = CalculateFilteredValue();
+
         AdjustAndApplyData();
+    }
+
+    /// <summary>
+    /// フィルタ済みGSR値を計算（移動平均）
+    /// </summary>
+    private float CalculateFilteredValue()
+    {
+        if (data.Count == 0) return 0f;
+
+        var windowSize = Mathf.Min(filterWindowSize, data.Count);
+        var sum = 0f;
+        for (var i = data.Count - windowSize; i < data.Count; i++)
+        {
+            sum += data[i].y;
+        }
+        return sum / windowSize;
     }
 
     /// <summary>
