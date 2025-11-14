@@ -69,11 +69,23 @@ struct IntArray {
 struct IntArray convert(int value) {
   IntArray result;
   result.length = 0;
+
+  // value=0の場合の特別処理
+  if (value == 0) {
+    result.array[0] = '0';
+    result.array[1] = '\0';
+    result.length = 1;
+    return result;
+  }
+
+  // 桁数を計算
   int v = value;
   while (v != 0) {
     v /= 10;
     result.length++;
   }
+
+  // 各桁を文字に変換
   for (int i = 0; i < result.length; i++) {
     result.array[result.length - i - 1] = '0' + value % 10;
     value /= 10;
@@ -139,8 +151,8 @@ void loop() {
         int analog_value = analogRead(ANALOG_PIN);
         IntArray DATA = convert(analog_value);
 
-        // アナログ値をPCに送信
-        if (false == gs2200.write(server_cid, DATA.array, strlen((const char*)DATA.array))) {
+        // アナログ値をPCに送信 (result.lengthを使用)
+        if (false == gs2200.write(server_cid, DATA.array, DATA.length)) {
           Serial.println("Failed to send data");
           delay(10);
         }
