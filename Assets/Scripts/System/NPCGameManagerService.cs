@@ -21,12 +21,11 @@ public partial class NPCGameManagerService : IGameManagerService
 
     private float _startTime;
     private readonly GameConfig _gameConfig;
+    private readonly GsrProcessorService _gsrProcessor;
     private TagGameDataLogger _dataLogger;
     private IPlayerSpawnService _playerSpawnService;
-    private GsrGraph _gsrGraph;
 
-    // GSRデータ（VitalRouterで更新）
-    private float _currentGsrRaw = 0f;
+    // 生体状態（VitalRouterで更新）
     private bool _isExcited = false;
 
     // ログ設定
@@ -35,10 +34,10 @@ public partial class NPCGameManagerService : IGameManagerService
     public string ExperimentGroup { get; set; } = "BfHuman";
 
     [Inject]
-    public NPCGameManagerService(GameConfig gameConfig, GsrGraph gsrGraph)
+    public NPCGameManagerService(GameConfig gameConfig, GsrProcessorService gsrProcessor)
     {
         _gameConfig = gameConfig;
-        _gsrGraph = gsrGraph;
+        _gsrProcessor = gsrProcessor;
     }
 
     /// <summary>
@@ -112,8 +111,8 @@ public partial class NPCGameManagerService : IGameManagerService
         if (EnableLogging && _dataLogger != null)
         {
             _dataLogger.RecordItChange(CurrentItIndex, GetPlayerPositions(),
-                _gsrGraph.CurrentGsrRaw, _gsrGraph.CurrentGsrFiltered,
-                _gsrGraph.CurrentGsrDerivative, _gsrGraph.CurrentThreshold,
+                _gsrProcessor.CurrentGsrRaw, _gsrProcessor.CurrentGsrFiltered,
+                _gsrProcessor.CurrentGsrDerivative, _gsrProcessor.CurrentThreshold,
                 GetIsExcited());
         }
     }
@@ -161,8 +160,8 @@ public partial class NPCGameManagerService : IGameManagerService
             if (Time.frameCount % 60 == 0)
             {
                 _dataLogger.RecordGameTick(CurrentItIndex, GetPlayerPositions(),
-                    _gsrGraph.CurrentGsrRaw, _gsrGraph.CurrentGsrFiltered,
-                    _gsrGraph.CurrentGsrDerivative, _gsrGraph.CurrentThreshold,
+                    _gsrProcessor.CurrentGsrRaw, _gsrProcessor.CurrentGsrFiltered,
+                    _gsrProcessor.CurrentGsrDerivative, _gsrProcessor.CurrentThreshold,
                     GetIsExcited());
             }
         }
@@ -200,28 +199,11 @@ public partial class NPCGameManagerService : IGameManagerService
     }
 
     /// <summary>
-    /// GSR値を取得
-    /// </summary>
-    private float GetGsrValue()
-    {
-        return _currentGsrRaw;
-    }
-
-    /// <summary>
     /// 興奮状態を取得
     /// </summary>
     private bool GetIsExcited()
     {
         return _isExcited;
-    }
-
-    /// <summary>
-    /// GSRデータ受信コマンドハンドラ
-    /// </summary>
-    [Route]
-    private void On(GsrDataReceivedCommand cmd)
-    {
-        _currentGsrRaw = cmd.RawValue;
     }
 
     /// <summary>

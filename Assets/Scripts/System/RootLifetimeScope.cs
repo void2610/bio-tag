@@ -13,10 +13,24 @@ public class RootLifetimeScope : LifetimeScope
     [Header("GSRデータソース設定")]
     [SerializeField] private bool useTcpServer = true;
 
+    [Header("GSRプロセッサ設定")]
+    [SerializeField] private int historyLength = 500;
+    [SerializeField] private int filterWindowSize = 10;
+    [SerializeField] private float threshold = 5f;
+    [SerializeField] private float thresholdMagnification = 1.5f;
+    [SerializeField] private float checkLength = 0.1f;
+
     protected override void Configure(IContainerBuilder builder)
     {
-        // BiometricService (VitalRouter使用)
-        builder.Register<BiometricService>(Lifetime.Singleton);
+        // GsrProcessorService (GSRデータ処理層)
+        builder.Register(_ =>
+            new GsrProcessorService(
+                historyLength,
+                filterWindowSize,
+                threshold,
+                thresholdMagnification,
+                checkLength),
+            Lifetime.Singleton);
 
         // GSRデータソース (TcpServer or GsrMock)
         if (useTcpServer)
@@ -42,6 +56,12 @@ public class RootLifetimeScope : LifetimeScope
         if (Container.TryResolve<BiometricService>(out var biometricService))
         {
             biometricService.MapTo(Router.Default);
+        }
+
+        // GsrProcessorServiceをVitalRouterのデフォルトルーターに登録
+        if (Container.TryResolve<GsrProcessorService>(out var gsrProcessor))
+        {
+            gsrProcessor.MapTo(Router.Default);
         }
     }
 }

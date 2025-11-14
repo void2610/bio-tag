@@ -30,10 +30,6 @@ public class NpcGameLifetimeScope : LifetimeScope
         // BiometricService (VitalRouter使用)
         builder.Register<BiometricService>(Lifetime.Singleton);
 
-        // GSRデータソース
-        // builder.Register<TcpServer>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-        builder.Register<GsrMock>(Lifetime.Singleton).AsImplementedInterfaces();
-
         // 設定値をコンテナに登録
         builder.RegisterInstance(gameConfig);
         builder.RegisterInstance(playerNameUIPrefab).As<PlayerNameUI>();
@@ -61,6 +57,12 @@ public class NpcGameLifetimeScope : LifetimeScope
         if (Container.TryResolve<BiometricService>(out var biometricService))
         {
             biometricService.MapTo(Router.Default);
+        }
+
+        // GsrProcessorServiceをVitalRouterのデフォルトルーターに登録
+        if (Container.TryResolve<GsrProcessorService>(out var gsrProcessor))
+        {
+            gsrProcessor.MapTo(Router.Default);
         }
 
         // GameManagerServiceをVitalRouterのデフォルトルーターに登録

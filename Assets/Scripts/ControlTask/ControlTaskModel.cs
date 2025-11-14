@@ -5,6 +5,20 @@ using BioTag.Biometric;
 namespace ControlTask
 {
     /// <summary>
+    /// ControlTask実験の状態
+    /// </summary>
+    public enum ControlState
+    {
+        Calibration,      // キャリブレーション
+        GoalPresentation, // 目標提示
+        Preparation,      // 準備期間
+        Excited,          // 測定（興奮）
+        Calmed,           // 測定（冷静）
+        Feedback,         // フィードバック
+        Rest              // 休憩
+    }
+
+    /// <summary>
     /// ControlTaskのModel層 - データと状態を管理
     /// </summary>
     public class ControlTaskModel

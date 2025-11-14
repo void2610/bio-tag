@@ -16,12 +16,10 @@ using BioTag.Biometric;
 /// </summary>
 public sealed class TcpServer : IStartable, IDisposable
 {
+    public bool IsConnected { get; private set; }
+    
     private CancellationTokenSource _cts;
 
-    /// <summary>クライアントが接続中かどうか</summary>
-    public bool IsConnected { get; private set; } = false;
-
-    // ────────── Core Logic ──────────
     /// <summary>TCPListener を立ててクライアント接続を待ち受けるループ</summary>
     private async UniTaskVoid ListenLoopAsync(CancellationToken token)
     {
@@ -64,20 +62,18 @@ public sealed class TcpServer : IStartable, IDisposable
         await using var stream = client.GetStream();
         var buffer = new byte[512];
 
-        // クライアント接続時に状態を更新
         IsConnected = true;
 
         try
         {
             while (!token.IsCancellationRequested && client.Connected)
             {
-                int n = await stream.ReadAsync(buffer, 0, buffer.Length, token).AsUniTask();
+                var n = await stream.ReadAsync(buffer, 0, buffer.Length, token).AsUniTask();
                 if (n == 0) break;                      // 切断
 
                 var msg = Encoding.UTF8.GetString(buffer, 0, n);
                 if (int.TryParse(msg, out var v))
                 {
-                    // VitalRouter CommandでGSRデータを配信
                     await Router.Default.PublishAsync(new GsrDataReceivedCommand(v));
                 }
                 else
@@ -102,7 +98,6 @@ public sealed class TcpServer : IStartable, IDisposable
     public void Start()
     {
         _cts = new CancellationTokenSource();
-        // fire-and-forget で待ち受けループ開始
         ListenLoopAsync(_cts.Token).Forget();
     }
 

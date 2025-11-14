@@ -16,11 +16,11 @@ namespace ControlTask
     {
         private readonly ControlTaskModel _model;
         private readonly IControlTaskService _service;
-        private readonly GsrGraph _gsrGraph;
+        private readonly GsrProcessorService _gsrProcessor;
         private readonly TargetStateUI _targetStateUI;
         private readonly TimerUI _timerUI;
         private readonly ScoreUI _scoreUI;
-        
+
         public void StartExperiment() => UpdateExperimentFlow().Forget();
         public void UpdateTime(float deltaTime) => _model.CurrentTime.Value += deltaTime;
 
@@ -28,14 +28,14 @@ namespace ControlTask
         public ControlTaskPresenter(
             ControlTaskModel model,
             IControlTaskService service,
-            GsrGraph gsrGraph,
+            GsrProcessorService gsrProcessor,
             TargetStateUI targetStateUI,
             TimerUI timerUI,
             ScoreUI scoreUI)
         {
             _model = model;
             _service = service;
-            _gsrGraph = gsrGraph;
+            _gsrProcessor = gsrProcessor;
             _targetStateUI = targetStateUI;
             _timerUI = timerUI;
             _scoreUI = scoreUI;
@@ -154,10 +154,10 @@ namespace ControlTask
                 var instantaneousScore = isCorrect ? 100 : 0;
 
                 _service.RecordTimeSeriesData(
-                    _gsrGraph.CurrentGsrRaw,
-                    _gsrGraph.CurrentGsrFiltered,
-                    _gsrGraph.CurrentGsrDerivative,
-                    _gsrGraph.CurrentThreshold,
+                    _gsrProcessor.CurrentGsrRaw,
+                    _gsrProcessor.CurrentGsrFiltered,
+                    _gsrProcessor.CurrentGsrDerivative,
+                    _gsrProcessor.CurrentThreshold,
                     _model.TargetState.Value,
                     currentState,
                     instantaneousScore,

@@ -17,8 +17,8 @@ namespace BioTag.Biometric
     {
         private readonly List<VisualEffect> _vfxList = new();
         private readonly List<Tween> _tweenList = new();
+        private readonly IPlayerSpawnService _playerSpawn;
         private Volume _volume;
-        private IPlayerSpawnService _playerSpawn;
 
         public BiometricService(IPlayerSpawnService playerSpawn)
         {
