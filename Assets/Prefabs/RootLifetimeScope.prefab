@@ -48,4 +48,9 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
-  useTcpServer: 0
+  useTcpServer: 1
+  historyLength: 500
+  filterWindowSize: 10
+  threshold: 5
+  thresholdMagnification: 1.5
+  checkLength: 0.1

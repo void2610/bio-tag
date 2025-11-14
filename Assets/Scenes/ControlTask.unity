@@ -771,7 +771,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f826c613ba044634a486a981db3f8df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  graph: {fileID: 302484807}
 --- !u!1 &302484805
 GameObject:
   m_ObjectHideFlags: 0
@@ -800,17 +799,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 302484805}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d91d89cb507b0490bbfa6fc52dd81d68, type: 3}
+  m_Script: {fileID: 11500000, guid: eec443836b5484df7b84b6caf29de41d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dataLength: 150
-  threshold: 2
-  thresholdMagni: 1.5
-  checkLength: 0.2
-  v1: 1500
-  v2: 500
+  dataLength: 500
+  v1: 1600
+  v2: 700
   lineMaterial: {fileID: 2100000, guid: 889fd4f4e6399463dba266c78d0bbfb5, type: 2}
-  data: []
 --- !u!224 &302484808
 RectTransform:
   m_ObjectHideFlags: 0
@@ -829,7 +824,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 250, y: -200}
+  m_AnchoredPosition: {x: 250, y: -375}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &302484809
@@ -894,7 +889,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9dad25cabf734f6a91a0b6c55b4e255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  graph: {fileID: 302484807}
+  graphView: {fileID: 302484807}
 --- !u!4 &375950297
 Transform:
   m_ObjectHideFlags: 0
@@ -1095,23 +1090,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95e87ff68d70d4ea09b9fcd565ba986e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gsrGraph: {fileID: 302484807}
-  calibrationDuration: 5
-  trialCount: 9
-  goalPresentationDuration: 3
-  preparationDuration: 2
-  measurementDuration: 20
-  feedbackDuration: 5
-  restDuration: 5
-  enableLogging: 1
-  participantId: P001
-  experimentGroup: 0
-  testType: 0
-  roomTemperature: 23.5
-  roomHumidity: 45
-  baselineGsr: 2.45
-  minGsr: 1.82
-  maxGsr: 4.31
 --- !u!4 &603767642
 Transform:
   m_ObjectHideFlags: 0
