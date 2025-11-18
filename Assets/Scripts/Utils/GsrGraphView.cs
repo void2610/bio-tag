@@ -11,7 +11,7 @@ using BioTag.Biometric;
 [RequireComponent(typeof(UILineRenderer))]
 public class GsrGraphView : MonoBehaviour
 {
-    [SerializeField] private int dataLength = 500;
+    [SerializeField] private int dataLength = 200;
     [SerializeField] private float v1 = 580f;
     [SerializeField] private float v2 = 200f;
     [SerializeField] private Material lineMaterial;
@@ -43,7 +43,6 @@ public class GsrGraphView : MonoBehaviour
     private void Awake()
     {
         _lr = GetComponent<UILineRenderer>();
-        Debug.Assert(_lr != null, "UILineRenderer component is missing.");
         _lr.material = Instantiate(lineMaterial);
         _thresholdLine1 = transform.Find("th1").GetComponent<UILineRenderer>();
         _thresholdLine2 = transform.Find("th2").GetComponent<UILineRenderer>();
@@ -83,8 +82,7 @@ public class GsrGraphView : MonoBehaviour
         _min = Mathf.Min(_min, -_gsrProcessor.CurrentThreshold * 1.5f);
 
         var range = _max - _min;
-        if (Mathf.Approximately(range, 0f))
-            range = 1f;
+        if (Mathf.Approximately(range, 0f)) range = 1f;
 
         var normalizedData = gsrHistory.Select((v, i) =>
         {
@@ -94,8 +92,7 @@ public class GsrGraphView : MonoBehaviour
             return new Vector2(xPos, yPos);
         }).ToArray();
 
-        _lastData = normalizedData[Random.Range(0, normalizedData.Length)];
-
+        _lastData = normalizedData[^1];
         _lr.SetPositions(normalizedData);
     }
 
