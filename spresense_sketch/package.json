@@ -1,0 +1,13 @@
+{
+  "name": "arduino-serial-bridge",
+  "version": "1.0.0",
+  "description": "Arduino Serial to TCP Bridge for Unity",
+  "main": "arduino_serial_bridge.js",
+  "scripts": {
+    "start": "node arduino_serial_bridge.js"
+  },
+  "dependencies": {
+    "serialport": "^12.0.0",
+    "@serialport/parser-readline": "^12.0.0"
+  }
+}

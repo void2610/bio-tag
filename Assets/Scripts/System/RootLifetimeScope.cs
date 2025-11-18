@@ -55,9 +55,9 @@ public class RootLifetimeScope : LifetimeScope
                 break;
 
             case GsrDataSource.SerialServer:
-                builder.Register(_ => new SerialServer(serialPortName, serialBaudRate), Lifetime.Singleton)
-                    .AsImplementedInterfaces()
-                    .AsSelf();
+                // builder.Register(_ => new SerialServer(serialPortName, serialBaudRate), Lifetime.Singleton)
+                //     .AsImplementedInterfaces()
+                //     .AsSelf();
                 Debug.Log($"[RootLifetimeScope] SerialServerを使用 (Port: {serialPortName}, Baud: {serialBaudRate})");
                 break;
 
