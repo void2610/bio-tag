@@ -807,6 +807,7 @@ MonoBehaviour:
   v1: 1600
   v2: 700
   lineMaterial: {fileID: 2100000, guid: 889fd4f4e6399463dba266c78d0bbfb5, type: 2}
+  baseline: 700
 --- !u!224 &302484808
 RectTransform:
   m_ObjectHideFlags: 0

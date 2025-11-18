@@ -51,6 +51,6 @@ MonoBehaviour:
   dataSource: 0
   historyLength: 500
   filterWindowSize: 10
-  threshold: 70
-  thresholdMagnification: 1.5
-  checkLength: 0.1
+  threshold: 5
+  thresholdMagnification: 1
+  checkLength: 0.01

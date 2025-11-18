@@ -15,7 +15,6 @@ public class GsrGraphView : MonoBehaviour
     [SerializeField] private float v1 = 580f;
     [SerializeField] private float v2 = 200f;
     [SerializeField] private Material lineMaterial;
-    [SerializeField] private float baseline = 512f;
 
     private GsrProcessorService _gsrProcessor;
     private UILineRenderer _lr;
@@ -57,10 +56,17 @@ public class GsrGraphView : MonoBehaviour
 
         // GsrProcessorServiceからデータ履歴を取得
         var gsrHistory = _gsrProcessor.GetDataHistory();
-        if (gsrHistory.Count == 0) return;
+        if (gsrHistory.Count < 2) return;
+
+        // 履歴から微分値を計算
+        var derivativeHistory = new List<float>();
+        for (int i = 1; i < gsrHistory.Count; i++)
+        {
+            derivativeHistory.Add(gsrHistory[i] - gsrHistory[i - 1]);
+        }
 
         // グラフ描画用にデータを調整
-        AdjustAndApplyData(gsrHistory);
+        AdjustAndApplyData(derivativeHistory);
 
         // 閾値線を更新
         UpdateThresholdLines();
@@ -73,22 +79,20 @@ public class GsrGraphView : MonoBehaviour
     }
 
     /// <summary>
-    /// グラフデータを正規化して描画
+    /// グラフデータを正規化して描画（微分値）
     /// </summary>
-    private void AdjustAndApplyData(List<float> gsrHistory)
+    private void AdjustAndApplyData(List<float> derivativeHistory)
     {
-        // ベースラインを減算して0中心の値に変換
-        var adjustedHistory = gsrHistory.Select(v => v - baseline).ToList();
-
-        _max = adjustedHistory.Max();
-        _min = adjustedHistory.Min();
+        // 微分値は既に変化量なので、そのまま使用
+        _max = derivativeHistory.Max();
+        _min = derivativeHistory.Min();
         _max = Mathf.Max(_max, _gsrProcessor.CurrentThreshold * 1.5f);
         _min = Mathf.Min(_min, -_gsrProcessor.CurrentThreshold * 1.5f);
 
         var range = _max - _min;
         if (Mathf.Approximately(range, 0f)) range = 1f;
 
-        var normalizedData = adjustedHistory.Select((v, i) =>
+        var normalizedData = derivativeHistory.Select((v, i) =>
         {
             var normalizedY = (v - _min) / range;
             var xPos = i * v1 / (dataLength - 1);

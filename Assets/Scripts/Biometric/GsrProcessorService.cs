@@ -24,7 +24,7 @@ namespace BioTag.Biometric
         private readonly float _checkLength;
 
         // 現在値
-        public float CurrentGsrRaw { get; private set; } = 0f;
+        public float CurrentGsrRaw => _previousGsrRaw;
         public float CurrentGsrFiltered { get; private set; } = 0f;
         public float CurrentGsrDerivative { get; private set; } = 0f;
         public float CurrentThreshold => _threshold;
@@ -82,30 +82,25 @@ namespace BioTag.Biometric
             CurrentGsrDerivative = rawValue - _previousGsrRaw;
             _previousGsrRaw = rawValue;
 
-            CurrentGsrRaw = rawValue;
-
             // 履歴にデータを追加（古いデータを削除）
             for (int i = 0; i < _historyLength - 1; i++)
             {
                 _gsrHistory[i] = _gsrHistory[i + 1];
             }
-            _gsrHistory[_historyLength - 1] = rawValue;
+            _gsrHistory[_historyLength - 1] = CurrentGsrDerivative;
 
             // フィルタ済み値を計算（移動平均）
             CurrentGsrFiltered = CalculateFilteredValue();
 
-            // 興奮状態を判定
-            bool newIsExcited = CheckExcited();
-
+            var newIsExcited = CheckExcited();
             // 状態変化を検知してCommandを発行
             if (newIsExcited != _previousIsExcited)
             {
                 IsExcited = newIsExcited;
                 var newState = IsExcited ? BiometricState.Excited : BiometricState.Calm;
                 var previousState = _previousIsExcited ? BiometricState.Excited : BiometricState.Calm;
-                var intensity = CurrentGsrRaw;
 
-                Router.Default.PublishAsync(new BiometricStateChangedCommand(newState, previousState, intensity));
+                Router.Default.PublishAsync(new BiometricStateChangedCommand(newState, previousState, rawValue));
 
                 _previousIsExcited = IsExcited;
             }
