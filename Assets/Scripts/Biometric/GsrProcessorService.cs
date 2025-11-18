@@ -22,6 +22,7 @@ namespace BioTag.Biometric
         private float _threshold;
         private readonly float _thresholdMagnification;
         private readonly float _checkLength;
+        private int _receivedSampleCount = 0;
 
         // 現在値
         public float CurrentGsrRaw => _previousGsrRaw;
@@ -77,6 +78,14 @@ namespace BioTag.Biometric
         private void AddData(float rawValue)
         {
             rawValue = Mathf.Clamp(rawValue, 0f, 1024f);
+
+            // 初期の外れ値をスキップ
+            if (_receivedSampleCount < 5)
+            {
+                _receivedSampleCount++;
+                _previousGsrRaw = rawValue;  // 次回の微分計算のために更新
+                return;
+            }
 
             // 微分値を計算（前回値との差分）
             CurrentGsrDerivative = rawValue - _previousGsrRaw;
