@@ -15,6 +15,7 @@ public class GsrGraphView : MonoBehaviour
     [SerializeField] private float v1 = 580f;
     [SerializeField] private float v2 = 200f;
     [SerializeField] private Material lineMaterial;
+    [SerializeField] private float baseline = 512f;
 
     private GsrProcessorService _gsrProcessor;
     private UILineRenderer _lr;
@@ -76,15 +77,18 @@ public class GsrGraphView : MonoBehaviour
     /// </summary>
     private void AdjustAndApplyData(List<float> gsrHistory)
     {
-        _max = gsrHistory.Max();
-        _min = gsrHistory.Min();
+        // ベースラインを減算して0中心の値に変換
+        var adjustedHistory = gsrHistory.Select(v => v - baseline).ToList();
+
+        _max = adjustedHistory.Max();
+        _min = adjustedHistory.Min();
         _max = Mathf.Max(_max, _gsrProcessor.CurrentThreshold * 1.5f);
         _min = Mathf.Min(_min, -_gsrProcessor.CurrentThreshold * 1.5f);
 
         var range = _max - _min;
         if (Mathf.Approximately(range, 0f)) range = 1f;
 
-        var normalizedData = gsrHistory.Select((v, i) =>
+        var normalizedData = adjustedHistory.Select((v, i) =>
         {
             var normalizedY = (v - _min) / range;
             var xPos = i * v1 / (dataLength - 1);
