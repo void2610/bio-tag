@@ -48,7 +48,9 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
-  useTcpServer: 1
+  dataSource: 1
+  serialPortName: /dev/cu.usbmodem14201
+  serialBaudRate: 9600
   historyLength: 500
   filterWindowSize: 10
   threshold: 5

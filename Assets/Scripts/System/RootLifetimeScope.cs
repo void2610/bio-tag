@@ -5,13 +5,27 @@ using VitalRouter;
 using BioTag.Biometric;
 
 /// <summary>
+/// GSRデータソースの種類
+/// </summary>
+public enum GsrDataSource
+{
+    TcpServer,      // ネットワーク経由（Spresenseなど）
+    SerialServer,   // USBシリアル通信（Arduino Unoなど）
+    Mock            // モックデータ（テスト用）
+}
+
+/// <summary>
 /// ルートライフタイムスコープ - 全シーンで共有されるサービスを管理
-/// GSRデータソース(TcpServer/GsrMock)とBiometricServiceを提供
+/// GSRデータソース(TcpServer/SerialServer/GsrMock)とBiometricServiceを提供
 /// </summary>
 public class RootLifetimeScope : LifetimeScope
 {
     [Header("GSRデータソース設定")]
-    [SerializeField] private bool useTcpServer = true;
+    [SerializeField] private GsrDataSource dataSource = GsrDataSource.SerialServer;
+
+    [Header("シリアル通信設定（dataSource = SerialServer時に使用）")]
+    [SerializeField] private string serialPortName = "/dev/cu.usbmodem14201";
+    [SerializeField] private int serialBaudRate = 9600;
 
     [Header("GSRプロセッサ設定")]
     [SerializeField] private int historyLength = 500;
@@ -32,16 +46,25 @@ public class RootLifetimeScope : LifetimeScope
                 checkLength),
             Lifetime.Singleton);
 
-        // GSRデータソース (TcpServer or GsrMock)
-        if (useTcpServer)
+        // GSRデータソース (TcpServer / SerialServer / GsrMock)
+        switch (dataSource)
         {
-            builder.Register<TcpServer>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            Debug.Log("[RootLifetimeScope] TcpServerを使用");
-        }
-        else
-        {
-            builder.Register<GsrMock>(Lifetime.Singleton).AsImplementedInterfaces();
-            Debug.Log("[RootLifetimeScope] GsrMockを使用");
+            case GsrDataSource.TcpServer:
+                builder.Register<TcpServer>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+                Debug.Log("[RootLifetimeScope] TcpServerを使用");
+                break;
+
+            case GsrDataSource.SerialServer:
+                builder.Register(_ => new SerialServer(serialPortName, serialBaudRate), Lifetime.Singleton)
+                    .AsImplementedInterfaces()
+                    .AsSelf();
+                Debug.Log($"[RootLifetimeScope] SerialServerを使用 (Port: {serialPortName}, Baud: {serialBaudRate})");
+                break;
+
+            case GsrDataSource.Mock:
+                builder.Register<GsrMock>(Lifetime.Singleton).AsImplementedInterfaces();
+                Debug.Log("[RootLifetimeScope] GsrMockを使用");
+                break;
         }
     }
 

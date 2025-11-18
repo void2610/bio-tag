@@ -768,9 +768,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 206340506}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f826c613ba044634a486a981db3f8df, type: 3}
+  m_Script: {fileID: 11500000, guid: a9dad25cabf734f6a91a0b6c55b4e255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  graphView: {fileID: 302484807}
 --- !u!1 &302484805
 GameObject:
   m_ObjectHideFlags: 0
@@ -802,7 +803,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eec443836b5484df7b84b6caf29de41d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dataLength: 500
+  dataLength: 200
   v1: 1600
   v2: 700
   lineMaterial: {fileID: 2100000, guid: 889fd4f4e6399463dba266c78d0bbfb5, type: 2}
@@ -1366,7 +1367,8 @@ MonoBehaviour:
   parentReference:
     TypeName: 
   autoRun: 1
-  autoInjectGameObjects: []
+  autoInjectGameObjects:
+  - {fileID: 375950295}
   experimentConfig:
     calibrationDuration: 3
     trialCount: 9
