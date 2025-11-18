@@ -22,18 +22,15 @@ namespace BioTag.Biometric
         private float _threshold;
         private readonly float _thresholdMagnification;
         private readonly float _checkLength;
-        private int _receivedSampleCount = 0;
 
         // 現在値
-        public float CurrentGsrRaw => _previousGsrRaw;
-        public float CurrentGsrFiltered { get; private set; } = 0f;
-        public float CurrentGsrDerivative { get; private set; } = 0f;
+        public float CurrentGsrRaw { get; private set; }
+        public float CurrentGsrFiltered { get; private set; }
         public float CurrentThreshold => _threshold;
-        public bool IsExcited { get; private set; } = false;
+        public bool IsExcited { get; private set; }
 
-        // 前回値（微分計算・状態変化検知用）
-        private float _previousGsrRaw = 0f;
-        private bool _previousIsExcited = false;
+        // 状態変化検知用
+        private bool _previousIsExcited;
 
         /// <summary>
         /// コンストラクタ
@@ -79,29 +76,21 @@ namespace BioTag.Biometric
         {
             rawValue = Mathf.Clamp(rawValue, 0f, 1024f);
 
-            // 初期の外れ値をスキップ
-            if (_receivedSampleCount < 5)
-            {
-                _receivedSampleCount++;
-                _previousGsrRaw = rawValue;  // 次回の微分計算のために更新
-                return;
-            }
-
-            // 微分値を計算（前回値との差分）
-            CurrentGsrDerivative = rawValue - _previousGsrRaw;
-            _previousGsrRaw = rawValue;
+            CurrentGsrRaw = rawValue;
 
             // 履歴にデータを追加（古いデータを削除）
             for (int i = 0; i < _historyLength - 1; i++)
             {
                 _gsrHistory[i] = _gsrHistory[i + 1];
             }
-            _gsrHistory[_historyLength - 1] = CurrentGsrDerivative;
+            _gsrHistory[_historyLength - 1] = rawValue;
 
             // フィルタ済み値を計算（移動平均）
             CurrentGsrFiltered = CalculateFilteredValue();
 
+            // 興奮状態を判定
             var newIsExcited = CheckExcited();
+
             // 状態変化を検知してCommandを発行
             if (newIsExcited != _previousIsExcited)
             {

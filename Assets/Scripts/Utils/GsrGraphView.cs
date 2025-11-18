@@ -56,17 +56,10 @@ public class GsrGraphView : MonoBehaviour
 
         // GsrProcessorServiceからデータ履歴を取得
         var gsrHistory = _gsrProcessor.GetDataHistory();
-        if (gsrHistory.Count < 2) return;
-
-        // 履歴から微分値を計算
-        var derivativeHistory = new List<float>();
-        for (int i = 1; i < gsrHistory.Count; i++)
-        {
-            derivativeHistory.Add(gsrHistory[i] - gsrHistory[i - 1]);
-        }
+        if (gsrHistory.Count == 0) return;
 
         // グラフ描画用にデータを調整
-        AdjustAndApplyData(derivativeHistory);
+        AdjustAndApplyData(gsrHistory);
 
         // 閾値線を更新
         UpdateThresholdLines();
@@ -79,20 +72,19 @@ public class GsrGraphView : MonoBehaviour
     }
 
     /// <summary>
-    /// グラフデータを正規化して描画（微分値）
+    /// グラフデータを正規化して描画
     /// </summary>
-    private void AdjustAndApplyData(List<float> derivativeHistory)
+    private void AdjustAndApplyData(List<float> gsrHistory)
     {
-        // 微分値は既に変化量なので、そのまま使用
-        _max = derivativeHistory.Max();
-        _min = derivativeHistory.Min();
+        _max = gsrHistory.Max();
+        _min = gsrHistory.Min();
         _max = Mathf.Max(_max, _gsrProcessor.CurrentThreshold * 1.5f);
         _min = Mathf.Min(_min, -_gsrProcessor.CurrentThreshold * 1.5f);
 
         var range = _max - _min;
         if (Mathf.Approximately(range, 0f)) range = 1f;
 
-        var normalizedData = derivativeHistory.Select((v, i) =>
+        var normalizedData = gsrHistory.Select((v, i) =>
         {
             var normalizedY = (v - _min) / range;
             var xPos = i * v1 / (dataLength - 1);
