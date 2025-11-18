@@ -59,10 +59,10 @@ public class GsrGraphView : MonoBehaviour
         if (gsrHistory.Count == 0) return;
 
         // グラフ描画用にデータを調整
-        AdjustAndApplyData(gsrHistory);
+        AdjustAndApplyData(gsrHistory, _gsrProcessor.Baseline);
 
         // 閾値線を更新
-        UpdateThresholdLines();
+        UpdateThresholdLines(_gsrProcessor.Baseline);
 
         // 閾値の手動調整（デバッグ用）
         if (Input.GetKeyDown(KeyCode.Y))
@@ -74,7 +74,7 @@ public class GsrGraphView : MonoBehaviour
     /// <summary>
     /// グラフデータを正規化して描画
     /// </summary>
-    private void AdjustAndApplyData(List<float> gsrHistory)
+    private void AdjustAndApplyData(List<float> gsrHistory, float baseline)
     {
         _max = gsrHistory.Max();
         _min = gsrHistory.Min();
@@ -99,7 +99,7 @@ public class GsrGraphView : MonoBehaviour
     /// <summary>
     /// 閾値線を更新
     /// </summary>
-    private void UpdateThresholdLines()
+    private void UpdateThresholdLines(float baseline)
     {
         var range = _max - _min;
         if (Mathf.Approximately(range, 0f)) range = 1f;

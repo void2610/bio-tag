@@ -22,8 +22,11 @@ public class ControlTaskLifetimeScope : LifetimeScope
     [SerializeField] private float roomHumidity = 45.0f;
 
     [Header("キャリブレーション設定")]
+    [Tooltip("実験ログ記録用のベースラインGSR値（処理済み値）")]
     [SerializeField] private float baselineGsr = 2.45f;
+    [Tooltip("実験ログ記録用の最小GSR値（処理済み値）")]
     [SerializeField] private float minGsr = 1.82f;
+    [Tooltip("実験ログ記録用の最大GSR値（処理済み値）")]
     [SerializeField] private float maxGsr = 4.31f;
 
     protected override void Configure(IContainerBuilder builder)

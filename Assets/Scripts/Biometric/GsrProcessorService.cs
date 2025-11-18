@@ -27,6 +27,7 @@ namespace BioTag.Biometric
         public float CurrentGsrRaw { get; private set; }
         public float CurrentGsrFiltered { get; private set; }
         public float CurrentThreshold => _threshold;
+        public float Baseline { get; }
         public bool IsExcited { get; private set; }
 
         // 状態変化検知用
@@ -37,24 +38,27 @@ namespace BioTag.Biometric
         /// </summary>
         /// <param name="historyLength">履歴保持数（デフォルト500）</param>
         /// <param name="filterWindowSize">移動平均ウィンドウサイズ（デフォルト10）</param>
+        /// <param name="baseline">基準値（デフォルト512.0）</param>
         /// <param name="threshold">興奮判定閾値（デフォルト5.0）</param>
         /// <param name="thresholdMagnification">閾値倍率（デフォルト1.5）</param>
         /// <param name="checkLength">チェック範囲（デフォルト0.1 = 10%）</param>
         public GsrProcessorService(
             int historyLength = 500,
             int filterWindowSize = 10,
+            float baseline = 512f,
             float threshold = 5f,
             float thresholdMagnification = 1.5f,
             float checkLength = 0.1f)
         {
             _historyLength = historyLength;
             _filterWindowSize = filterWindowSize;
+            Baseline = baseline;
             _threshold = threshold;
             _thresholdMagnification = thresholdMagnification;
             _checkLength = checkLength;
 
             // 履歴を初期化
-            for (int i = 0; i < _historyLength; i++)
+            for (var i = 0; i < _historyLength; i++)
             {
                 _gsrHistory.Add(0f);
             }
@@ -166,10 +170,11 @@ namespace BioTag.Biometric
 
         /// <summary>
         /// データ履歴を取得（UI描画用）
+        /// ベースラインからの差分値として返す
         /// </summary>
         public List<float> GetDataHistory()
         {
-            return new List<float>(_gsrHistory);
+            return _gsrHistory.Select(value => value - Baseline).ToList();
         }
 
         /// <summary>
