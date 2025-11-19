@@ -18,6 +18,7 @@ namespace ControlTask
 
         private SessionInfo _sessionInfo;
         private int _currentTrialNumber;
+        private float _sessionStartTime;  // セッション全体の基準時刻
         private float _trialStartTime;
         private List<float> _trialGsrData = new();
 
@@ -35,6 +36,9 @@ namespace ControlTask
 
             var sessionName = $"{sessionInfo.participantInfo.participantID}_{sessionInfo.participantInfo.testType}";
             _session = new ExperimentSession(sessionName);
+
+            // セッション開始時刻を記録（実験全体の時系列データの基準）
+            _sessionStartTime = Time.time;
 
             // セッション情報をJSONで保存
             _session.SaveJson("session.json", _sessionInfo);
@@ -69,7 +73,8 @@ namespace ControlTask
         {
             if (!EnableLogging) return;
 
-            var timestamp = (int)((Time.time - _trialStartTime) * 1000); // ミリ秒
+            // セッション開始からの経過時間を記録（実験全体の連続した時系列データ）
+            var timestamp = (int)((Time.time - _sessionStartTime) * 1000); // ミリ秒
 
             var record = new TimeSeriesRecord
             {
@@ -97,7 +102,7 @@ namespace ControlTask
         {
             if (!EnableLogging || _trialGsrData.Count == 0) return;
 
-            var duration = (Time.time - _trialStartTime) * 1000; // ミリ秒
+            var startTime = (int)((_trialStartTime - _sessionStartTime) * 1000); // ミリ秒
             var meanGsr = _trialGsrData.Average();
             var sdGsr = CalculateStandardDeviation(_trialGsrData);
 
@@ -107,7 +112,7 @@ namespace ControlTask
                 TestType = _sessionInfo.participantInfo.testType,
                 TrialNumber = _currentTrialNumber,
                 TargetState = targetState.ToString(),
-                DurationMS = (int)duration,
+                StartTimeMS = startTime,
                 Score = score,
                 SuccessRate = successRate,
                 MeanGsr = meanGsr,

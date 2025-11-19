@@ -55,7 +55,7 @@ namespace ControlTask
         public string TestType;
         public int TrialNumber;
         public string TargetState;
-        public int DurationMS;
+        public int StartTimeMS;  // 試行開始時刻（セッション開始からの経過時間）
         public float Score;
         public float SuccessRate;
         public float MeanGsr;
@@ -63,8 +63,8 @@ namespace ControlTask
         public int ResponseTimeMS;
 
         // ICsvSerializable実装
-        public string GetCsvHeader() => "participant_id,test_type,trial_number,target_state,duration_ms,score,success_rate,mean_gsr,sd_gsr,response_time_ms";
-        public string ToCsvRow() => $"{ParticipantID},{TestType},{TrialNumber},{TargetState},{DurationMS},{Score:F1},{SuccessRate:F2},{MeanGsr:F2},{SDGsr:F2},{ResponseTimeMS}";
+        public string GetCsvHeader() => "participant_id,test_type,trial_number,target_state,start_time_ms,score,success_rate,mean_gsr,sd_gsr,response_time_ms";
+        public string ToCsvRow() => $"{ParticipantID},{TestType},{TrialNumber},{TargetState},{StartTimeMS},{Score:F1},{SuccessRate:F2},{MeanGsr:F2},{SDGsr:F2},{ResponseTimeMS}";
     }
 
     // 時系列データ（CSV形式で保存）
