@@ -11,7 +11,7 @@ using BioTag.Biometric;
 [RequireComponent(typeof(UILineRenderer))]
 public class GsrGraphView : MonoBehaviour
 {
-    [SerializeField] private int dataLength = 200;
+    [SerializeField] private int dataLength = 500;
     [SerializeField] private float v1 = 580f;
     [SerializeField] private float v2 = 200f;
     [SerializeField] private Material lineMaterial;
