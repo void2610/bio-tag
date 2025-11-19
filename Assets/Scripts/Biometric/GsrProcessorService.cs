@@ -165,11 +165,13 @@ namespace BioTag.Biometric
 
         /// <summary>
         /// 興奮状態を判定
+        /// ベースラインからの差分が閾値を超えた場合にExcitedと判定
         /// </summary>
         private bool CheckExcited()
         {
-            // 最新の値をチェック
-            if (Mathf.Abs(_gsrHistory[^1]) > _threshold)
+            // 最新の値をベースラインからの差分でチェック
+            var latestDiff = Mathf.Abs(_gsrHistory[^1] - Baseline);
+            if (latestDiff > _threshold)
                 return true;
 
             // 過去の値をチェック（閾値の倍率を大きく超えると判定）
@@ -177,7 +179,8 @@ namespace BioTag.Biometric
             var checkCount = Mathf.FloorToInt(_checkLength * _historyLength);
             for (var i = _gsrHistory.Count - 1; i >= 0 && _gsrHistory.Count - 1 - i < checkCount; i--)
             {
-                if (Mathf.Abs(_gsrHistory[i]) > significantThreshold) return true;
+                var diff = Mathf.Abs(_gsrHistory[i] - Baseline);
+                if (diff > significantThreshold) return true;
             }
 
             return false;
