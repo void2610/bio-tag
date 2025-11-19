@@ -63,12 +63,6 @@ public class GsrGraphView : MonoBehaviour
 
         // 閾値線を更新
         UpdateThresholdLines(_gsrProcessor.Baseline);
-
-        // 閾値の手動調整（デバッグ用）
-        if (Input.GetKeyDown(KeyCode.Y))
-            _gsrProcessor.AdjustThreshold(-1f);
-        else if (Input.GetKeyDown(KeyCode.U))
-            _gsrProcessor.AdjustThreshold(1f);
     }
 
     /// <summary>

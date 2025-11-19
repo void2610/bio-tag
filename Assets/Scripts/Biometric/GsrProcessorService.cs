@@ -27,11 +27,16 @@ namespace BioTag.Biometric
         public float CurrentGsrRaw { get; private set; }
         public float CurrentGsrFiltered { get; private set; }
         public float CurrentThreshold => _threshold;
-        public float Baseline { get; }
+        public float Baseline { get; private set; }
         public bool IsExcited { get; private set; }
 
         // 状態変化検知用
         private bool _previousIsExcited;
+
+        public List<float> GetDataHistory() => _gsrHistory.Select(value => value - Baseline).ToList();
+        public void AdjustThreshold(float delta) => _threshold += delta;
+        public void SetBaseline(float baseline) => Baseline = baseline;
+        public void AdjustBaseline(float delta) => Baseline += delta;
 
         /// <summary>
         /// コンストラクタ
@@ -62,6 +67,36 @@ namespace BioTag.Biometric
             {
                 _gsrHistory.Add(0f);
             }
+        }
+
+        /// <summary>
+        /// 自動キャリブレーション
+        /// 現在の履歴データの平均値をベースラインに設定
+        /// </summary>
+        public void AutoCalibrate()
+        {
+            if (_gsrHistory.Count == 0) return;
+            SetBaseline(GetMean());
+        }
+
+        /// <summary>
+        /// GSRデータの平均値を計算
+        /// </summary>
+        public float GetMean()
+        {
+            if (_gsrHistory.Count == 0) return 0f;
+            return _gsrHistory.Average();
+        }
+
+        /// <summary>
+        /// GSRデータの標準偏差を計算
+        /// </summary>
+        public float GetStandardDeviation()
+        {
+            if (_gsrHistory.Count == 0) return 0f;
+            var mean = GetMean();
+            var sumOfSquares = _gsrHistory.Sum(v => (v - mean) * (v - mean));
+            return Mathf.Sqrt(sumOfSquares / _gsrHistory.Count);
         }
 
         /// <summary>
@@ -146,44 +181,6 @@ namespace BioTag.Biometric
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// GSRデータの平均値を計算
-        /// </summary>
-        public float GetMean()
-        {
-            if (_gsrHistory.Count == 0) return 0f;
-            return _gsrHistory.Average();
-        }
-
-        /// <summary>
-        /// GSRデータの標準偏差を計算
-        /// </summary>
-        public float GetStandardDeviation()
-        {
-            if (_gsrHistory.Count == 0) return 0f;
-            var mean = GetMean();
-            var sumOfSquares = _gsrHistory.Sum(v => (v - mean) * (v - mean));
-            return Mathf.Sqrt(sumOfSquares / _gsrHistory.Count);
-        }
-
-        /// <summary>
-        /// データ履歴を取得（UI描画用）
-        /// ベースラインからの差分値として返す
-        /// </summary>
-        public List<float> GetDataHistory()
-        {
-            return _gsrHistory.Select(value => value - Baseline).ToList();
-        }
-
-        /// <summary>
-        /// 閾値を手動調整（デバッグ用）
-        /// </summary>
-        public void AdjustThreshold(float delta)
-        {
-            _threshold += delta;
-            Debug.Log($"[GsrProcessorService] Threshold adjusted to {_threshold}");
         }
     }
 }

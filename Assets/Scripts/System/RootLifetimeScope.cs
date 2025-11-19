@@ -3,6 +3,7 @@ using VContainer;
 using VContainer.Unity;
 using VitalRouter;
 using BioTag.Biometric;
+using BioTag.Utils;
 
 /// <summary>
 /// GSRデータソースの種類
@@ -55,6 +56,9 @@ public class RootLifetimeScope : LifetimeScope
                 Debug.Log("[RootLifetimeScope] GsrMockを使用");
                 break;
         }
+
+        // CalibrationInputService (キャリブレーションキー入力管理)
+        builder.RegisterEntryPoint<CalibrationInputService>();
     }
 
     protected override void Awake()
