@@ -2061,8 +2061,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 9
-  footstepAudioClips:
-  - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}
   - {fileID: 8300000, guid: 22537e39083884518b948b6542639237, type: 3}
   - {fileID: 8300000, guid: 43db7da7ab06f44108f08affa300c419, type: 3}
   landingAudioClip: {fileID: 8300000, guid: 1e27bdb7813524c9791edadb30b134c1, type: 3}
