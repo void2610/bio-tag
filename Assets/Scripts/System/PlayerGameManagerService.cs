@@ -108,6 +108,7 @@ public partial class PlayerGameManagerService : IGameManagerService
             {
                 _dataLogger.RecordItChange(CurrentItIndex, GetPlayerPositions(),
                     _gsrProcessor.CurrentGsrRaw, _gsrProcessor.CurrentGsrFiltered,
+                    _gsrProcessor.CurrentGsrDerivative,
                     _gsrProcessor.CurrentThreshold,
                     GetIsExcited());
             }
@@ -154,6 +155,7 @@ public partial class PlayerGameManagerService : IGameManagerService
             {
                 _dataLogger.RecordGameTick(CurrentItIndex, GetPlayerPositions(),
                     _gsrProcessor.CurrentGsrRaw, _gsrProcessor.CurrentGsrFiltered,
+                    _gsrProcessor.CurrentGsrDerivative,
                     _gsrProcessor.CurrentThreshold,
                     GetIsExcited());
             }

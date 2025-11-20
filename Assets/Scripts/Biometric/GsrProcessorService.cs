@@ -26,12 +26,17 @@ namespace BioTag.Biometric
         // 現在値
         public float CurrentGsrRaw { get; private set; }
         public float CurrentGsrFiltered { get; private set; }
+        public float CurrentGsrDerivative { get; private set; } = 0f;
         public float CurrentThreshold => _threshold;
         public float Baseline { get; private set; }
         public bool IsExcited { get; private set; }
 
         // 状態変化検知用
         private bool _previousIsExcited;
+
+        // 微分値計算用
+        private float _previousGsrRaw = 0f;
+        private int _receivedSampleCount = 0;
 
         public List<float> GetDataHistory() => _gsrHistory.Select(value => value - Baseline).ToList();
         public void AdjustThreshold(float delta) => _threshold += delta;
@@ -117,12 +122,24 @@ namespace BioTag.Biometric
 
             CurrentGsrRaw = rawValue;
 
+            // 初期の外れ値をスキップ
+            if (_receivedSampleCount < 5)
+            {
+                _receivedSampleCount++;
+                _previousGsrRaw = rawValue;  // 次回の微分計算のために更新
+                return;
+            }
+
+            // 微分値を計算（前回値との差分）
+            CurrentGsrDerivative = rawValue - _previousGsrRaw;
+            _previousGsrRaw = rawValue;
+
             // 履歴にデータを追加（古いデータを削除）
             for (int i = 0; i < _historyLength - 1; i++)
             {
                 _gsrHistory[i] = _gsrHistory[i + 1];
             }
-            _gsrHistory[_historyLength - 1] = rawValue;
+            _gsrHistory[_historyLength - 1] = CurrentGsrDerivative;
 
             // フィルタ済み値を計算（移動平均）
             CurrentGsrFiltered = CalculateFilteredValue();

@@ -76,6 +76,7 @@ namespace ControlTask
         public int TimestampMS;
         public float GsrRaw;
         public float GsrFiltered;
+        public float GsrDerivative;
         public float GsrThreshold;
         public string TargetValue;
         public string CurrentState;
@@ -83,7 +84,7 @@ namespace ControlTask
         public int CumulativeScore;
 
         // ICsvSerializable実装
-        public string GetCsvHeader() => "participant_id,test_type,trial_number,timestamp_ms,gsr_raw,gsr_filtered,gsr_threshold,target_value,current_state,instantaneous_score,cumulative_score";
-        public string ToCsvRow() => $"{ParticipantID},{TestType},{TrialNumber},{TimestampMS},{GsrRaw:F2},{GsrFiltered:F2},{GsrThreshold:F2},{TargetValue},{CurrentState},{InstantaneousScore},{CumulativeScore}";
+        public string GetCsvHeader() => "participant_id,test_type,trial_number,timestamp_ms,gsr_raw,gsr_filtered,gsr_derivative,gsr_threshold,target_value,current_state,instantaneous_score,cumulative_score";
+        public string ToCsvRow() => $"{ParticipantID},{TestType},{TrialNumber},{TimestampMS},{GsrRaw:F2},{GsrFiltered:F2},{GsrDerivative:F2},{GsrThreshold:F2},{TargetValue},{CurrentState},{InstantaneousScore},{CumulativeScore}";
     }
 }

@@ -156,6 +156,7 @@ namespace ControlTask
                 _service.RecordTimeSeriesData(
                     _gsrProcessor.CurrentGsrRaw,
                     _gsrProcessor.CurrentGsrFiltered,
+                    _gsrProcessor.CurrentGsrDerivative,
                     _gsrProcessor.CurrentThreshold,
                     _model.TargetState.Value,
                     currentState,

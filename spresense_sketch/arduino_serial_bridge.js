@@ -6,15 +6,32 @@
 const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
 const net = require("net");
+const os = require("os");
 
-// コマンドライン引数からポート番号を取得 (例: node arduino_serial_bridge.js 101)
+// ローカルマシンのIPアドレスを自動検出
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // IPv4、内部アドレスでない（ループバックでない）
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '127.0.0.1'; // フォールバック
+}
+
+// コマンドライン引数からシリアルポート番号を取得
+// 使用例: node arduino_serial_bridge.js [serial_port_number]
+// TCP_HOSTは常に自動検出
 const args = process.argv.slice(2);
+const TCP_HOST = getLocalIP(); // 常に自動検出
 const portNumber = args[0] || "101"; // デフォルトは101
 
 // 設定
 const SERIAL_PORT = `/dev/cu.usbmodem${portNumber}`; // Arduinoのシリアルポート
 const BAUD_RATE = 9600;
-const TCP_HOST = "127.0.0.1";
 const TCP_PORT = 10001;
 
 // TCPクライアント
