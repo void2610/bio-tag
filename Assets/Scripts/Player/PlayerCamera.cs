@@ -14,6 +14,10 @@ public class PlayerCamera : MonoBehaviour
     public float minY = -20f;
     public float maxY =  80f;
 
+    [Header("Gamepad Sensitivity")]
+    [Tooltip("ゲームパッド入力時の感度倍率（マウスとの感度差を調整）")]
+    public float gamepadSensitivityMultiplier = 5.0f;
+
     [Header("Smooth")]
     public float followSpeed   = 10f;
     public float rotateSmooth  = 10f;
@@ -26,7 +30,15 @@ public class PlayerCamera : MonoBehaviour
     // 入力イベント
     public void OnLook(InputValue value)
     {
-        _lookInput = value.Get<Vector2>(); // ここでは代入だけ
+        _lookInput = value.Get<Vector2>();
+
+        // ゲームパッド入力の場合は感度倍率を適用
+        // ゲームパッドは-1.0～1.0に正規化されているため、マウスデルタより値が小さい
+        if (Gamepad.current != null &&
+            Mathf.Abs(_lookInput.x) <= 1.1f && Mathf.Abs(_lookInput.y) <= 1.1f)
+        {
+            _lookInput *= gamepadSensitivityMultiplier;
+        }
     }
 
     private void Update()
