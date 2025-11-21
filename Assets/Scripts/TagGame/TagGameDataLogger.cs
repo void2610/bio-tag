@@ -66,7 +66,7 @@ namespace TagGame
             _playerItTimeStart[initialItIndex] = Time.time;
 
             // ゲーム開始イベントを記録
-            RecordEvent("GameStart", initialItIndex, playerPositions, 0f, 0f, 0f, 0f, false);
+            RecordEvent("GameStart", initialItIndex, playerPositions, 0f, 0f, 0f, false);
 
             Debug.Log($"[TagGameLog] Game started. Initial It: Player{initialItIndex}");
         }
@@ -74,7 +74,7 @@ namespace TagGame
         /// <summary>
         /// 鬼交代イベントを記録
         /// </summary>
-        public void RecordItChange(int newItIndex, List<Vector3> playerPositions, float gsrRaw, float gsrFiltered, float gsrDerivative, float gsrThreshold, bool isExcited)
+        public void RecordItChange(int newItIndex, List<Vector3> playerPositions, float gsrRaw, float gsrDerivative, float gsrThreshold, bool isExcited)
         {
             // 前の鬼の時間を記録
             foreach (var (playerIndex, startTime) in _playerItTimeStart)
@@ -91,7 +91,7 @@ namespace TagGame
             _itChangeCount++;
 
             // イベントを記録
-            RecordEvent("ItChanged", newItIndex, playerPositions, gsrRaw, gsrFiltered, gsrDerivative, gsrThreshold, isExcited);
+            RecordEvent("ItChanged", newItIndex, playerPositions, gsrRaw, gsrDerivative, gsrThreshold, isExcited);
 
             Debug.Log($"[TagGameLog] It changed to Player{newItIndex}. Total changes: {_itChangeCount}");
         }
@@ -99,15 +99,15 @@ namespace TagGame
         /// <summary>
         /// 定期的なゲーム状態を記録（バイオメトリック + 位置）
         /// </summary>
-        public void RecordGameTick(int currentItIndex, List<Vector3> playerPositions, float gsrRaw, float gsrFiltered, float gsrDerivative, float gsrThreshold, bool isExcited)
+        public void RecordGameTick(int currentItIndex, List<Vector3> playerPositions, float gsrRaw, float gsrDerivative, float gsrThreshold, bool isExcited)
         {
-            RecordEvent("Tick", currentItIndex, playerPositions, gsrRaw, gsrFiltered, gsrDerivative, gsrThreshold, isExcited);
+            RecordEvent("Tick", currentItIndex, playerPositions, gsrRaw, gsrDerivative, gsrThreshold, isExcited);
         }
 
         /// <summary>
         /// イベントを記録する共通メソッド
         /// </summary>
-        private void RecordEvent(string eventType, int currentItIndex, List<Vector3> playerPositions, float gsrRaw, float gsrFiltered, float gsrDerivative, float gsrThreshold, bool isExcited)
+        private void RecordEvent(string eventType, int currentItIndex, List<Vector3> playerPositions, float gsrRaw, float gsrDerivative, float gsrThreshold, bool isExcited)
         {
             var timestamp = (int)((Time.time - _gameStartTime) * 1000); // ミリ秒
 
@@ -122,7 +122,6 @@ namespace TagGame
                 Player1PosX = playerPositions.Count > 1 ? playerPositions[1].x : 0,
                 Player1PosZ = playerPositions.Count > 1 ? playerPositions[1].z : 0,
                 GsrRaw = gsrRaw,
-                GsrFiltered = gsrFiltered,
                 GsrDerivative = gsrDerivative,
                 GsrThreshold = gsrThreshold,
                 IsExcited = isExcited
@@ -152,7 +151,7 @@ namespace TagGame
             var gameDuration = Time.time - _gameStartTime;
 
             // ゲーム終了イベントを記録
-            RecordEvent("GameEnd", -1, playerPositions, 0f, 0f, 0f, 0f, false);
+            RecordEvent("GameEnd", -1, playerPositions, 0f, 0f, 0f, false);
 
             // ゲームサマリーを記録
             var summary = new GameSummary

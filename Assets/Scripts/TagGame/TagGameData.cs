@@ -75,7 +75,6 @@ namespace TagGame
         public float Player1PosX;
         public float Player1PosZ;
         public float GsrRaw;
-        public float GsrFiltered;
         public float GsrDerivative;
         public float GsrThreshold;
         public bool IsExcited;
@@ -83,11 +82,11 @@ namespace TagGame
         public string GetCsvHeader() =>
             "participant_id,timestamp_ms,event_type,current_it_index," +
             "player0_pos_x,player0_pos_z,player1_pos_x,player1_pos_z," +
-            "gsr_raw,gsr_filtered,gsr_derivative,gsr_threshold,is_excited";
+            "gsr_raw,gsr_derivative,gsr_threshold,is_excited";
 
         public string ToCsvRow() =>
             $"{ParticipantID},{TimestampMS},{EventType},{CurrentItIndex}," +
             $"{Player0PosX:F2},{Player0PosZ:F2},{Player1PosX:F2},{Player1PosZ:F2}," +
-            $"{GsrRaw:F2},{GsrFiltered:F2},{GsrDerivative:F2},{GsrThreshold:F2},{IsExcited}";
+            $"{GsrRaw:F2},{GsrDerivative:F2},{GsrThreshold:F2},{IsExcited}";
     }
 }

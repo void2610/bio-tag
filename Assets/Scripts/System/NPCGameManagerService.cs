@@ -111,7 +111,7 @@ public partial class NPCGameManagerService : IGameManagerService
         if (EnableLogging && _dataLogger != null)
         {
             _dataLogger.RecordItChange(CurrentItIndex, GetPlayerPositions(),
-                _gsrProcessor.CurrentGsrRaw, _gsrProcessor.CurrentGsrFiltered,
+                _gsrProcessor.CurrentGsrRaw,
                 _gsrProcessor.CurrentGsrDerivative,
                 _gsrProcessor.CurrentThreshold,
                 GetIsExcited());
@@ -161,7 +161,7 @@ public partial class NPCGameManagerService : IGameManagerService
             if (Time.frameCount % 60 == 0)
             {
                 _dataLogger.RecordGameTick(CurrentItIndex, GetPlayerPositions(),
-                    _gsrProcessor.CurrentGsrRaw, _gsrProcessor.CurrentGsrFiltered, _gsrProcessor.CurrentGsrDerivative, _gsrProcessor.CurrentThreshold,
+                    _gsrProcessor.CurrentGsrRaw, _gsrProcessor.CurrentGsrDerivative, _gsrProcessor.CurrentThreshold,
                     GetIsExcited());
             }
         }

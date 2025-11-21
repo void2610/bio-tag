@@ -26,7 +26,6 @@ namespace BioTag.Biometric
 
         // 現在値
         public float CurrentGsrRaw { get; private set; }
-        public float CurrentGsrFiltered { get; private set; }
         public float CurrentGsrDerivative { get; private set; } = 0f;
         public float CurrentThreshold => _threshold;
         public float Baseline { get; private set; }
@@ -44,7 +43,6 @@ namespace BioTag.Biometric
         /// コンストラクタ
         /// </summary>
         /// <param name="historyLength">履歴保持数（デフォルト500）</param>
-        /// <param name="filterWindowSize">移動平均ウィンドウサイズ（デフォルト10）</param>
         /// <param name="derivativeWindowSize">微分計算のウィンドウサイズ（デフォルト10）</param>
         /// <param name="baseline">基準値（デフォルト512.0）</param>
         /// <param name="threshold">興奮判定閾値（デフォルト5.0）</param>
@@ -153,9 +151,6 @@ namespace BioTag.Biometric
                 _gsrHistory[i] = _gsrHistory[i + 1];
             }
             _gsrHistory[_historyLength - 1] = CurrentGsrDerivative;
-
-            // フィルタ済み値を計算（移動平均）
-            CurrentGsrFiltered = CalculateFilteredValue();
 
             // 興奮状態を判定
             var newIsExcited = CheckExcited();
