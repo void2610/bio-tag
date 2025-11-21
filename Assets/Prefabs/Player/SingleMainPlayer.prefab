@@ -2014,11 +2014,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCameraPrefab: {fileID: 5409894540958609353, guid: b4be50f88394247c3bd92fe52a339b1a, type: 3}
-  footstepAudioClips:
-  - {fileID: 8300000, guid: 2b199664bae4e417cb33f5f5a201f6cf, type: 3}
-  - {fileID: 8300000, guid: 22537e39083884518b948b6542639237, type: 3}
-  - {fileID: 8300000, guid: 43db7da7ab06f44108f08affa300c419, type: 3}
-  landingAudioClip: {fileID: 8300000, guid: 1e27bdb7813524c9791edadb30b134c1, type: 3}
   jumpPower: 6
   walkSpeed: 6
   velocity: {x: 0, y: 0, z: 0}
@@ -2073,7 +2068,7 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: Keyboard&Mouse
+  m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
