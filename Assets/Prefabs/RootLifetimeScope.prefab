@@ -50,7 +50,6 @@ MonoBehaviour:
   autoInjectGameObjects: []
   dataSource: 0
   historyLength: 500
-  filterWindowSize: 10
   derivativeWindowSize: 10
   baseline: 0
   threshold: 5
