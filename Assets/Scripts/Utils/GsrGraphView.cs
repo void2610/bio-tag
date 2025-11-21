@@ -33,7 +33,7 @@ public class GsrGraphView : MonoBehaviour
     /// <summary>
     /// グラフ線の色を設定
     /// </summary>
-    public void SetLineColor(Color c) => _lr.material.color = c;
+    private void SetLineColor(Color c) => _lr.material.color = c;
 
     /// <summary>
     /// 最後のデータ位置を取得（パーティクル配置用）
@@ -53,6 +53,16 @@ public class GsrGraphView : MonoBehaviour
     private void Update()
     {
         if (_gsrProcessor == null) return;
+
+        // グラフの色を興奮状態に応じて変更
+        if (_gsrProcessor.IsExcited)
+        {
+            SetLineColor(Color.red);  // 興奮状態：赤色
+        }
+        else
+        {
+            SetLineColor(Color.white); // 落ち着き状態：白色
+        }
 
         // GsrProcessorServiceからデータ履歴を取得
         var gsrHistory = _gsrProcessor.GetDataHistory();

@@ -52,7 +52,6 @@ public class ControlTaskLifetimeScope : LifetimeScope
         builder.RegisterComponentInHierarchy<TargetStateUI>();
         builder.RegisterComponentInHierarchy<TimerUI>();
         builder.RegisterComponentInHierarchy<ScoreUI>();
-        builder.RegisterComponentInHierarchy<GraphParticleView>();
         builder.RegisterComponentInHierarchy<GsrGraphView>();
 
         // EntryPoint
