@@ -133,6 +133,7 @@ namespace BioTag.Biometric
             _gsrRawHistory[_historyLength - 1] = rawValue;
 
             // 微分値を計算（windowSize分前の値との差分）
+            // GSRの変化率を計算し、興奮判定とグラフ表示に使用
             // 履歴が十分に溜まっている場合のみ計算
             var nonZeroCount = _gsrRawHistory.Count(v => v != 0f);
             if (nonZeroCount >= _derivativeWindowSize)
@@ -145,7 +146,7 @@ namespace BioTag.Biometric
                 CurrentGsrDerivative = 0f;
             }
 
-            // 微分値の履歴にデータを追加（グラフ表示用）
+            // 微分値の履歴にデータを追加（グラフ表示と興奮判定に使用）
             for (int i = 0; i < _historyLength - 1; i++)
             {
                 _gsrHistory[i] = _gsrHistory[i + 1];
@@ -173,23 +174,24 @@ namespace BioTag.Biometric
         }
 
         /// <summary>
-        /// 興奮状態を判定
-        /// ベースラインからの差分が閾値を超えた場合にExcitedと判定
+        /// GSRの変化率（微分値）が閾値を超えた場合にExcitedと判定
+        /// 急激な上昇または下降を検出
         /// </summary>
         private bool CheckExcited()
         {
-            // 最新の値をベースラインからの差分でチェック
-            var latestDiff = Mathf.Abs(_gsrRawHistory[^1] - Baseline);
-            if (latestDiff > _threshold)
+            // 最新の微分値の絶対値をチェック
+            // GSRが急激に変化している場合は興奮状態と判定
+            if (Mathf.Abs(CurrentGsrDerivative) > _threshold)
                 return true;
 
-            // 過去の値をチェック（閾値の倍率を大きく超えると判定）
+            // 過去の微分値をチェック（閾値の倍率を大きく超えると判定）
             var significantThreshold = _threshold * _thresholdMagnification;
             var checkCount = Mathf.FloorToInt(_checkLength * _historyLength);
-            for (var i = _gsrRawHistory.Count - 1; i >= 0 && _gsrRawHistory.Count - 1 - i < checkCount; i--)
+            for (var i = _gsrHistory.Count - 1; i >= 0 && _gsrHistory.Count - 1 - i < checkCount; i--)
             {
-                var diff = Mathf.Abs(_gsrRawHistory[i] - Baseline);
-                if (diff > significantThreshold) return true;
+                // 過去の急激な変化も考慮
+                if (Mathf.Abs(_gsrHistory[i]) > significantThreshold)
+                    return true;
             }
 
             return false;
