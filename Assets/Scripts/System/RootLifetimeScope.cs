@@ -25,7 +25,7 @@ public class RootLifetimeScope : LifetimeScope
 
     [Header("GSRプロセッサ設定")]
     [SerializeField] private int historyLength = 500;
-    [SerializeField] private int filterWindowSize = 10;
+    [SerializeField] private int derivativeWindowSize = 10;
     [SerializeField] private float baseline = 512f;
     [SerializeField] private float threshold = 5f;
     [SerializeField] private float thresholdMagnification = 1.5f;
@@ -37,14 +37,14 @@ public class RootLifetimeScope : LifetimeScope
         builder.Register(_ =>
             new GsrProcessorService(
                 historyLength,
-                filterWindowSize,
+                derivativeWindowSize,
                 baseline,
                 threshold,
                 thresholdMagnification,
                 checkLength),
             Lifetime.Singleton);
 
-        // GSRデータソース (TcpServer / SerialServer / GsrMock)
+        // GSRデータソース (TcpServer / GsrMock)
         switch (dataSource)
         {
             case GsrDataSource.TcpServer:

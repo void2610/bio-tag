@@ -14,11 +14,12 @@ namespace BioTag.Biometric
     public partial class GsrProcessorService
     {
         // データ保持
-        private readonly List<float> _gsrHistory = new();
+        private readonly List<float> _gsrRawHistory = new();  // 生の値の履歴（微分計算用）
+        private readonly List<float> _gsrHistory = new();     // 微分値の履歴（グラフ表示用）
         private readonly int _historyLength;
 
         // フィルタ・閾値設定
-        private readonly int _filterWindowSize;
+        private readonly int _derivativeWindowSize;
         private float _threshold;
         private readonly float _thresholdMagnification;
         private readonly float _checkLength;
@@ -34,10 +35,6 @@ namespace BioTag.Biometric
         // 状態変化検知用
         private bool _previousIsExcited;
 
-        // 微分値計算用
-        private float _previousGsrRaw = 0f;
-        private int _receivedSampleCount = 0;
-
         public List<float> GetDataHistory() => _gsrHistory.Select(value => value - Baseline).ToList();
         public void AdjustThreshold(float delta) => _threshold += delta;
         public void SetBaseline(float baseline) => Baseline = baseline;
@@ -48,20 +45,21 @@ namespace BioTag.Biometric
         /// </summary>
         /// <param name="historyLength">履歴保持数（デフォルト500）</param>
         /// <param name="filterWindowSize">移動平均ウィンドウサイズ（デフォルト10）</param>
+        /// <param name="derivativeWindowSize">微分計算のウィンドウサイズ（デフォルト10）</param>
         /// <param name="baseline">基準値（デフォルト512.0）</param>
         /// <param name="threshold">興奮判定閾値（デフォルト5.0）</param>
         /// <param name="thresholdMagnification">閾値倍率（デフォルト1.5）</param>
         /// <param name="checkLength">チェック範囲（デフォルト0.1 = 10%）</param>
         public GsrProcessorService(
             int historyLength = 500,
-            int filterWindowSize = 10,
+            int derivativeWindowSize = 10,
             float baseline = 512f,
             float threshold = 5f,
             float thresholdMagnification = 1.5f,
             float checkLength = 0.1f)
         {
             _historyLength = historyLength;
-            _filterWindowSize = filterWindowSize;
+            _derivativeWindowSize = derivativeWindowSize;
             Baseline = baseline;
             _threshold = threshold;
             _thresholdMagnification = thresholdMagnification;
@@ -70,6 +68,7 @@ namespace BioTag.Biometric
             // 履歴を初期化
             for (var i = 0; i < _historyLength; i++)
             {
+                _gsrRawHistory.Add(0f);
                 _gsrHistory.Add(0f);
             }
         }
@@ -80,16 +79,22 @@ namespace BioTag.Biometric
         /// </summary>
         public void AutoCalibrate()
         {
-            if (_gsrHistory.Count == 0) return;
+            if (_gsrRawHistory.Count == 0) return;
             SetBaseline(GetMean());
         }
 
         /// <summary>
         /// GSRデータの平均値を計算
         /// </summary>
+        public float GetRawMean()
+        {
+            if (_gsrRawHistory.Count == 0) return 0f;
+            return _gsrRawHistory.Average();
+        }
+
         public float GetMean()
         {
-            if (_gsrHistory.Count == 0) return 0f;
+            if (_gsrRawHistory.Count == 0) return 0f;
             return _gsrHistory.Average();
         }
 
@@ -98,10 +103,10 @@ namespace BioTag.Biometric
         /// </summary>
         public float GetStandardDeviation()
         {
-            if (_gsrHistory.Count == 0) return 0f;
+            if (_gsrRawHistory.Count == 0) return 0f;
             var mean = GetMean();
-            var sumOfSquares = _gsrHistory.Sum(v => (v - mean) * (v - mean));
-            return Mathf.Sqrt(sumOfSquares / _gsrHistory.Count);
+            var sumOfSquares = _gsrRawHistory.Sum(v => (v - mean) * (v - mean));
+            return Mathf.Sqrt(sumOfSquares / _gsrRawHistory.Count);
         }
 
         /// <summary>
@@ -122,19 +127,27 @@ namespace BioTag.Biometric
 
             CurrentGsrRaw = rawValue;
 
-            // 初期の外れ値をスキップ
-            if (_receivedSampleCount < 5)
+            // 生の値の履歴にデータを追加（古いデータを削除）
+            for (int i = 0; i < _historyLength - 1; i++)
             {
-                _receivedSampleCount++;
-                _previousGsrRaw = rawValue;  // 次回の微分計算のために更新
-                return;
+                _gsrRawHistory[i] = _gsrRawHistory[i + 1];
+            }
+            _gsrRawHistory[_historyLength - 1] = rawValue;
+
+            // 微分値を計算（windowSize分前の値との差分）
+            // 履歴が十分に溜まっている場合のみ計算
+            var nonZeroCount = _gsrRawHistory.Count(v => v != 0f);
+            if (nonZeroCount >= _derivativeWindowSize)
+            {
+                var pastValue = _gsrRawHistory[_historyLength - _derivativeWindowSize];
+                CurrentGsrDerivative = rawValue - pastValue;
+            }
+            else
+            {
+                CurrentGsrDerivative = 0f;
             }
 
-            // 微分値を計算（前回値との差分）
-            CurrentGsrDerivative = rawValue - _previousGsrRaw;
-            _previousGsrRaw = rawValue;
-
-            // 履歴にデータを追加（古いデータを削除）
+            // 微分値の履歴にデータを追加（グラフ表示用）
             for (int i = 0; i < _historyLength - 1; i++)
             {
                 _gsrHistory[i] = _gsrHistory[i + 1];
@@ -165,38 +178,22 @@ namespace BioTag.Biometric
         }
 
         /// <summary>
-        /// フィルタ済みGSR値を計算（移動平均）
-        /// </summary>
-        private float CalculateFilteredValue()
-        {
-            if (_gsrHistory.Count == 0) return 0f;
-
-            var windowSize = Mathf.Min(_filterWindowSize, _gsrHistory.Count);
-            var sum = 0f;
-            for (var i = _gsrHistory.Count - windowSize; i < _gsrHistory.Count; i++)
-            {
-                sum += _gsrHistory[i];
-            }
-            return sum / windowSize;
-        }
-
-        /// <summary>
         /// 興奮状態を判定
         /// ベースラインからの差分が閾値を超えた場合にExcitedと判定
         /// </summary>
         private bool CheckExcited()
         {
             // 最新の値をベースラインからの差分でチェック
-            var latestDiff = Mathf.Abs(_gsrHistory[^1] - Baseline);
+            var latestDiff = Mathf.Abs(_gsrRawHistory[^1] - Baseline);
             if (latestDiff > _threshold)
                 return true;
 
             // 過去の値をチェック（閾値の倍率を大きく超えると判定）
             var significantThreshold = _threshold * _thresholdMagnification;
             var checkCount = Mathf.FloorToInt(_checkLength * _historyLength);
-            for (var i = _gsrHistory.Count - 1; i >= 0 && _gsrHistory.Count - 1 - i < checkCount; i--)
+            for (var i = _gsrRawHistory.Count - 1; i >= 0 && _gsrRawHistory.Count - 1 - i < checkCount; i--)
             {
-                var diff = Mathf.Abs(_gsrHistory[i] - Baseline);
+                var diff = Mathf.Abs(_gsrRawHistory[i] - Baseline);
                 if (diff > significantThreshold) return true;
             }
 

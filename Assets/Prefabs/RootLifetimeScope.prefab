@@ -51,7 +51,8 @@ MonoBehaviour:
   dataSource: 0
   historyLength: 500
   filterWindowSize: 10
-  baseline: 515
+  derivativeWindowSize: 10
+  baseline: 0
   threshold: 5
   thresholdMagnification: 1
   checkLength: 0.01
