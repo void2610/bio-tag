@@ -771,18 +771,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9dad25cabf734f6a91a0b6c55b4e255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  graphView: {fileID: 302484807}
---- !u!114 &302484807 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6202441889949045532, guid: 7bb2e224b9e864c7cb38fb779ed00840, type: 3}
-  m_PrefabInstance: {fileID: 8821250869818608245}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eec443836b5484df7b84b6caf29de41d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &302484808 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8670070371062992140, guid: 7bb2e224b9e864c7cb38fb779ed00840, type: 3}
@@ -1124,25 +1112,24 @@ MonoBehaviour:
   parentReference:
     TypeName: 
   autoRun: 1
-  autoInjectGameObjects:
-  - {fileID: 0}
+  autoInjectGameObjects: []
   experimentConfig:
-    calibrationDuration: 3
-    trialCount: 9
-    goalPresentationDuration: 3
-    preparationDuration: 2
+    calibrationDuration: 10
+    trialCount: 3
+    goalPresentationDuration: 5
+    preparationDuration: 3
     measurementDuration: 20
     feedbackDuration: 5
-    restDuration: 0
+    restDuration: 5
   enableLogging: 1
-  participantId: P001
+  participantId: void
   experimentGroup: 0
   testType: 0
-  roomTemperature: 23.5
+  roomTemperature: 22
   roomHumidity: 45
-  baselineGsr: 2.45
-  minGsr: 1.82
-  maxGsr: 4.31
+  baselineGsr: 0
+  minGsr: 0
+  maxGsr: 0
 --- !u!4 &1351680352
 Transform:
   m_ObjectHideFlags: 0
