@@ -24,10 +24,8 @@ public class ControlTaskLifetimeScope : LifetimeScope
     [Header("キャリブレーション設定")]
     [Tooltip("実験ログ記録用のベースラインGSR値（処理済み値）")]
     [SerializeField] private float baselineGsr = 2.45f;
-    [Tooltip("実験ログ記録用の最小GSR値（処理済み値）")]
-    [SerializeField] private float minGsr = 1.82f;
-    [Tooltip("実験ログ記録用の最大GSR値（処理済み値）")]
-    [SerializeField] private float maxGsr = 4.31f;
+    [Tooltip("実験ログ記録用の閾値GSR値（処理済み値）")]
+    [SerializeField] private float thresholdGsr = 3.0f;
 
     protected override void Configure(IContainerBuilder builder)
     {
@@ -62,8 +60,7 @@ public class ControlTaskLifetimeScope : LifetimeScope
             .WithParameter("roomTemperature", roomTemperature)
             .WithParameter("roomHumidity", roomHumidity)
             .WithParameter("baselineGsr", baselineGsr)
-            .WithParameter("minGsr", minGsr)
-            .WithParameter("maxGsr", maxGsr);
+            .WithParameter("thresholdGsr", thresholdGsr);
     }
 
     protected override void Awake()

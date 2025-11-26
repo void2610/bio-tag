@@ -43,8 +43,7 @@ namespace ControlTask
     public class CalibrationData
     {
         public float baselineGsr;
-        public float minGsr;
-        public float maxGsr;
+        public float thresholdGsr;
         public int calibrationDurationMS;
     }
 

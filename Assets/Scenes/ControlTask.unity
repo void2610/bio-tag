@@ -1127,9 +1127,8 @@ MonoBehaviour:
   testType: 0
   roomTemperature: 22
   roomHumidity: 45
-  baselineGsr: 0
-  minGsr: 0
-  maxGsr: 0
+  baselineGsr: 760
+  thresholdGsr: 5
 --- !u!4 &1351680352
 Transform:
   m_ObjectHideFlags: 0

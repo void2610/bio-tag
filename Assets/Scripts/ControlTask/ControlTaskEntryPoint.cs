@@ -24,8 +24,7 @@ namespace ControlTask
         private readonly float _roomTemperature;
         private readonly float _roomHumidity;
         private readonly float _baselineGsr;
-        private readonly float _minGsr;
-        private readonly float _maxGsr;
+        private readonly float _thresholdGsr;
 
         // 実験開始フラグ
         private bool _experimentStarted = false;
@@ -43,8 +42,7 @@ namespace ControlTask
             float roomTemperature,
             float roomHumidity,
             float baselineGsr,
-            float minGsr,
-            float maxGsr)
+            float thresholdGsr)
         {
             _model = model;
             _presenter = presenter;
@@ -60,8 +58,7 @@ namespace ControlTask
             _roomTemperature = roomTemperature;
             _roomHumidity = roomHumidity;
             _baselineGsr = baselineGsr;
-            _minGsr = minGsr;
-            _maxGsr = maxGsr;
+            _thresholdGsr = thresholdGsr;
         }
 
         public void Start()
@@ -104,8 +101,7 @@ namespace ControlTask
                 calibration = new CalibrationData
                 {
                     baselineGsr = _baselineGsr,
-                    minGsr = _minGsr,
-                    maxGsr = _maxGsr,
+                    thresholdGsr = _thresholdGsr,
                     calibrationDurationMS = (int)(_model.CalibrationDuration * 1000)
                 },
                 roomTemperature = _roomTemperature,
