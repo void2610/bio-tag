@@ -76,8 +76,9 @@ namespace ControlTask
                 var targetState = (i % 2 == 0) ? ControlState.Calmed : ControlState.Excited;
 
                 // 目標提示
-                _model.ChangePhase(ControlState.GoalPresentation);
                 _model.CurrentTrialTargetState = targetState;
+                _targetStateUI.SetNextTargetState(targetState); // UIに次の目標を設定
+                _model.ChangePhase(ControlState.GoalPresentation);
                 Debug.Log($"[ControlTaskPresenter] Trial {i + 1}/{_model.TrialCount}: Goal = {targetState}");
                 await UniTask.Delay((int)(_model.GoalPresentationDuration * 1000));
 
