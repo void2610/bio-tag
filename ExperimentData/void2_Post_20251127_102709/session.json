@@ -1,0 +1,15 @@
+{
+    "participantInfo": {
+        "participantID": "void2",
+        "group": "BfHuman",
+        "testType": "Post"
+    },
+    "calibration": {
+        "baselineGsr": 760.0,
+        "thresholdGsr": 5.0,
+        "calibrationDurationMS": 10000
+    },
+    "datetime": "2025-11-27T10:27:09",
+    "roomTemperature": 22.0,
+    "roomHumidity": 45.0
+}
