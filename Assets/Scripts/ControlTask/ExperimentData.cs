@@ -50,8 +50,6 @@ namespace ControlTask
     // 試行サマリーデータ（CSV形式で保存）
     public class TrialSummary : ICsvSerializable
     {
-        public string ParticipantID;
-        public string TestType;
         public int TrialNumber;
         public string TargetState;
         public int StartTimeMS;  // 試行開始時刻（セッション開始からの経過時間）
@@ -62,15 +60,13 @@ namespace ControlTask
         public int ResponseTimeMS;
 
         // ICsvSerializable実装
-        public string GetCsvHeader() => "participant_id,test_type,trial_number,target_state,start_time_ms,score,success_rate,mean_gsr,sd_gsr,response_time_ms";
-        public string ToCsvRow() => $"{ParticipantID},{TestType},{TrialNumber},{TargetState},{StartTimeMS},{Score:F1},{SuccessRate:F2},{MeanGsr:F2},{SDGsr:F2},{ResponseTimeMS}";
+        public string GetCsvHeader() => "trial_number,target_state,start_time_ms,score,success_rate,mean_gsr,sd_gsr,response_time_ms";
+        public string ToCsvRow() => $"{TrialNumber},{TargetState},{StartTimeMS},{Score:F1},{SuccessRate:F2},{MeanGsr:F2},{SDGsr:F2},{ResponseTimeMS}";
     }
 
     // 時系列データ（CSV形式で保存）
     public class TimeSeriesRecord : ICsvSerializable
     {
-        public string ParticipantID;
-        public string TestType;
         public int TrialNumber;
         public int TimestampMS;
         public float GsrRaw;
@@ -82,7 +78,7 @@ namespace ControlTask
         public int CumulativeScore;
 
         // ICsvSerializable実装
-        public string GetCsvHeader() => "participant_id,test_type,trial_number,timestamp_ms,gsr_raw,gsr_derivative,gsr_threshold,target_value,current_state,instantaneous_score,cumulative_score";
-        public string ToCsvRow() => $"{ParticipantID},{TestType},{TrialNumber},{TimestampMS},{GsrRaw:F2},{GsrDerivative:F2},{GsrThreshold:F2},{TargetValue},{CurrentState},{InstantaneousScore},{CumulativeScore}";
+        public string GetCsvHeader() => "trial_number,timestamp_ms,gsr_raw,gsr_derivative,gsr_threshold,target_value,current_state,instantaneous_score,cumulative_score";
+        public string ToCsvRow() => $"{TrialNumber},{TimestampMS},{GsrRaw:F2},{GsrDerivative:F2},{GsrThreshold:F2},{TargetValue},{CurrentState},{InstantaneousScore},{CumulativeScore}";
     }
 }

@@ -78,8 +78,6 @@ namespace ControlTask
 
             var record = new TimeSeriesRecord
             {
-                ParticipantID = _sessionInfo.participantInfo.participantID,
-                TestType = _sessionInfo.participantInfo.testType,
                 TrialNumber = _currentTrialNumber,
                 TimestampMS = timestamp,
                 GsrRaw = gsrRaw,
@@ -108,8 +106,6 @@ namespace ControlTask
 
             var summary = new TrialSummary
             {
-                ParticipantID = _sessionInfo.participantInfo.participantID,
-                TestType = _sessionInfo.participantInfo.testType,
                 TrialNumber = _currentTrialNumber,
                 TargetState = targetState.ToString(),
                 StartTimeMS = startTime,

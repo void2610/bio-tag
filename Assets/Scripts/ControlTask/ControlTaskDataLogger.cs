@@ -82,8 +82,6 @@ namespace ControlTask
 
             var summary = new TrialSummary
             {
-                ParticipantID = _sessionInfo.participantInfo.participantID,
-                TestType = _sessionInfo.participantInfo.testType,
                 TrialNumber = _currentTrialNumber,
                 TargetState = targetState.ToString(),
                 StartTimeMS = startTime,
@@ -103,18 +101,19 @@ namespace ControlTask
         /// <summary>
         /// 時系列データの記録（高頻度呼び出し用）
         /// </summary>
-        public void RecordTimeSeriesData(float gsrRaw, ControlState targetState, ControlState currentState,
+        public void RecordTimeSeriesData(float gsrRaw, float gsrDerivative, float gsrThreshold,
+                                         ControlState targetState, ControlState currentState,
                                          int instantaneousScore, int cumulativeScore)
         {
             var timestamp = (int)((Time.time - _sessionStartTime) * 1000); // ミリ秒
 
             var record = new TimeSeriesRecord
             {
-                ParticipantID = _sessionInfo.participantInfo.participantID,
-                TestType = _sessionInfo.participantInfo.testType,
                 TrialNumber = _currentTrialNumber,
                 TimestampMS = timestamp,
                 GsrRaw = gsrRaw,
+                GsrDerivative = gsrDerivative,
+                GsrThreshold = gsrThreshold,
                 TargetValue = targetState.ToString(),
                 CurrentState = currentState.ToString(),
                 InstantaneousScore = instantaneousScore,
