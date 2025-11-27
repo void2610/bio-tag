@@ -1122,7 +1122,7 @@ MonoBehaviour:
     feedbackDuration: 5
     restDuration: 5
   enableLogging: 1
-  participantId: void
+  participantId: void2
   experimentGroup: 0
   testType: 0
   roomTemperature: 22

@@ -1,0 +1,16 @@
+{
+    "participantInfo": {
+        "participantID": "void2",
+        "group": "BfHuman",
+        "testType": "Pre"
+    },
+    "calibration": {
+        "baselineGsr": 760.0,
+        "thresholdGsr": 5.0,
+        "calibrationDurationMS": 10000
+    },
+    "datetime": "2025-11-27T10:09:15",
+    "roomTemperature": 22.0,
+    "roomHumidity": 45.0,
+    "notes": "自分のデータ。比較用にちょっと変化多め？"
+}
