@@ -108,6 +108,7 @@ namespace ControlTask
             }
 
             // 全試行完了
+            _model.ChangePhase(ControlState.Finished);
             Debug.Log($"[ControlTaskPresenter] All trials complete! Total Score: {_model.Score.Value}");
             _service.EndSession();
         }

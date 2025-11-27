@@ -43,6 +43,7 @@ namespace ControlTask
                 ControlState.Calmed => "目標: 冷静",
                 ControlState.Feedback => "結果表示中",
                 ControlState.Rest => "休憩中",
+                ControlState.Finished => "終了",
                 _ => ""
             };
         }

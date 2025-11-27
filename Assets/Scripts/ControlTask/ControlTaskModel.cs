@@ -15,7 +15,8 @@ namespace ControlTask
         Excited,          // 測定（興奮）
         Calmed,           // 測定（冷静）
         Feedback,         // フィードバック
-        Rest              // 休憩
+        Rest,             // 休憩
+        Finished          // 終了
     }
 
     /// <summary>
