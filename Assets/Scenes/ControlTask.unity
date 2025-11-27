@@ -1115,14 +1115,14 @@ MonoBehaviour:
   autoInjectGameObjects: []
   experimentConfig:
     calibrationDuration: 10
-    trialCount: 3
+    trialCount: 6
     goalPresentationDuration: 5
     preparationDuration: 3
     measurementDuration: 20
     feedbackDuration: 5
     restDuration: 5
   enableLogging: 1
-  participantId: void2
+  participantId: aaa
   experimentGroup: 0
   testType: 1
   roomTemperature: 22
