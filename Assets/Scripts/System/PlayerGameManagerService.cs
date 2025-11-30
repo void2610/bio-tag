@@ -5,6 +5,7 @@ using VitalRouter;
 using BioTag.GameUI;
 using BioTag.Biometric;
 using TagGame;
+using Experiment;
 
 /// <summary>
 /// WithPlayerシーン用ゲームマネージャーサービス
@@ -21,6 +22,7 @@ public partial class PlayerGameManagerService : IGameManagerService
 
     private float _startTime;
     private readonly GameConfig _gameConfig;
+    private readonly ExperimentSettings _experimentSettings;
     private TagGameDataLogger _dataLogger;
     private IPlayerSpawnService _playerSpawnService;
     private readonly GsrProcessorService _gsrProcessor;
@@ -28,17 +30,12 @@ public partial class PlayerGameManagerService : IGameManagerService
     // 生体状態（VitalRouterで更新）
     private bool _isExcited = false;
 
-    // ログ設定
-    public bool EnableLogging { get; set; } = false;
-    public string ParticipantID { get; set; } = "P001";
-    public string ExperimentGroup { get; set; } = "BfHuman";
-    public string TestType { get; set; } = "Pre";
-
     [Inject]
-    public PlayerGameManagerService(GameConfig gameConfig, GsrProcessorService gsrProcessor)
+    public PlayerGameManagerService(GameConfig gameConfig, GsrProcessorService gsrProcessor, ExperimentSettings experimentSettings)
     {
         _gameConfig = gameConfig;
         _gsrProcessor = gsrProcessor;
+        _experimentSettings = experimentSettings;
     }
 
     /// <summary>
@@ -60,7 +57,7 @@ public partial class PlayerGameManagerService : IGameManagerService
         Router.Default.PublishAsync(new ItChangedCommand(CurrentItIndex, itName, null));
 
         // ログ記録開始
-        if (EnableLogging)
+        if (_experimentSettings != null && _experimentSettings.enableLogging)
         {
             InitializeLogger();
             _dataLogger.RecordGameStart(CurrentItIndex, GetPlayerPositions());
@@ -76,14 +73,14 @@ public partial class PlayerGameManagerService : IGameManagerService
 
         var sessionInfo = new TagGameSessionInfo
         {
-            participantID = ParticipantID,
-            experimentGroup = ExperimentGroup,
+            participantID = _experimentSettings.participantId,
+            experimentGroup = _experimentSettings.experimentGroup.ToString(),
             gameMode = GameMode.PlayerVsPlayer,
             playerCount = 2,
             npcCount = 0,
             gameLengthSeconds = _gameConfig.gameLength,
-            roomTemperature = 23.5f,
-            roomHumidity = 45.0f
+            roomTemperature = _experimentSettings.roomTemperature,
+            roomHumidity = _experimentSettings.roomHumidity
         };
 
         _dataLogger.StartSession(sessionInfo);
@@ -104,7 +101,7 @@ public partial class PlayerGameManagerService : IGameManagerService
             Router.Default.PublishAsync(new ItChangedCommand(CurrentItIndex, itName, targetTransform));
 
             // 鬼交代をログ記録
-            if (EnableLogging && _dataLogger != null)
+            if (_dataLogger != null)
             {
                 _dataLogger.RecordItChange(CurrentItIndex, GetPlayerPositions(),
                     _gsrProcessor.CurrentGsrRaw,
@@ -114,7 +111,7 @@ public partial class PlayerGameManagerService : IGameManagerService
             }
         }
     }
-    
+
     public void SetGameState(int state)
     {
         if (GameState != state)
@@ -126,18 +123,18 @@ public partial class PlayerGameManagerService : IGameManagerService
             Router.Default.PublishAsync(new GameStateChangedCommand(state, previousState));
         }
     }
-    
+
     public void AddPlayerName(string name)
     {
         PlayerNames.Add(name);
         PlayerScores.Add(0);
     }
-    
+
     public float GetElapsedTime()
     {
         return Time.time - _startTime;
     }
-    
+
     public float GetGameLength()
     {
         return _gameConfig.gameLength;
@@ -148,7 +145,7 @@ public partial class PlayerGameManagerService : IGameManagerService
     /// </summary>
     public void UpdateLogging()
     {
-        if (EnableLogging && _dataLogger != null && GameState == 1)
+        if (_dataLogger != null && GameState == 1)
         {
             // 1秒ごとに記録（フレームレート非依存）
             if (Time.frameCount % 60 == 0)
@@ -167,7 +164,7 @@ public partial class PlayerGameManagerService : IGameManagerService
     /// </summary>
     public void EndGame()
     {
-        if (EnableLogging && _dataLogger != null)
+        if (_dataLogger != null)
         {
             _dataLogger.RecordGameEnd(PlayerNames, PlayerScores, GetPlayerPositions());
             _dataLogger.Dispose();

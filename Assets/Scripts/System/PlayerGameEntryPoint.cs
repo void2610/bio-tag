@@ -4,7 +4,6 @@ using VContainer.Unity;
 using System;
 using VitalRouter;
 using BioTag.GameUI;
-using Experiment;
 
 /// <summary>
 /// WithPlayerシーンのエントリーポイント
@@ -17,8 +16,6 @@ public class PlayerGameEntryPoint : IStartable, ITickable
     private readonly IPlayerDataService _playerDataService;
     private readonly IGameUIService _gameUI;
     private readonly GameConfig _gameConfig;
-    private readonly ExperimentSettings _experimentSettings;
-    private readonly ExperimentLoggingService _loggingService;
 
     private bool _isPlayerReady = false;
 
@@ -28,21 +25,13 @@ public class PlayerGameEntryPoint : IStartable, ITickable
         IPlayerSpawnService playerSpawn,
         IPlayerDataService playerDataService,
         IGameUIService gameUI,
-        GameConfig gameConfig,
-        IObjectResolver resolver)
+        GameConfig gameConfig)
     {
         _gameManager = gameManager;
         _playerSpawn = playerSpawn;
         _playerDataService = playerDataService;
         _gameUI = gameUI;
         _gameConfig = gameConfig;
-
-        // ExperimentSettingsをOptionalに解決
-        if (resolver.TryResolve<ExperimentSettings>(out var settings))
-        {
-            _experimentSettings = settings;
-            _loggingService = new ExperimentLoggingService(settings);
-        }
     }
 
     public void Start()
@@ -52,9 +41,6 @@ public class PlayerGameEntryPoint : IStartable, ITickable
         {
             playerGameManager.SetPlayerSpawnService(_playerSpawn);
         }
-
-        // 実験セッションを開始
-        _loggingService?.StartSession("TagGame_Player");
 
         InitializeGame();
 
@@ -153,7 +139,6 @@ public class PlayerGameEntryPoint : IStartable, ITickable
                 if (_gameManager is PlayerGameManagerService gameManagerService && _gameManager.GetElapsedTime() >= gameManagerService.GetGameLength())
                 {
                     _gameManager.EndGame();
-                    _loggingService?.EndSession();
                     _gameManager.SetGameState(2);
                 }
 
