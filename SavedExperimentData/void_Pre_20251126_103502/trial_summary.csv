@@ -1,4 +1,0 @@
-﻿participant_id,test_type,trial_number,target_state,start_time_ms,score,success_rate,mean_gsr,sd_gsr,response_time_ms
-void,Pre,1,Calmed,18011,4511.0,3.76,766.80,0.46,0
-void,Pre,2,Excited,56024,1307.0,1.09,743.18,6.63,0
-void,Pre,3,Calmed,94042,5754.0,4.80,712.04,1.52,0

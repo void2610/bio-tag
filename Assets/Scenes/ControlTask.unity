@@ -1122,9 +1122,9 @@ MonoBehaviour:
     feedbackDuration: 5
     restDuration: 5
   enableLogging: 1
-  participantId: aaa
+  participantId: izumi
   experimentGroup: 0
-  testType: 1
+  testType: 0
   roomTemperature: 22
   roomHumidity: 45
   baselineGsr: 760

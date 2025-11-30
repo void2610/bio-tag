@@ -1,6 +1,6 @@
 {
     "participantInfo": {
-        "participantID": "void2",
+        "participantID": "izumi",
         "group": "BfHuman",
         "testType": "Pre"
     },
@@ -9,7 +9,7 @@
         "thresholdGsr": 5.0,
         "calibrationDurationMS": 10000
     },
-    "datetime": "2025-11-27T10:24:29",
+    "datetime": "2025-11-30T21:17:20",
     "roomTemperature": 22.0,
     "roomHumidity": 45.0
 }
