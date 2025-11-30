@@ -370,11 +370,26 @@ public class Npc : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player") || _index == _gameManager?.CurrentItIndex) return;
+        if (!other.CompareTag("Player")) return;
 
-        // 自分自身のTransformを含めてCommandを発行
-        Router.Default.PublishAsync(new PlayerTaggedCommand(_index, transform));
-        Wait(1f).Forget();
+        var currentItIndex = _gameManager?.CurrentItIndex;
+
+        // 自分が鬼の場合：相手（プレイヤー）を新しい鬼にする
+        if (_index == currentItIndex)
+        {
+            var targetPlayer = other.GetComponent<PlayerBase>();
+            if (targetPlayer != null)
+            {
+                Router.Default.PublishAsync(new PlayerTaggedCommand(targetPlayer.Index, other.transform));
+                Wait(1f).Forget();
+            }
+        }
+        // 自分が鬼でない場合：鬼にタッチされたので自分が新しい鬼になる
+        else
+        {
+            Router.Default.PublishAsync(new PlayerTaggedCommand(_index, transform));
+            Wait(1f).Forget();
+        }
     }
     
     private void OnDestroy()
