@@ -1,7 +1,0 @@
-﻿trial_number,target_state,start_time_ms,score,success_rate,mean_gsr,sd_gsr,response_time_ms
-1,Calmed,18004,5870.0,4.89,532.17,4.04,0
-2,Excited,56015,4661.0,3.88,486.92,11.65,0
-3,Calmed,94023,4100.0,3.42,479.76,14.44,0
-4,Excited,132031,2698.0,2.25,446.69,4.60,0
-5,Calmed,170039,4592.0,3.83,451.16,3.90,0
-6,Excited,208044,4252.0,3.54,435.63,6.83,0
