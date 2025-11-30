@@ -2,6 +2,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 using BioTag.Camera;
+using Experiment;
 
 namespace ControlTask
 {
@@ -16,15 +17,7 @@ namespace ControlTask
         private readonly IControlTaskService _service;
         private readonly CameraEffectService _cameraEffect;
         private readonly TcpServer _tcpServer; // Optional: GsrMock使用時はnull
-
-        // 実験設定（LifetimeScopeから注入）
-        private readonly string _participantId;
-        private readonly ExperimentGroup _experimentGroup;
-        private readonly TestType _testType;
-        private readonly float _roomTemperature;
-        private readonly float _roomHumidity;
-        private readonly float _baselineGsr;
-        private readonly float _thresholdGsr;
+        private readonly ExperimentSettings _experimentSettings;
 
         // 実験開始フラグ
         private bool _experimentStarted = false;
@@ -35,14 +28,7 @@ namespace ControlTask
             ControlTaskPresenter presenter,
             IControlTaskService service,
             CameraEffectService cameraEffect,
-            IObjectResolver resolver,
-            string participantId,
-            ExperimentGroup experimentGroup,
-            TestType testType,
-            float roomTemperature,
-            float roomHumidity,
-            float baselineGsr,
-            float thresholdGsr)
+            IObjectResolver resolver)
         {
             _model = model;
             _presenter = presenter;
@@ -52,13 +38,8 @@ namespace ControlTask
             // TcpServerをOptionalに解決（GsrMock使用時はnull）
             resolver.TryResolve<TcpServer>(out _tcpServer);
 
-            _participantId = participantId;
-            _experimentGroup = experimentGroup;
-            _testType = testType;
-            _roomTemperature = roomTemperature;
-            _roomHumidity = roomHumidity;
-            _baselineGsr = baselineGsr;
-            _thresholdGsr = thresholdGsr;
+            // ExperimentSettingsをOptionalに解決
+            resolver.TryResolve<ExperimentSettings>(out _experimentSettings);
         }
 
         public void Start()
@@ -89,27 +70,19 @@ namespace ControlTask
             if (_experimentStarted) return;
             _experimentStarted = true;
 
-            // セッション情報を生成
-            var sessionInfo = new SessionInfo
+            // ExperimentSettingsからセッション情報を生成
+            if (_experimentSettings != null)
             {
-                participantInfo = new ParticipantInfo
-                {
-                    participantID = _participantId,
-                    group = _experimentGroup.ToString(),
-                    testType = _testType.ToString()
-                },
-                calibration = new CalibrationData
-                {
-                    baselineGsr = _baselineGsr,
-                    thresholdGsr = _thresholdGsr,
-                    calibrationDurationMS = (int)(_model.CalibrationDuration * 1000)
-                },
-                roomTemperature = _roomTemperature,
-                roomHumidity = _roomHumidity
-            };
+                var calibrationDurationMS = (int)(_model.CalibrationDuration * 1000);
+                var sessionInfo = _experimentSettings.CreateSessionInfo(calibrationDurationMS);
 
-            // セッション開始
-            _service.StartSession(sessionInfo);
+                // セッション開始
+                _service.StartSession(sessionInfo);
+            }
+            else
+            {
+                Debug.LogWarning("[ControlTaskEntryPoint] ExperimentSettings not found, skipping session logging");
+            }
 
             // 実験フロー開始
             _presenter.StartExperiment();

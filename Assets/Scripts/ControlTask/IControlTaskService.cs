@@ -1,3 +1,5 @@
+using Experiment;
+
 namespace ControlTask
 {
     /// <summary>

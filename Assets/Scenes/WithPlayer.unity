@@ -2697,6 +2697,7 @@ MonoBehaviour:
     gameLength: 15
     npcCount: 0
   audioConfig: {fileID: 11400000, guid: 0c7b1bca4b9de44debe4d804027b52e1, type: 2}
+  experimentSettings: {fileID: 11400000, guid: a42694e60e2964894bb092ff0ade85b1, type: 2}
 --- !u!1 &1375775660
 GameObject:
   m_ObjectHideFlags: 0

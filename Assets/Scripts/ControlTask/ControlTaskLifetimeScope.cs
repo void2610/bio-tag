@@ -4,6 +4,7 @@ using VContainer.Unity;
 using VitalRouter;
 using BioTag.Camera;
 using ControlTask;
+using Experiment;
 
 /// <summary>
 /// ControlTaskシーンのVContainer LifetimeScope
@@ -12,34 +13,28 @@ public class ControlTaskLifetimeScope : LifetimeScope
 {
     [Header("実験設定")]
     [SerializeField] private ExperimentConfig experimentConfig = new ExperimentConfig();
-
-    [Header("ログ設定")]
-    [SerializeField] private bool enableLogging = true;
-    [SerializeField] private string participantId = "P001";
-    [SerializeField] private ExperimentGroup experimentGroup = ExperimentGroup.BfHuman;
-    [SerializeField] private TestType testType = TestType.Pre;
-    [SerializeField] private float roomTemperature = 23.5f;
-    [SerializeField] private float roomHumidity = 45.0f;
-
-    [Header("キャリブレーション設定")]
-    [Tooltip("実験ログ記録用のベースラインGSR値（処理済み値）")]
-    [SerializeField] private float baselineGsr = 2.45f;
-    [Tooltip("実験ログ記録用の閾値GSR値（処理済み値）")]
-    [SerializeField] private float thresholdGsr = 3.0f;
+    [SerializeField] private ExperimentSettings experimentSettings;
 
     protected override void Configure(IContainerBuilder builder)
     {
         // ExperimentConfigをインスタンス登録
         builder.RegisterInstance(experimentConfig);
 
+        // ExperimentSettingsをインスタンス登録
+        if (experimentSettings != null)
+        {
+            builder.RegisterInstance(experimentSettings);
+        }
+
         // Model (ExperimentConfigから設定を注入)
         builder.Register<ControlTaskModel>(Lifetime.Singleton).AsSelf();
 
         // Service
-        builder.Register<IControlTaskService>(_ =>
+        builder.Register<IControlTaskService>(container =>
         {
+            var settings = container.TryResolve<ExperimentSettings>(out var s) ? s : null;
             var service = new ControlTaskService();
-            service.EnableLogging = enableLogging;
+            service.EnableLogging = settings?.enableLogging ?? true;
             return service;
         }, Lifetime.Singleton);
 
@@ -53,14 +48,7 @@ public class ControlTaskLifetimeScope : LifetimeScope
         builder.RegisterComponentInHierarchy<GsrGraphView>();
 
         // EntryPoint
-        builder.RegisterEntryPoint<ControlTaskEntryPoint>()
-            .WithParameter("participantId", participantId)
-            .WithParameter("experimentGroup", experimentGroup)
-            .WithParameter("testType", testType)
-            .WithParameter("roomTemperature", roomTemperature)
-            .WithParameter("roomHumidity", roomHumidity)
-            .WithParameter("baselineGsr", baselineGsr)
-            .WithParameter("thresholdGsr", thresholdGsr);
+        builder.RegisterEntryPoint<ControlTaskEntryPoint>();
     }
 
     protected override void Awake()

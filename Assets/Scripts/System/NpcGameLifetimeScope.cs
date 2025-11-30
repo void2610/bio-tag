@@ -5,14 +5,22 @@ using VContainer.Unity;
 using VitalRouter;
 using BioTag.Audio;
 using BioTag.Biometric;
+using Experiment;
 
 public class NpcGameLifetimeScope : LifetimeScope
 {
     [SerializeField] private PlayerNameUI playerNameUIPrefab;
     [SerializeField] private GameConfig gameConfig;
     [SerializeField] private AudioConfig audioConfig;
+    [SerializeField] private ExperimentSettings experimentSettings;
+
     protected override void Configure(IContainerBuilder builder)
     {
+        // ExperimentSettingsをインスタンス登録
+        if (experimentSettings != null)
+        {
+            builder.RegisterInstance(experimentSettings);
+        }
         // 共通サービス
         builder.Register<ISceneService, SceneService>(Lifetime.Singleton);
         builder.Register<IThemeService, ThemeService>(Lifetime.Singleton);

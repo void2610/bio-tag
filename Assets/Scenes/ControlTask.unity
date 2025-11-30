@@ -1121,14 +1121,7 @@ MonoBehaviour:
     measurementDuration: 20
     feedbackDuration: 5
     restDuration: 5
-  enableLogging: 1
-  participantId: izumi
-  experimentGroup: 0
-  testType: 0
-  roomTemperature: 22
-  roomHumidity: 45
-  baselineGsr: 760
-  thresholdGsr: 5
+  experimentSettings: {fileID: 11400000, guid: a42694e60e2964894bb092ff0ade85b1, type: 2}
 --- !u!4 &1351680352
 Transform:
   m_ObjectHideFlags: 0

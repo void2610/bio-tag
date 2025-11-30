@@ -4,6 +4,7 @@ using VContainer.Unity;
 using System;
 using VitalRouter;
 using BioTag.GameUI;
+using Experiment;
 
 /// <summary>
 /// WithNPCシーンのエントリーポイント
@@ -16,6 +17,8 @@ public class NpcGameEntryPoint : IStartable, ITickable
     private readonly IPlayerDataService _playerDataService;
     private readonly IGameUIService _gameUI;
     private readonly GameConfig _gameConfig;
+    private readonly ExperimentSettings _experimentSettings;
+    private readonly ExperimentLoggingService _loggingService;
 
     private bool _isPlayerReady = false;
 
@@ -25,13 +28,21 @@ public class NpcGameEntryPoint : IStartable, ITickable
         IPlayerSpawnService playerSpawn,
         IPlayerDataService playerDataService,
         IGameUIService gameUI,
-        GameConfig gameConfig)
+        GameConfig gameConfig,
+        IObjectResolver resolver)
     {
         _gameManager = gameManager;
         _playerSpawn = playerSpawn;
         _playerDataService = playerDataService;
         _gameUI = gameUI;
         _gameConfig = gameConfig;
+
+        // ExperimentSettingsをOptionalに解決
+        if (resolver.TryResolve<ExperimentSettings>(out var settings))
+        {
+            _experimentSettings = settings;
+            _loggingService = new ExperimentLoggingService(settings);
+        }
     }
 
     public void Start()
@@ -41,6 +52,9 @@ public class NpcGameEntryPoint : IStartable, ITickable
         {
             npcGameManager.SetPlayerSpawnService(_playerSpawn);
         }
+
+        // 実験セッションを開始
+        _loggingService?.StartSession("TagGame_NPC");
 
         InitializeGame();
     }
@@ -67,13 +81,13 @@ public class NpcGameEntryPoint : IStartable, ITickable
             _gameManager.AddPlayerName($"NPC{i}");
         }
     }
-    
+
     public void Tick()
     {
         HandleInput();
         UpdateGameLogic();
     }
-    
+
     private void HandleInput()
     {
         if (Input.GetKeyDown(KeyCode.G))
@@ -100,7 +114,7 @@ public class NpcGameEntryPoint : IStartable, ITickable
         }
         return null;
     }
-    
+
     private void UpdateGameLogic()
     {
         switch (_gameManager.GameState)
@@ -119,7 +133,7 @@ public class NpcGameEntryPoint : IStartable, ITickable
                     }
                 }
                 break;
-                
+
             case 1: // Playing
                 // スコア更新
                 var itPlayerScores = _gameManager.PlayerScores;
@@ -145,6 +159,7 @@ public class NpcGameEntryPoint : IStartable, ITickable
                 if (_gameManager.GetElapsedTime() >= _gameConfig.gameLength)
                 {
                     _gameManager.EndGame();
+                    _loggingService?.EndSession();
                     _gameManager.SetGameState(2);
                 }
 

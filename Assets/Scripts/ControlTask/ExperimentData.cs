@@ -1,53 +1,10 @@
-using System;
-using System.Collections.Generic;
 using Experiment;
 
 namespace ControlTask
 {
-    // 実験グループの定義
-    public enum ExperimentGroup
-    {
-        BfHuman,      // バイオフィードバックあり_人間対戦
-        BF_NPC,        // バイオフィードバックあり_NPC対戦
-        NoBfHuman,    // バイオフィードバックなし_人間対戦
-        NoBfNpc       // バイオフィードバックなし_NPC対戦
-    }
-
-    // テスト種類の定義
-    public enum TestType
-    {
-        Pre,   // 事前テスト
-        Post   // 事後テスト
-    }
-
-    // セッション情報（JSON形式で保存）
-    [Serializable]
-    public class SessionInfo
-    {
-        public ParticipantInfo participantInfo;
-        public CalibrationData calibration;
-        public string datetime;
-        public float roomTemperature;
-        public float roomHumidity;
-    }
-
-    [Serializable]
-    public class ParticipantInfo
-    {
-        public string participantID;
-        public string group;
-        public string testType;
-    }
-
-    [Serializable]
-    public class CalibrationData
-    {
-        public float baselineGsr;
-        public float thresholdGsr;
-        public int calibrationDurationMS;
-    }
-
-    // 試行サマリーデータ（CSV形式で保存）
+    /// <summary>
+    /// 試行サマリーデータ（CSV形式で保存）
+    /// </summary>
     public class TrialSummary : ICsvSerializable
     {
         public int TrialNumber;
@@ -64,7 +21,9 @@ namespace ControlTask
         public string ToCsvRow() => $"{TrialNumber},{TargetState},{StartTimeMS},{Score:F1},{SuccessRate:F2},{MeanGsr:F2},{SDGsr:F2},{ResponseTimeMS}";
     }
 
-    // 時系列データ（CSV形式で保存）
+    /// <summary>
+    /// 時系列データ（CSV形式で保存）
+    /// </summary>
     public class TimeSeriesRecord : ICsvSerializable
     {
         public int TrialNumber;
