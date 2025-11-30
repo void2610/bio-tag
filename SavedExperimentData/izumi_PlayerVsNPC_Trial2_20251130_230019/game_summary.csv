@@ -1,0 +1,2 @@
+﻿participant_id,game_mode,game_duration_seconds,it_change_count,player0_name,player0_score,player0_it_time_seconds,player1_name,player1_score,player1_it_time_seconds,player2_name,player2_score,player2_it_time_seconds
+izumi,PlayerVsNPC,60.01,8,No Name,30.7,30.72,NPC1,29.3,29.29,,0.0,0.00

@@ -1,0 +1,12 @@
+{
+    "participantID": "izumi",
+    "experimentGroup": "BfHuman",
+    "trialNumber": 1,
+    "gameMode": 1,
+    "playerCount": 1,
+    "npcCount": 1,
+    "gameLengthSeconds": 60.0,
+    "datetime": "2025-11-30T22:58:44",
+    "roomTemperature": 23.5,
+    "roomHumidity": 45.0
+}

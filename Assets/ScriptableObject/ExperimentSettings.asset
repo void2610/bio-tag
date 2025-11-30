@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: ExperimentSettings
   m_EditorClassIdentifier: 
   enableLogging: 1
-  participantId: izumi
+  participantId: izumi2
   experimentGroup: 0
-  testType: 0
+  testType: 1
+  gameTrialNumber: 2
   roomTemperature: 23.5
   roomHumidity: 45
   baselineGsr: 0
