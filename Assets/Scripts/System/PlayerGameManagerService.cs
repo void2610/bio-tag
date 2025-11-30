@@ -75,6 +75,7 @@ public partial class PlayerGameManagerService : IGameManagerService
         {
             participantID = _experimentSettings.participantId,
             experimentGroup = _experimentSettings.experimentGroup.ToString(),
+            trialNumber = _experimentSettings.gameTrialNumber,
             gameMode = GameMode.PlayerVsPlayer,
             playerCount = 2,
             npcCount = 0,

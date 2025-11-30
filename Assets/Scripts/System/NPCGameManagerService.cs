@@ -80,6 +80,7 @@ public partial class NPCGameManagerService : IGameManagerService
         {
             participantID = _experimentSettings.participantId,
             experimentGroup = _experimentSettings.experimentGroup.ToString(),
+            trialNumber = _experimentSettings.gameTrialNumber,
             gameMode = GameMode.PlayerVsNPC,
             playerCount = 1,
             npcCount = _gameConfig.npcCount,

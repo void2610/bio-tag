@@ -21,8 +21,12 @@ namespace Experiment
         [Tooltip("実験グループ")]
         public ExperimentGroup experimentGroup = ExperimentGroup.BfHuman;
 
-        [Tooltip("テスト種類（事前/事後）")]
+        [Tooltip("テスト種類（事前/事後）- ControlTask用")]
         public TestType testType = TestType.Pre;
+
+        [Tooltip("ゲーム試行回数 - 鬼ごっこゲーム用")]
+        [Range(1, 10)]
+        public int gameTrialNumber = 1;
 
         [Header("環境情報")]
         [Tooltip("室温（℃）")]

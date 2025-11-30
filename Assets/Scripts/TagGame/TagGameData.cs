@@ -20,6 +20,7 @@ namespace TagGame
     {
         public string participantID;
         public string experimentGroup;
+        public int trialNumber;
         public GameMode gameMode;
         public int playerCount;
         public int npcCount;
