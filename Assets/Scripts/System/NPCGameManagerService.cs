@@ -65,7 +65,7 @@ public partial class NPCGameManagerService : IGameManagerService
         if (_experimentSettings != null && _experimentSettings.enableLogging)
         {
             InitializeLogger();
-            _dataLogger.RecordGameStart(CurrentItIndex, GetPlayerPositions());
+            _dataLogger.RecordGameStart(CurrentItIndex, GetPlayerDistance());
         }
     }
 
@@ -109,7 +109,7 @@ public partial class NPCGameManagerService : IGameManagerService
         // 鬼交代をログ記録
         if (_dataLogger != null)
         {
-            _dataLogger.RecordItChange(CurrentItIndex, GetPlayerPositions(),
+            _dataLogger.RecordItChange(CurrentItIndex, GetPlayerDistance(),
                 _gsrProcessor.CurrentGsrRaw,
                 _gsrProcessor.CurrentGsrDerivative,
                 _gsrProcessor.CurrentThreshold,
@@ -159,7 +159,7 @@ public partial class NPCGameManagerService : IGameManagerService
             // 1秒ごとに記録（フレームレート非依存）
             if (Time.frameCount % 60 == 0)
             {
-                _dataLogger.RecordGameTick(CurrentItIndex, GetPlayerPositions(),
+                _dataLogger.RecordGameTick(CurrentItIndex, GetPlayerDistance(),
                     _gsrProcessor.CurrentGsrRaw, _gsrProcessor.CurrentGsrDerivative, _gsrProcessor.CurrentThreshold,
                     GetIsExcited());
             }
@@ -173,28 +173,26 @@ public partial class NPCGameManagerService : IGameManagerService
     {
         if (_dataLogger != null)
         {
-            _dataLogger.RecordGameEnd(PlayerNames, PlayerScores, GetPlayerPositions());
+            _dataLogger.RecordGameEnd(PlayerNames, PlayerScores, GetPlayerDistance());
             _dataLogger.Dispose();
         }
     }
 
     /// <summary>
-    /// プレイヤー位置を取得
+    /// プレイヤー間の距離を取得
     /// </summary>
-    private List<Vector3> GetPlayerPositions()
+    private float GetPlayerDistance()
     {
-        var positions = new List<Vector3>();
+        if (_playerSpawnService?.SpawnedPlayers == null || _playerSpawnService.SpawnedPlayers.Count < 2)
+            return 0f;
 
-        if (_playerSpawnService?.SpawnedPlayers != null)
-        {
-            foreach (var player in _playerSpawnService.SpawnedPlayers)
-            {
-                if (player != null)
-                    positions.Add(player.transform.position);
-            }
-        }
+        var player0 = _playerSpawnService.SpawnedPlayers[0];
+        var player1 = _playerSpawnService.SpawnedPlayers[1];
 
-        return positions;
+        if (player0 == null || player1 == null)
+            return 0f;
+
+        return Vector3.Distance(player0.transform.position, player1.transform.position);
     }
 
     /// <summary>

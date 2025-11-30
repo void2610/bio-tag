@@ -67,27 +67,21 @@ namespace TagGame
     /// </summary>
     public class GameEventRecord : ICsvSerializable
     {
-        public string ParticipantID;
         public int TimestampMS;
         public string EventType;  // "GameStart", "ItChanged", "GameEnd", "Tick"
         public int CurrentItIndex;
-        public float Player0PosX;
-        public float Player0PosZ;
-        public float Player1PosX;
-        public float Player1PosZ;
+        public float PlayerDistance;
         public float GsrRaw;
         public float GsrDerivative;
         public float GsrThreshold;
         public bool IsExcited;
 
         public string GetCsvHeader() =>
-            "participant_id,timestamp_ms,event_type,current_it_index," +
-            "player0_pos_x,player0_pos_z,player1_pos_x,player1_pos_z," +
+            "timestamp_ms,event_type,current_it_index,player_distance," +
             "gsr_raw,gsr_derivative,gsr_threshold,is_excited";
 
         public string ToCsvRow() =>
-            $"{ParticipantID},{TimestampMS},{EventType},{CurrentItIndex}," +
-            $"{Player0PosX:F2},{Player0PosZ:F2},{Player1PosX:F2},{Player1PosZ:F2}," +
+            $"{TimestampMS},{EventType},{CurrentItIndex},{PlayerDistance:F2}," +
             $"{GsrRaw:F2},{GsrDerivative:F2},{GsrThreshold:F2},{IsExcited}";
     }
 }
