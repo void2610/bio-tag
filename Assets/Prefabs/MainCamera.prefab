@@ -156,8 +156,8 @@ MonoBehaviour:
   rotationSpeed: 180
   minY: -45
   maxY: 45
-  isMouseInvertedY: 0
-  isGamepadInvertedY: 0
+  isMouseInverted: 1
+  isGamepadInverted: 0
   gamepadSensitivityMultiplier: 3
   followSpeed: 100
   rotateSmooth: 200
