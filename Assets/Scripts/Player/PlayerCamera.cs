@@ -14,10 +14,10 @@ public class PlayerCamera : MonoBehaviour
     public float maxY =  80f;
 
     [Header("Invert Settings")]
-    [Tooltip("マウス操作のY軸反転")]
-    public bool isMouseInvertedY = false;
-    [Tooltip("ゲームパッド操作のY軸反転")]
-    public bool isGamepadInvertedY = false;
+    [Tooltip("マウス操作の反転（X軸とY軸両方）")]
+    public bool isMouseInverted = false;
+    [Tooltip("ゲームパッド操作の反転（X軸とY軸両方）")]
+    public bool isGamepadInverted = false;
 
     [Header("Gamepad Sensitivity")]
     [Tooltip("ゲームパッド入力時の感度倍率（マウスとの感度差を調整）")]
@@ -48,18 +48,18 @@ public class PlayerCamera : MonoBehaviour
             // ゲームパッド：感度倍率を適用
             _lookInput *= gamepadSensitivityMultiplier;
 
-            // ゲームパッド：Y軸反転処理
-            if (isGamepadInvertedY)
+            // ゲームパッド：反転処理（X軸とY軸両方）
+            if (isGamepadInverted)
             {
-                _lookInput.y = -_lookInput.y;
+                _lookInput = -_lookInput;
             }
         }
         else
         {
-            // マウス：Y軸反転処理
-            if (isMouseInvertedY)
+            // マウス：反転処理（X軸とY軸両方）
+            if (isMouseInverted)
             {
-                _lookInput.y = -_lookInput.y;
+                _lookInput = -_lookInput;
             }
         }
     }
