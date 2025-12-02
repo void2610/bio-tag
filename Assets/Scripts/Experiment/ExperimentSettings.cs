@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace Experiment
@@ -23,10 +25,6 @@ namespace Experiment
 
         [Tooltip("テスト種類（事前/事後）- ControlTask用")]
         public TestType testType = TestType.Pre;
-
-        [Tooltip("ゲーム試行回数 - 鬼ごっこゲーム用")]
-        [Range(1, 10)]
-        public int gameTrialNumber = 1;
 
         [Header("環境情報")]
         [Tooltip("室温（℃）")]
@@ -75,6 +73,37 @@ namespace Experiment
         public string GetSessionName()
         {
             return $"{participantId}_{testType}";
+        }
+
+        /// <summary>
+        /// 既存データから次のゲーム試行番号を取得
+        /// </summary>
+        /// <param name="gameMode">ゲームモード（PlayerVsNPC, PlayerVsPlayer等）</param>
+        /// <returns>次の試行番号</returns>
+        public int GetNextTrialNumber(string gameMode)
+        {
+            var baseDirectory = Path.Combine(Application.persistentDataPath, "ExperimentData");
+
+            if (!Directory.Exists(baseDirectory))
+                return 1;
+
+            // パターン: {participantId}_{gameMode}_Trial{N}_timestamp
+            var pattern = $@"^{Regex.Escape(participantId)}_{Regex.Escape(gameMode)}_Trial(\d+)_";
+            var regex = new Regex(pattern);
+
+            int maxTrialNumber = 0;
+
+            foreach (var dir in Directory.GetDirectories(baseDirectory))
+            {
+                var dirName = Path.GetFileName(dir);
+                var match = regex.Match(dirName);
+                if (match.Success && int.TryParse(match.Groups[1].Value, out int trialNum))
+                {
+                    maxTrialNumber = Math.Max(maxTrialNumber, trialNum);
+                }
+            }
+
+            return maxTrialNumber + 1;
         }
     }
 }
