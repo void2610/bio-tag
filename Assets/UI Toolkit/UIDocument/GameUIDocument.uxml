@@ -6,10 +6,10 @@
     xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
     <Style src="project://database/Assets/UI%20Toolkit/GlobalUIStyles.uss" />
-    
+
     <!-- Game UI Container -->
     <engine:VisualElement name="game-ui-container" class="game-ui-container overlay-container">
-        
+
         <!-- Top HUD Section -->
         <engine:VisualElement name="top-hud" class="top-hud centered-container">
             <!-- Game Message -->
@@ -17,7 +17,7 @@
                 <engine:Label name="game-message-label" text="" class="game-message-label text-heading panel-overlay" />
             </engine:VisualElement>
         </engine:VisualElement>
-        
+
         <!-- Game Info Panel -->
         <engine:VisualElement name="game-info-panel" class="game-info-panel panel-secondary pos-absolute top-left">
             <!-- Timer -->
@@ -25,19 +25,24 @@
                 <engine:Label text="Time:" class="info-label text-caption" />
                 <engine:Label name="timer-value" text="0.00" class="info-value text-body" />
             </engine:VisualElement>
-            
+
             <!-- It Player -->
             <engine:VisualElement name="it-container" class="info-item flex-row justify-between">
                 <engine:Label text="It:" class="info-label text-caption" />
                 <engine:Label name="it-value" text="---" class="info-value text-body it-name" />
             </engine:VisualElement>
         </engine:VisualElement>
-        
+
         <!-- Score Board (Optional - for GSR Game) -->
         <engine:VisualElement name="score-board-container" class="score-board-container panel-secondary pos-absolute top-right hidden">
             <engine:Label text="Scores" class="score-board-title text-subheading" />
             <engine:Label name="score-board-content" text="" class="score-board-content text-caption" />
         </engine:VisualElement>
-        
+
+        <!-- Game Over Overlay -->
+        <engine:VisualElement name="game-over-overlay" class="game-over-overlay hidden">
+            <engine:Label text="ゲーム終了" class="game-over-title" />
+        </engine:VisualElement>
+
     </engine:VisualElement>
 </engine:UXML>

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections.Generic;
 using System.Linq;
-using VContainer;
 using VitalRouter;
 using BioTag.GameUI;
 
@@ -18,7 +18,8 @@ public partial class GameUIToolkit : MonoBehaviour
     private Label _itValue;
     private Label _scoreBoardContent;
     private VisualElement _scoreBoardContainer;
-    
+    private VisualElement _gameOverOverlay;
+
     public enum MessageType
     {
         Default,
@@ -27,7 +28,7 @@ public partial class GameUIToolkit : MonoBehaviour
         Success,
         Error
     }
-    
+
     private void OnEnable()
     {
         var uiDocument = GetComponent<UIDocument>();
@@ -39,6 +40,7 @@ public partial class GameUIToolkit : MonoBehaviour
         _itValue = root.Q<Label>("it-value");
         _scoreBoardContainer = root.Q<VisualElement>("score-board-container");
         _scoreBoardContent = root.Q<Label>("score-board-content");
+        _gameOverOverlay = root.Q<VisualElement>("game-over-overlay");
 
         // Initially clear the message
         if (_gameMessageLabel != null)
@@ -50,6 +52,12 @@ public partial class GameUIToolkit : MonoBehaviour
         if (_scoreBoardContainer != null)
         {
             _scoreBoardContainer.style.display = DisplayStyle.Flex;
+        }
+
+        // Hide game over overlay initially
+        if (_gameOverOverlay != null)
+        {
+            _gameOverOverlay.style.display = DisplayStyle.None;
         }
 
         // VitalRouterのデフォルトルーターに登録
@@ -173,11 +181,13 @@ public partial class GameUIToolkit : MonoBehaviour
         {
             case 1: // Playing
                 ClearMessage();
+                if (_gameOverOverlay != null)
+                    _gameOverOverlay.style.display = DisplayStyle.None;
                 break;
             case 2: // Game Over
-                SetMessage("Game Over", MessageType.Info);
+                if (_gameOverOverlay != null)
+                    _gameOverOverlay.style.display = DisplayStyle.Flex;
                 break;
         }
     }
-
 }

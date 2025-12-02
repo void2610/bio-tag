@@ -512,3 +512,23 @@
     background-color: #000000;
     color: var(--text-primary);
 }
+
+/* ====================
+   Game Over Overlay Styles
+   ==================== */
+
+.game-over-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    justify-content: center;
+    align-items: center;
+}
+
+.game-over-title {
+    font-size: 72px;
+    color: var(--accent-color);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
