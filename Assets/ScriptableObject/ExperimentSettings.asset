@@ -20,4 +20,4 @@ MonoBehaviour:
   roomTemperature: 23.5
   roomHumidity: 45
   baselineGsr: 0
-  thresholdGsr: 3
+  thresholdGsr: 5

@@ -46,6 +46,9 @@ public class PlayerGameLifetimeScope : LifetimeScope
         builder.RegisterComponentInHierarchy<ItMarker>();
         builder.RegisterComponentInHierarchy<SensorManager>();
 
+        // 入力ハンドラ
+        builder.Register<GameInputHandler>(Lifetime.Singleton);
+
         // WithPlayerEntryPointをEntryPointとして登録
         builder.RegisterEntryPoint<PlayerGameEntryPoint>();
     }

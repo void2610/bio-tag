@@ -16,6 +16,7 @@ public class NpcGameEntryPoint : IStartable, ITickable
     private readonly IPlayerDataService _playerDataService;
     private readonly IGameUIService _gameUI;
     private readonly GameConfig _gameConfig;
+    private readonly GameInputHandler _inputHandler;
 
     private bool _isPlayerReady = false;
 
@@ -25,13 +26,15 @@ public class NpcGameEntryPoint : IStartable, ITickable
         IPlayerSpawnService playerSpawn,
         IPlayerDataService playerDataService,
         IGameUIService gameUI,
-        GameConfig gameConfig)
+        GameConfig gameConfig,
+        GameInputHandler inputHandler)
     {
         _gameManager = gameManager;
         _playerSpawn = playerSpawn;
         _playerDataService = playerDataService;
         _gameUI = gameUI;
         _gameConfig = gameConfig;
+        _inputHandler = inputHandler;
     }
 
     public void Start()
@@ -76,9 +79,9 @@ public class NpcGameEntryPoint : IStartable, ITickable
 
     private void HandleInput()
     {
-        if (Input.GetKeyDown(KeyCode.G))
+        // デバッグ用: Gキーでプレイヤー1を"It"にする
+        if (_inputHandler != null && _inputHandler.IsDebugChangeItPressed)
         {
-            // デバッグ用: Gキーでプレイヤー1を"It"にする
             var targetPlayer = GetPlayerByIndex(1);
             if (targetPlayer != null)
             {
@@ -86,9 +89,11 @@ public class NpcGameEntryPoint : IStartable, ITickable
             }
         }
 
-        if (_gameManager.GameState == 0 && Input.GetKeyDown(KeyCode.F))
+        // Ready入力（キーボードF or コントローラーStart）
+        if (_gameManager.GameState == 0 && _inputHandler != null && _inputHandler.IsReadyPressed)
         {
             _isPlayerReady = true;
+            _inputHandler.ConsumeReadyInput();
         }
     }
 

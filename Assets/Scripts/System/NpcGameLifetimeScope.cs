@@ -47,6 +47,9 @@ public class NpcGameLifetimeScope : LifetimeScope
         builder.RegisterComponentInHierarchy<ItMarker>();
         builder.RegisterComponentInHierarchy<SensorManager>();
 
+        // 入力ハンドラ
+        builder.Register<GameInputHandler>(Lifetime.Singleton);
+
         // NPCGameManagerをEntryPointとして登録
         builder.RegisterEntryPoint<NpcGameEntryPoint>();
     }
