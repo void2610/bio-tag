@@ -105,5 +105,30 @@ namespace Experiment
 
             return maxTrialNumber + 1;
         }
+
+        /// <summary>
+        /// 既存データからテスト種類（Pre/Post）を自動判定
+        /// </summary>
+        /// <returns>判定されたテスト種類</returns>
+        public TestType GetAutoTestType()
+        {
+            var baseDirectory = Path.Combine(Application.persistentDataPath, "ExperimentData");
+
+            if (!Directory.Exists(baseDirectory))
+                return TestType.Pre;
+
+            // パターン: {participantId}_Pre_timestamp
+            var pattern = $@"^{Regex.Escape(participantId)}_Pre_";
+            var regex = new Regex(pattern);
+
+            foreach (var dir in Directory.GetDirectories(baseDirectory))
+            {
+                var dirName = Path.GetFileName(dir);
+                if (regex.IsMatch(dirName))
+                    return TestType.Post; // Preが存在する → Post
+            }
+
+            return TestType.Pre; // Preが存在しない → Pre
+        }
     }
 }
