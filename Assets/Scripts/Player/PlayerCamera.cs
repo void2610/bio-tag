@@ -48,18 +48,20 @@ public class PlayerCamera : MonoBehaviour
             // ゲームパッド：感度倍率を適用
             _lookInput *= gamepadSensitivityMultiplier;
 
-            // ゲームパッド：反転処理（X軸とY軸両方）
+            // ゲームパッド：反転処理
             if (isGamepadInverted)
             {
-                _lookInput = -_lookInput;
+                _lookInput.x = -_lookInput.x;
+                _lookInput.y = -_lookInput.y;
             }
         }
         else
         {
-            // マウス：反転処理（X軸とY軸両方）
+            // マウス：反転処理
             if (isMouseInverted)
             {
-                _lookInput = -_lookInput;
+                _lookInput.x = -_lookInput.x;
+                _lookInput.y = -_lookInput.y;
             }
         }
     }
