@@ -73,9 +73,6 @@ namespace ControlTask
             // ExperimentSettingsからセッション情報を生成
             if (_experimentSettings != null)
             {
-                // テスト種類（Pre/Post）を自動判定して設定
-                _experimentSettings.testType = _experimentSettings.GetAutoTestType();
-
                 var calibrationDurationMS = (int)(_model.CalibrationDuration * 1000);
                 var sessionInfo = _experimentSettings.CreateSessionInfo(calibrationDurationMS);
 

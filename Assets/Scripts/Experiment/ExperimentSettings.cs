@@ -23,9 +23,6 @@ namespace Experiment
         [Tooltip("実験グループ")]
         public ExperimentGroup experimentGroup = ExperimentGroup.BfHuman;
 
-        [Tooltip("テスト種類（事前/事後）- ControlTask用")]
-        public TestType testType = TestType.Pre;
-
         [Header("環境情報")]
         [Tooltip("室温（℃）")]
         public float roomTemperature = 23.5f;
@@ -53,7 +50,7 @@ namespace Experiment
                 {
                     participantID = participantId,
                     group = experimentGroup.ToString(),
-                    testType = testType.ToString()
+                    testType = GetAutoTestType().ToString()
                 },
                 calibration = new CalibrationData
                 {
@@ -72,7 +69,7 @@ namespace Experiment
         /// </summary>
         public string GetSessionName()
         {
-            return $"{participantId}_{testType}";
+            return $"{participantId}_{GetAutoTestType()}";
         }
 
         /// <summary>
