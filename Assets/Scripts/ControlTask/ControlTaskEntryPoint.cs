@@ -107,7 +107,7 @@ namespace ControlTask
             if (_experimentStarted)
             {
                 _presenter.UpdateTime(Time.deltaTime);
-                _presenter.UpdateScoring();
+                _presenter.UpdateScoring(Time.deltaTime);
             }
         }
     }

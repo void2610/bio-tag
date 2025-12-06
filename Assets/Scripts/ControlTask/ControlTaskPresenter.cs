@@ -21,6 +21,9 @@ namespace ControlTask
         private readonly TimerUI _timerUI;
         private readonly ScoreUI _scoreUI;
 
+        // スコア累積用（FPS非依存のためfloatで蓄積）
+        private float _scoreAccumulator;
+
         public void StartExperiment() => UpdateExperimentFlow().Forget();
         public void UpdateTime(float deltaTime) => _model.CurrentTime.Value += deltaTime;
 
@@ -119,7 +122,7 @@ namespace ControlTask
         private void EndAndLogTrial(ControlState targetState)
         {
             var trialScore = _model.Score.Value - _model.LastScore;
-            var maxPossibleScore = _model.MeasurementDuration * 60; // 60fps想定
+            var maxPossibleScore = _model.MeasurementDuration * ControlTaskModel.SCORE_PER_SECOND;
             var successRate = maxPossibleScore > 0 ? trialScore / maxPossibleScore : 0f;
 
             _service.EndTrial(targetState, trialScore, successRate);
@@ -128,7 +131,8 @@ namespace ControlTask
         /// <summary>
         /// スコアリング更新（Tickableから呼ばれる）
         /// </summary>
-        public void UpdateScoring()
+        /// <param name="deltaTime">前フレームからの経過時間</param>
+        public void UpdateScoring(float deltaTime)
         {
             var isCorrect = false;
 
@@ -142,7 +146,9 @@ namespace ControlTask
 
                 if (_model.CurrentBiometricState.Value == targetBiometricState)
                 {
-                    _model.Score.Value += 1;
+                    // FPS非依存: 時間比例でスコアを加算
+                    _scoreAccumulator += deltaTime * ControlTaskModel.SCORE_PER_SECOND;
+                    _model.Score.Value = (int)_scoreAccumulator;
                     isCorrect = true;
                 }
             }

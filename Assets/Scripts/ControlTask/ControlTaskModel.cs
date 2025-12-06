@@ -24,6 +24,9 @@ namespace ControlTask
     /// </summary>
     public class ControlTaskModel
     {
+        // スコアリング設定
+        public const float SCORE_PER_SECOND = 200f; // 1秒あたりのスコア（60fps想定と互換性維持）
+
         // 状態のReactiveProperty
         public readonly ReactiveProperty<ControlState> TargetState = new();
         public readonly ReactiveProperty<int> Score = new(0);
