@@ -8,7 +8,8 @@ namespace Experiment
     public enum ExperimentGroup
     {
         BfHuman,      // バイオフィードバックあり_人間対戦
-        BF_NPC,       // バイオフィードバックあり_NPC対戦
+        // ReSharper disable once InconsistentNaming
+        BFNpc,       // バイオフィードバックあり_NPC対戦
         NoBfHuman,    // バイオフィードバックなし_人間対戦
         NoBfNpc       // バイオフィードバックなし_NPC対戦
     }
